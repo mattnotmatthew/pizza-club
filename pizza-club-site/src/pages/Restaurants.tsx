@@ -3,98 +3,8 @@ import MapContainer from '@/components/map/MapContainer';
 import RestaurantList from '@/components/restaurants/RestaurantList';
 import Skeleton from '@/components/common/Skeleton';
 import { useSort } from '@/hooks/useSort';
+import { dataService } from '@/services/data';
 import type { Restaurant } from '@/types';
-
-// Mock data - replace with CMS fetch
-const mockRestaurants: Restaurant[] = [
-  {
-    id: '1',
-    name: 'Lou Malnati\'s Pizzeria',
-    address: '439 N Wells St, Chicago, IL 60654',
-    coordinates: { lat: 41.890251, lng: -87.633991 },
-    averageRating: 4.5,
-    totalVisits: 3,
-    priceRange: '$$',
-    website: 'https://www.loumalnatis.com',
-    phone: '(312) 828-9800',
-  },
-  {
-    id: '2',
-    name: 'Pequod\'s Pizza',
-    address: '2207 N Clybourn Ave, Chicago, IL 60614',
-    coordinates: { lat: 41.922577, lng: -87.664421 },
-    averageRating: 4.8,
-    totalVisits: 2,
-    priceRange: '$$',
-    website: 'https://pequodspizza.com',
-    phone: '(773) 327-1512',
-  },
-  {
-    id: '3',
-    name: 'Art of Pizza',
-    address: '3033 N Ashland Ave, Chicago, IL 60657',
-    coordinates: { lat: 41.937594, lng: -87.668365 },
-    averageRating: 4.3,
-    totalVisits: 4,
-    priceRange: '$',
-    website: 'https://artofpizzachicago.com',
-    phone: '(773) 327-5600',
-  },
-  {
-    id: '4',
-    name: 'Giordano\'s',
-    address: '730 N Rush St, Chicago, IL 60611',
-    coordinates: { lat: 41.895734, lng: -87.625331 },
-    averageRating: 4.2,
-    totalVisits: 5,
-    priceRange: '$$',
-    website: 'https://giordanos.com',
-    phone: '(312) 951-0747',
-  },
-  {
-    id: '5',
-    name: 'Piece Brewery and Pizzeria',
-    address: '1927 W North Ave, Chicago, IL 60622',
-    coordinates: { lat: 41.910363, lng: -87.676260 },
-    averageRating: 4.4,
-    totalVisits: 3,
-    priceRange: '$$',
-    website: 'https://piecechicago.com',
-    phone: '(773) 772-4422',
-  },
-  {
-    id: '6',
-    name: 'Spacca Napoli',
-    address: '1769 W Sunnyside Ave, Chicago, IL 60640',
-    coordinates: { lat: 41.963238, lng: -87.684722 },
-    averageRating: 4.7,
-    totalVisits: 2,
-    priceRange: '$$$',
-    website: 'https://spaccanapolipizzeria.com',
-    phone: '(773) 878-2420',
-  },
-  {
-    id: '7',
-    name: 'Pizzeria Uno',
-    address: '29 E Ohio St, Chicago, IL 60611',
-    coordinates: { lat: 41.892369, lng: -87.626648 },
-    averageRating: 3.9,
-    totalVisits: 1,
-    priceRange: '$$',
-    website: 'https://www.unos.com',
-    phone: '(312) 321-1000',
-  },
-  {
-    id: '8',
-    name: 'Vito & Nick\'s',
-    address: '8433 S Pulaski Rd, Chicago, IL 60652',
-    coordinates: { lat: 41.739685, lng: -87.722614 },
-    averageRating: 4.6,
-    totalVisits: 3,
-    priceRange: '$',
-    phone: '(773) 735-2050',
-  },
-];
 
 const Restaurants: React.FC = () => {
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
@@ -106,16 +16,19 @@ const Restaurants: React.FC = () => {
   const { sortedData, toggleSort } = useSort(restaurants, sortField);
 
   useEffect(() => {
-    // Simulate API call
     const fetchRestaurants = async () => {
       setLoading(true);
       try {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        // TODO: Replace with actual CMS fetch
-        setRestaurants(mockRestaurants);
+        const fetchedRestaurants = await dataService.getRestaurants();
+        // Map totalVisits for backward compatibility
+        const mappedRestaurants = fetchedRestaurants.map(restaurant => ({
+          ...restaurant,
+          totalVisits: restaurant.totalVisits || restaurant.visits?.length || 0
+        }));
+        setRestaurants(mappedRestaurants);
       } catch (error) {
         console.error('Failed to fetch restaurants:', error);
+        setRestaurants([]);
       } finally {
         setLoading(false);
       }
