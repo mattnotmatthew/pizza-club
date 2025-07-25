@@ -1,0 +1,74 @@
+[
+  {
+    "id": "mike-rossi",
+    "name": "Mike Rossi",
+    "photo": "/images/members/mike-rossi.jpg",
+    "bio": "Founder of the Greater Chicagoland Pizza Club. Born and raised in Chicago, I've been on a quest to find the perfect slice since 1987. Deep dish enthusiast, but I won't turn down a good tavern-style.",
+    "memberSince": "2019-03-15",
+    "favoritePizzaStyle": "Chicago Deep Dish",
+    "restaurantsVisited": 47
+  },
+  {
+    "id": "sarah-chen",
+    "name": "Sarah Chen",
+    "photo": "/images/members/sarah-chen.jpg",
+    "bio": "Software engineer by day, pizza connoisseur by night. I moved to Chicago from NYC five years ago and I'm still defending thin crust. Someone has to keep this club honest!",
+    "memberSince": "2019-06-22",
+    "favoritePizzaStyle": "New York Style",
+    "restaurantsVisited": 43
+  },
+  {
+    "id": "tony-martinez",
+    "name": "Tony Martinez",
+    "photo": "/images/members/tony-martinez.jpg",
+    "bio": "Third-generation Chicagoan and pizza purist. If it doesn't take 45 minutes to bake, is it even pizza? I rate based on cheese pull, crust integrity, and sauce-to-topping ratio.",
+    "memberSince": "2019-04-10",
+    "favoritePizzaStyle": "Chicago Deep Dish",
+    "restaurantsVisited": 45
+  },
+  {
+    "id": "jessica-walsh",
+    "name": "Jessica Walsh",
+    "photo": "/images/members/jessica-walsh.jpg",
+    "bio": "Food blogger and pizza photographer. I joined the club to document Chicago's pizza scene. Follow my Instagram @ChiPizzaChronicles for behind-the-scenes shots of our adventures!",
+    "memberSince": "2020-01-15",
+    "favoritePizzaStyle": "Neapolitan",
+    "restaurantsVisited": 38
+  },
+  {
+    "id": "david-kim",
+    "name": "David Kim",
+    "photo": "/images/members/david-kim.jpg",
+    "bio": "Statistician who takes pizza ratings very seriously. I maintain our club's comprehensive spreadsheet with 27 rating criteria. Yes, 'structural integrity when folded' is a real metric.",
+    "memberSince": "2019-11-30",
+    "favoritePizzaStyle": "Detroit Style",
+    "restaurantsVisited": 41
+  },
+  {
+    "id": "maria-santos",
+    "name": "Maria Santos",
+    "photo": "/images/members/maria-santos.jpg",
+    "bio": "Restaurant industry veteran and crust expert. I can tell you the hydration percentage of dough by touch. Always searching for that perfect char and chew combination.",
+    "memberSince": "2020-08-20",
+    "favoritePizzaStyle": "Artisan Wood-Fired",
+    "restaurantsVisited": 35
+  },
+  {
+    "id": "raj-patel",
+    "name": "Raj Patel",
+    "photo": "/images/members/raj-patel.jpg",
+    "bio": "Vegetarian pizza advocate proving that great pizza doesn't need meat. I've converted several members to the glory of a well-done margherita. Basil is not optional.",
+    "memberSince": "2021-02-14",
+    "favoritePizzaStyle": "Margherita",
+    "restaurantsVisited": 29
+  },
+  {
+    "id": "alex-johnson",
+    "name": "Alex Johnson",
+    "photo": "/images/members/alex-johnson.jpg",
+    "bio": "Newest member and tavern-style evangelist. Grew up in the suburbs where thin, crispy, and cut in squares is the only way. Currently working on converting the deep dish faithful.",
+    "memberSince": "2023-09-10",
+    "favoritePizzaStyle": "Chicago Tavern Style",
+    "restaurantsVisited": 12
+  }
+]

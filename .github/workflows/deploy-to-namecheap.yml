@@ -1,0 +1,48 @@
+name: Deploy to Namecheap
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'pizza-club-site/**'
+      - '.github/workflows/deploy-to-namecheap.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: pizza-club-site/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./pizza-club-site
+      run: npm ci
+
+    - name: Build project
+      working-directory: ./pizza-club-site
+      run: npm run build
+      env:
+        VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+
+    - name: Deploy to Namecheap via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./pizza-club-site/dist/
+        server-dir: ${{ secrets.FTP_SERVER_DIR }}
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          .github/**

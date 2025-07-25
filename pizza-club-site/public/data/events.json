@@ -1,0 +1,32 @@
+[
+  {
+    "id": "2025-02-pizza-night",
+    "title": "February Pizza Night - Deep Dish Showdown",
+    "date": "2025-02-15T18:00:00",
+    "location": "Lou Malnati's - River North",
+    "address": "439 N Wells St, Chicago, IL 60654",
+    "description": "We're kicking off our 2025 deep dish series at the legendary Lou Malnati's!",
+    "maxAttendees": 12,
+    "rsvpLink": null
+  },
+  {
+    "id": "2025-03-pizza-crawl",
+    "title": "March Madness Pizza Crawl",
+    "date": "2025-03-22T17:00:00",
+    "location": "Multiple Locations - Starting at Piece Brewery",
+    "address": "1927 W North Ave, Chicago, IL 60622",
+    "description": "Our annual pizza crawl! We'll hit 3-4 spots in Wicker Park/Bucktown. Pace yourself!",
+    "maxAttendees": 10,
+    "rsvpLink": null
+  },
+  {
+    "id": "2025-04-new-spot",
+    "title": "April Adventure - Spacca Napoli",
+    "date": "2025-04-19T18:30:00",
+    "location": "Spacca Napoli Pizzeria",
+    "address": "1769 W Sunnyside Ave, Chicago, IL 60640",
+    "description": "Time to explore Neapolitan style at this Ravenswood gem. BYOB!",
+    "maxAttendees": 8,
+    "rsvpLink": null
+  }
+]
