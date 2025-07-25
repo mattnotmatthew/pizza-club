@@ -22,7 +22,7 @@ const Loading: React.FC = () => (
 
 function App() {
   return (
-    <Router>
+    <Router basename="/pizza">
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<Layout />}>
