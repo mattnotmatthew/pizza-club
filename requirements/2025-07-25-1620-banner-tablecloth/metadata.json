@@ -1,0 +1,17 @@
+{
+  "id": "banner-tablecloth",
+  "started": "2025-07-25T16:20:00Z",
+  "lastUpdated": "2025-07-25T16:26:00Z",
+  "status": "active",
+  "phase": "complete",
+  "progress": {
+    "discovery": { "answered": 5, "total": 5 },
+    "detail": { "answered": 5, "total": 5 }
+  },
+  "contextFiles": [
+    "/pizza-club-site/src/components/common/Header.tsx",
+    "/pizza-club-site/src/pages/Home.tsx",
+    "/pizza-club-site/src/index.css"
+  ],
+  "relatedFeatures": ["header styling", "hero section"]
+}

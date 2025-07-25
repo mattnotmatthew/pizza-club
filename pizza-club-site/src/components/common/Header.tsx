@@ -17,8 +17,8 @@ const Header: React.FC = () => {
     }`;
   
   return (
-    <header className="bg-red-700 shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-checkered-border shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="text-white font-bold text-xl md:text-2xl">
             🍕 GCPC
