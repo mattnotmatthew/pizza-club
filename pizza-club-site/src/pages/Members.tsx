@@ -7,7 +7,7 @@ import type { Member } from '@/types';
 const mockMembers: Member[] = [
   {
     id: '1',
-    name: 'John Smith',
+    name: 'John Smith II',
     bio: 'Pizza enthusiast since 1985. I believe the perfect pizza has a crispy crust, balanced sauce, and just the right amount of cheese. Always searching for the next great slice in Chicago.',
     photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
     joinDate: new Date('2020-01-15'),
