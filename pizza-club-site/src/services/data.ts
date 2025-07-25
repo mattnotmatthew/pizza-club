@@ -1,6 +1,6 @@
 import type { Event, Member, Restaurant } from '@/types';
 
-const DATA_BASE_URL = '/data';
+const DATA_BASE_URL = import.meta.env.BASE_URL + 'data';
 
 async function fetchJSON<T>(path: string): Promise<T> {
   try {
