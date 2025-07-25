@@ -79,7 +79,7 @@ const Events: React.FC = () => {
           {!isPast && event.rsvpLink && (
             <Button
               variant="primary"
-              size="sm"
+              size="small"
               onClick={() => window.open(event.rsvpLink!, '_blank')}
               className="w-full"
             >

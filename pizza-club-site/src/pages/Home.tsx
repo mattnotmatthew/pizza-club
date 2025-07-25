@@ -4,7 +4,7 @@ import { dataService } from '@/services/data';
 import Card from '@/components/common/Card';
 import Button from '@/components/common/Button';
 import StarRating from '@/components/common/StarRating';
-import { Skeleton } from '@/components/common/Skeleton';
+import Skeleton from '@/components/common/Skeleton';
 import type { Event, Restaurant } from '@/types';
 
 const Home: React.FC = () => {
@@ -127,7 +127,7 @@ const Home: React.FC = () => {
                   <Card key={restaurant.id}>
                     <div className="p-6">
                       <h3 className="font-semibold text-lg mb-2">{restaurant.name}</h3>
-                      <StarRating rating={restaurant.averageRating} size="sm" />
+                      <StarRating rating={restaurant.averageRating} size="small" />
                       <p className="text-sm text-gray-600 mt-2 mb-4">{restaurant.address}</p>
                       {latestVisit && (
                         <p className="text-sm text-gray-500">
