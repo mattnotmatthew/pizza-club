@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { dataService } from '@/services/data';
 import Card from '@/components/common/Card';
 import Button from '@/components/common/Button';
-import StarRating from '@/components/common/StarRating';
+import PizzaRating from '@/components/common/PizzaRating';
 import Skeleton from '@/components/common/Skeleton';
 import type { Event, Restaurant } from '@/types';
 
@@ -66,11 +66,13 @@ const Home: React.FC = () => {
       <section className="bg-red-700 text-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center">
-            <img 
-              src="/pizza/logo.png" 
-              alt="Greater Chicagoland Pizza Club Logo" 
-              className="h-45 w-45 md:h-60 md:w-60 lg:h-100 lg:w-100 rounded-full shadow-xl object-cover mb-6"
-            />
+            <div className="checkered-pizza-border shadow-xl mb-6">
+              <img 
+                src="/pizza/logo.png" 
+                alt="Greater Chicagoland Pizza Club Logo" 
+                className="h-45 w-45 md:h-60 md:w-60 lg:h-100 lg:w-100 object-cover"
+              />
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold text-center mb-6">
               Greater Chicagoland Pizza Club
             </h1>
@@ -134,7 +136,7 @@ const Home: React.FC = () => {
                   <Card key={restaurant.id}>
                     <div className="p-6">
                       <h3 className="font-semibold text-lg mb-2">{restaurant.name}</h3>
-                      <StarRating rating={restaurant.averageRating} size="small" />
+                      <PizzaRating rating={restaurant.averageRating} size="small" />
                       <p className="text-sm text-gray-600 mt-2 mb-4">{restaurant.address}</p>
                       {latestVisit && (
                         <p className="text-sm text-gray-500">

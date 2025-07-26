@@ -12,8 +12,19 @@ const Restaurants: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>();
   const [sortField, setSortField] = useState<keyof Restaurant>('averageRating');
+  const [isDesktop, setIsDesktop] = useState(false);
   
   const { sortedData, toggleSort } = useSort(restaurants, sortField);
+
+  useEffect(() => {
+    const checkIsDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    
+    checkIsDesktop();
+    window.addEventListener('resize', checkIsDesktop);
+    return () => window.removeEventListener('resize', checkIsDesktop);
+  }, []);
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -95,8 +106,8 @@ const Restaurants: React.FC = () => {
           </div>
         </div>
 
-        {/* Sorting Options - List View Only */}
-        {viewMode === 'list' && !loading && (
+        {/* Sorting Options - List View and Desktop */}
+        {(viewMode === 'list' || isDesktop) && !loading && (
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm text-gray-600">
               {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} found

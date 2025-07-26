@@ -6,7 +6,7 @@
     "bio": "Joe serves as the President of Club Coordination at the Pizza Club, where his unwavering dedication ensures the seamless organization of our gastronomic adventures. With an impressive track record of coaxing timely responses from even the flakiest of members, Joe's role is pivotal to our club's success.\n\nJoe's responsibilities include diligently texting club members to nail down meeting dates, a task he approaches with both persistence and a hint of exasperation. His exceptional talent for handling non-responders and managing the delicate art of converting initial enthusiasm into confirmed commitments is unparalleled. Without Joe's tireless efforts, our pizza explorations would remain mere aspirations.\n\nJoe's expertise in herding cats—otherwise known as coordinating our club meetings—has cemented his reputation as the indispensable force behind our successful gatherings. His leadership ensures that our love for pizza is regularly celebrated with gusto, one meticulously planned outing at a time.",
     "memberSince": "2013-01-26",
     "favoritePizzaStyle": "President of Club Coordination",
-    "restaurantsVisited": 47
+    "restaurantsVisited": 6
   },
   {
     "id": "ryan-coe",
@@ -15,41 +15,41 @@
     "bio": "Ryan is the Vice President of Table Management and Growth at the Pizza Club, where he brings his unparalleled expertise in optimizing table space and maintaining an organized dining environment. With a sharp eye for detail and a no-nonsense approach to unnecessary clutter, Ryan ensures that our table remains free of frivolous items, enhancing the overall dining experience.\n\nRenowned for his pioneering advocacy of the 'No Ask, No Glass' policy, Ryan has successfully minimized the intrusion of unrequested water glasses brought by well-meaning waitstaff. This policy, now widely adopted by the industry at large, reflects Ryan's innovative approach to table management. His vigilance extends beyond water, encompassing all aspects of table organization to ensure that every item is precisely where it needs to be throughout the meal.\n\nRyan's commitment to efficient table management has significantly contributed to the growth and enjoyment of our club gatherings. His leadership guarantees a streamlined and enjoyable pizza experience, where every slice is savored without the distraction of unnecessary clutter.",
     "memberSince": "2013-01-26",
     "favoritePizzaStyle": "VP of Table Management & Growth",
-    "restaurantsVisited": 43
+    "restaurantsVisited": 6
   },
   {
-    "id": "tony-martinez",
-    "name": "Tony Martinez",
+    "id": "chris-daum",
+    "name": "Chris Daum",
     "photo": "/images/members/chris-daum.jpg",
-    "bio": "Third-generation Chicagoan and pizza purist. If it doesn't take 45 minutes to bake, is it even pizza? I rate based on cheese pull, crust integrity, and sauce-to-topping ratio.",
-    "memberSince": "2019-04-10",
-    "favoritePizzaStyle": "Chicago Deep Dish",
-    "restaurantsVisited": 45
+    "bio": "As the the world's only salami sommelier, Chris brings over thirty years of unparalleled expertise in the art of pizza topping selection. His discerning palate and passion for culinary topping combination creativity ensure that every pizza we order is a masterpiece of flavor and innovation.\n\nChris’ journey to topping greatness began in the taverns on the south side of Chicago, where, as a youth, he discovered an uncanny knack for topping selection. With the esteemed Rose Barraco once referring to a teenage Chris as the next  Jimmy 'The Selectsman' Bufugliano.\n\nAfter honing his skills studying under the artisanal cheesemakers of Wisconsin, Chris returned to Chicago and quickly ascended to the top of the pizza topping connoisseurship world. His innovative approach to blending classic and contemporary flavors has earned him numerous accolades, including the coveted Wesley Willis Award for Pepperoni Placement.\n\nHis unwavering commitment to excellence and his uncanny ability to discover unique and delectable toppings make him the bedrock of the Greater Chicagoland Pizza Club.",
+    "memberSince": "2013-01-26",
+    "favoritePizzaStyle": "VP of Topping Innovation",
+    "restaurantsVisited": 4
   },
   {
-    "id": "jessica-walsh",
-    "name": "Jessica Walsh",
-    "photo": "/images/members/jessica-walsh.jpg",
-    "bio": "Food blogger and pizza photographer. I joined the club to document Chicago's pizza scene. Follow my Instagram @ChiPizzaChronicles for behind-the-scenes shots of our adventures!",
-    "memberSince": "2020-01-15",
-    "favoritePizzaStyle": "Neapolitan",
-    "restaurantsVisited": 38
+    "id": "bob-gill",
+    "name": "Bob Gill",
+    "photo": "/images/members/bob-gill.jpg",
+    "bio": "As the Vice President of Appetizer Selection at the Pizza Club, his discerning palate and extensive knowledge of restaurant menus make him an indispensable asset. Bob's primary responsibility is to ensure that our appetizer selections are nothing short of perfect, catering to the mature tastes and preferences of our members.\n\nBob's expertise in appetizer selection is unmatched. Prior to each club meeting, he spends hours researching in his impressive at-home library of restaurant menus, considered to be one of the most extensive private collection of restaurant menus in the world.  His ability to adeptly navigate any disagreement or debate about appetizer selection ensures a harmonious and satisfying start to every meal.\n\nBefore joining the Pizza Club, Bob founded Muncheese, the revolutionary appetizer selection app often referred to as the 'Tinder of appetizer selection apps.' His groundbreaking and innovative approach to choosing the perfect appetizers has garnered widespread acclaim, solidifying his reputation as a trailblazer in the field.",
+    "memberSince": "2013-01-26",
+    "favoritePizzaStyle": "VP of Appetizer Selection",
+    "restaurantsVisited": 6
   },
   {
-    "id": "david-kim",
-    "name": "David Kim",
-    "photo": "/images/members/david-kim.jpg",
-    "bio": "Statistician who takes pizza ratings very seriously. I maintain our club's comprehensive spreadsheet with 27 rating criteria. Yes, 'structural integrity when folded' is a real metric.",
-    "memberSince": "2019-11-30",
-    "favoritePizzaStyle": "Detroit Style",
-    "restaurantsVisited": 41
+    "id": "pat-kleszynski",
+    "name": "Pat Kleszynski",
+    "photo": "/images/members/pat-k.png",
+    "bio": "Pat holds the crucial role of Director of Fungal Coordination at the Pizza Club, a position born out of his profound aversion to mushrooms. Known for his generally amenable nature, Pat is willing to go along with almost any decision—until the topic of mushrooms arises.\n\nPat's primary responsibility is to ensure that our pizzas remain free of mushrooms, employing a range of pioneering strategies to achieve this goal. His tactics include meticulous menu scrutiny, preemptive discussions with waitstaff, and the occasional use of coded language to avoid the dreaded ingredient. Pat's unwavering commitment to this cause has saved countless pizzas from being 'soiled' by mushrooms, much to the delight of like-minded members.\n\nDespite his firm stance on mushrooms, Pat's flexibility and willingness to accommodate other preferences make him an invaluable member of our club. His dedication to fungal coordination ensures that our pizza experiences are enjoyable for all, maintaining a harmonious balance between personal preferences and collective enjoyment.",
+    "memberSince": "2013-01-26",
+    "favoritePizzaStyle": "Director of Fungal Avoidance",
+    "restaurantsVisited": 6
   },
   {
     "id": "maria-santos",
     "name": "Maria Santos",
     "photo": "/images/members/maria-santos.jpg",
     "bio": "Restaurant industry veteran and crust expert. I can tell you the hydration percentage of dough by touch. Always searching for that perfect char and chew combination.",
-    "memberSince": "2020-08-20",
+    "memberSince": "2013-01-26",
     "favoritePizzaStyle": "Artisan Wood-Fired",
     "restaurantsVisited": 35
   },
@@ -58,7 +58,7 @@
     "name": "Raj Patel",
     "photo": "/images/members/raj-patel.jpg",
     "bio": "Vegetarian pizza advocate proving that great pizza doesn't need meat. I've converted several members to the glory of a well-done margherita. Basil is not optional.",
-    "memberSince": "2021-02-14",
+    "memberSince": "2013-01-26",
     "favoritePizzaStyle": "Margherita",
     "restaurantsVisited": 29
   },
@@ -67,7 +67,7 @@
     "name": "Alex Johnson",
     "photo": "/images/members/alex-johnson.jpg",
     "bio": "Newest member and tavern-style evangelist. Grew up in the suburbs where thin, crispy, and cut in squares is the only way. Currently working on converting the deep dish faithful.",
-    "memberSince": "2023-09-10",
+    "memberSince": "2013-01-26",
     "favoritePizzaStyle": "Chicago Tavern Style",
     "restaurantsVisited": 12
   }

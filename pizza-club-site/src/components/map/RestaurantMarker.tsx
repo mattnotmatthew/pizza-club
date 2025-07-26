@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AdvancedMarker, InfoWindow, useAdvancedMarkerRef } from '@vis.gl/react-google-maps';
 import type { Restaurant } from '@/types';
 import PizzaMarker from './PizzaMarker';
-import StarRating from '@/components/common/StarRating';
+import PizzaRating from '@/components/common/PizzaRating';
 
 interface RestaurantMarkerProps {
   restaurant: Restaurant;
@@ -34,7 +34,7 @@ const RestaurantMarker: React.FC<RestaurantMarkerProps> = ({
         <PizzaMarker 
           rating={restaurant.averageRating} 
           isSelected={isSelected || showInfoWindow}
-          size="medium"
+          size="small"
         />
       </AdvancedMarker>
 
@@ -53,7 +53,7 @@ const RestaurantMarker: React.FC<RestaurantMarkerProps> = ({
             
             {/* Rating */}
             <div className="flex items-center gap-2 mb-2">
-              <StarRating rating={restaurant.averageRating} size="small" />
+              <PizzaRating rating={restaurant.averageRating} size="small" />
               <span className="text-sm text-gray-600">
                 ({restaurant.averageRating.toFixed(1)})
               </span>

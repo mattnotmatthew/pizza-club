@@ -30,30 +30,42 @@ const PizzaMarker: React.FC<PizzaMarkerProps> = ({
           cursor-pointer
         `}
       >
-        {/* Pizza SVG */}
+        {/* Whole Pizza SVG */}
         <svg
-          viewBox="0 0 100 100"
+          viewBox="0 0 24 24"
           className="w-full h-full drop-shadow-lg"
           style={{ filter: isSelected ? 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3))' : undefined }}
         >
-          {/* Pizza slice shape */}
-          <path
-            d="M50 10 L85 85 L15 85 Z"
-            fill="#FFA500"
-            stroke="#8B4513"
-            strokeWidth="2"
-          />
-          {/* Cheese layer */}
-          <path
-            d="M50 20 L75 75 L25 75 Z"
-            fill="#FFE4B5"
-            opacity="0.8"
-          />
-          {/* Pepperoni circles */}
-          <circle cx="50" cy="40" r="6" fill="#8B0000" />
-          <circle cx="40" cy="55" r="5" fill="#8B0000" />
-          <circle cx="60" cy="55" r="5" fill="#8B0000" />
-          <circle cx="50" cy="65" r="4" fill="#8B0000" />
+          {/* Outer crust */}
+          <circle cx="12" cy="12" r="11" fill="#92400e" stroke="#78350f" strokeWidth="1" />
+          
+          {/* Inner pizza with sauce */}
+          <circle cx="12" cy="12" r="9" fill="#dc2626" />
+          
+          {/* Cheese base */}
+          <circle cx="12" cy="12" r="8.5" fill="#fef3c7" opacity="0.7" />
+          
+          {/* Pizza slices lines */}
+          <g stroke="#78350f" strokeWidth="0.5" opacity="0.3">
+            <line x1="12" y1="3" x2="12" y2="21" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="5.6" y1="5.6" x2="18.4" y2="18.4" />
+            <line x1="18.4" y1="5.6" x2="5.6" y2="18.4" />
+          </g>
+          
+          {/* Pepperoni toppings */}
+          <circle cx="12" cy="7" r="1.5" fill="#8b0000" />
+          <circle cx="8" cy="10" r="1.3" fill="#8b0000" />
+          <circle cx="16" cy="10" r="1.3" fill="#8b0000" />
+          <circle cx="10" cy="14" r="1.4" fill="#8b0000" />
+          <circle cx="14" cy="15" r="1.2" fill="#8b0000" />
+          <circle cx="12" cy="17" r="1.1" fill="#8b0000" />
+          
+          {/* Cheese highlights */}
+          <circle cx="9" cy="8" r="0.8" fill="#fef3c7" opacity="0.8" />
+          <circle cx="15" cy="7" r="0.6" fill="#fef3c7" opacity="0.8" />
+          <circle cx="7" cy="13" r="0.7" fill="#fef3c7" opacity="0.8" />
+          <circle cx="17" cy="14" r="0.5" fill="#fef3c7" opacity="0.8" />
         </svg>
         
         {/* Rating badge */}
