@@ -41,6 +41,7 @@ build
 *~
 *.swp
 *.swo
+.current-requirements
 
 # OS generated files
 Thumbs.db
