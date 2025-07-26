@@ -1,12 +1,13 @@
 [
   {
-    "id": "lou-malnatis-river-north",
-    "name": "Lou Malnati's",
-    "location": "River North",
-    "address": "439 N Wells St, Chicago, IL 60654",
+    "id": "old-oak",
+    "name": "Old Oak Country Club",
+    "location": "Homer Glen",
+    "address": "14200 Parker Rd, Homer Glen, IL 60491",
     "coordinates": {
-      "lat": 41.890438,
-      "lng": -87.633945
+   
+      "lat": 41.630968929641305, 
+      "lng": -87.93612345678901
     },
     "style": "Chicago Deep Dish",
     "visits": [
@@ -41,155 +42,5 @@
     "priceRange": "$$",
     "website": "https://www.loumalnatis.com",
     "mustTry": "The Malnati Chicago Classic"
-  },
-  {
-    "id": "pequods-pizza",
-    "name": "Pequod's Pizza",
-    "location": "Lincoln Park",
-    "address": "2207 N Clybourn Ave, Chicago, IL 60614",
-    "coordinates": {
-      "lat": 41.921581,
-      "lng": -87.664349
-    },
-    "style": "Chicago Deep Dish",
-    "visits": [
-      {
-        "date": "2024-10-20",
-        "ratings": {
-          "overall": 4.8,
-          "crust": 4.9,
-          "sauce": 4.6,
-          "cheese": 4.9,
-          "toppings": 4.7,
-          "value": 4.5
-        },
-        "attendees": ["mike-rossi", "sarah-chen", "tony-martinez", "jessica-walsh", "david-kim", "maria-santos"],
-        "notes": "The caramelized crust is legendary. Even Sarah admitted it might convert her from thin crust."
-      }
-    ],
-    "averageRating": 4.8,
-    "priceRange": "$$",
-    "website": "https://pequodspizza.com",
-    "mustTry": "Large with caramelized crust"
-  },
-  {
-    "id": "piece-brewery",
-    "name": "Piece Brewery & Pizzeria",
-    "location": "Wicker Park",
-    "address": "1927 W North Ave, Chicago, IL 60622",
-    "coordinates": {
-      "lat": 41.910573,
-      "lng": -87.676417
-    },
-    "style": "New Haven Style",
-    "visits": [
-      {
-        "date": "2024-09-14",
-        "ratings": {
-          "overall": 4.4,
-          "crust": 4.6,
-          "sauce": 4.3,
-          "cheese": 4.2,
-          "toppings": 4.5,
-          "value": 4.6
-        },
-        "attendees": ["mike-rossi", "sarah-chen", "jessica-walsh", "alex-johnson"],
-        "notes": "Great thin crust and even better beer selection. The white pizza with clams was divisive but memorable."
-      }
-    ],
-    "averageRating": 4.4,
-    "priceRange": "$$",
-    "website": "https://piecechicago.com",
-    "mustTry": "Red or White Clam Pizza"
-  },
-  {
-    "id": "spacca-napoli",
-    "name": "Spacca Napoli Pizzeria",
-    "location": "Ravenswood",
-    "address": "1769 W Sunnyside Ave, Chicago, IL 60640",
-    "coordinates": {
-      "lat": 41.963307,
-      "lng": -87.673937
-    },
-    "style": "Neapolitan",
-    "visits": [
-      {
-        "date": "2024-07-20",
-        "ratings": {
-          "overall": 4.7,
-          "crust": 4.9,
-          "sauce": 4.8,
-          "cheese": 4.6,
-          "toppings": 4.5,
-          "value": 4.2
-        },
-        "attendees": ["mike-rossi", "jessica-walsh", "maria-santos", "raj-patel"],
-        "notes": "Authentic Neapolitan experience. The 900-degree oven makes all the difference. Raj's margherita was perfection."
-      }
-    ],
-    "averageRating": 4.7,
-    "priceRange": "$$$",
-    "website": "https://spaccanapolipizzeria.com",
-    "mustTry": "Margherita DOC"
-  },
-  {
-    "id": "vito-and-nicks",
-    "name": "Vito & Nick's",
-    "location": "Far South Side",
-    "address": "8433 S Pulaski Rd, Chicago, IL 60652",
-    "coordinates": {
-      "lat": 41.739763,
-      "lng": -87.722694
-    },
-    "style": "Chicago Tavern Style",
-    "visits": [
-      {
-        "date": "2024-06-15",
-        "ratings": {
-          "overall": 4.5,
-          "crust": 4.7,
-          "sauce": 4.4,
-          "cheese": 4.5,
-          "toppings": 4.4,
-          "value": 4.8
-        },
-        "attendees": ["mike-rossi", "tony-martinez", "david-kim", "alex-johnson"],
-        "notes": "The trek to the South Side was worth it. This is tavern-style at its finest. Alex was vindicated."
-      }
-    ],
-    "averageRating": 4.5,
-    "priceRange": "$",
-    "website": "http://vitoandnicks.com",
-    "mustTry": "Large thin crust with sausage"
-  },
-  {
-    "id": "coalfire-pizza",
-    "name": "Coalfire Pizza",
-    "location": "West Town",
-    "address": "1321 W Grand Ave, Chicago, IL 60642",
-    "coordinates": {
-      "lat": 41.891165,
-      "lng": -87.659943
-    },
-    "style": "Coal Oven",
-    "visits": [
-      {
-        "date": "2024-05-18",
-        "ratings": {
-          "overall": 4.6,
-          "crust": 4.8,
-          "sauce": 4.5,
-          "cheese": 4.6,
-          "toppings": 4.5,
-          "value": 4.3
-        },
-        "attendees": ["mike-rossi", "sarah-chen", "maria-santos", "raj-patel", "jessica-walsh"],
-        "notes": "The coal oven gives incredible char. Limited toppings but everything is high quality. No slices, only whole pies."
-      }
-    ],
-    "averageRating": 4.6,
-    "priceRange": "$$",
-    "website": "https://coalfirechicago.com",
-    "mustTry": "Margherita with housemade mozzarella"
   }
 ]

@@ -9,18 +9,18 @@
     "restaurantsVisited": 47
   },
   {
-    "id": "sarah-chen",
-    "name": "Sarah Chen",
-    "photo": "/images/members/sarah-chen.jpg",
-    "bio": "Software engineer by day, pizza connoisseur by night. I moved to Chicago from NYC five years ago and I'm still defending thin crust. Someone has to keep this club honest!",
-    "memberSince": "2019-06-22",
-    "favoritePizzaStyle": "New York Style",
+    "id": "ryan-coe",
+    "name": "Ryan Coe",
+    "photo": "/images/members/ryan-coe.jpg",
+    "bio": "Ryan is the Vice President of Table Management and Growth at the Pizza Club, where he brings his unparalleled expertise in optimizing table space and maintaining an organized dining environment. With a sharp eye for detail and a no-nonsense approach to unnecessary clutter, Ryan ensures that our table remains free of frivolous items, enhancing the overall dining experience.\n\nRenowned for his pioneering advocacy of the 'No Ask, No Glass' policy, Ryan has successfully minimized the intrusion of unrequested water glasses brought by well-meaning waitstaff. This policy, now widely adopted by the industry at large, reflects Ryan's innovative approach to table management. His vigilance extends beyond water, encompassing all aspects of table organization to ensure that every item is precisely where it needs to be throughout the meal.\n\nRyan's commitment to efficient table management has significantly contributed to the growth and enjoyment of our club gatherings. His leadership guarantees a streamlined and enjoyable pizza experience, where every slice is savored without the distraction of unnecessary clutter.",
+    "memberSince": "2013-01-26",
+    "favoritePizzaStyle": "VP of Table Management & Growth",
     "restaurantsVisited": 43
   },
   {
     "id": "tony-martinez",
     "name": "Tony Martinez",
-    "photo": "/images/members/tony-martinez.jpg",
+    "photo": "/images/members/chris-daum.jpg",
     "bio": "Third-generation Chicagoan and pizza purist. If it doesn't take 45 minutes to bake, is it even pizza? I rate based on cheese pull, crust integrity, and sauce-to-topping ratio.",
     "memberSince": "2019-04-10",
     "favoritePizzaStyle": "Chicago Deep Dish",

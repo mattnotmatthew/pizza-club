@@ -32,7 +32,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
         
         {/* Favorite Style Badge */}
         {member.favoriteStyle && (
-          <span className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-sm mb-3">
+          <span className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-xs mb-3">
             {member.favoriteStyle}
           </span>
         )}
