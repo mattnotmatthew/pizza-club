@@ -65,12 +65,19 @@ const Home: React.FC = () => {
     <div className="min-h-screen">
       <section className="bg-red-700 text-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-6xl font-bold text-center mb-6">
-            Greater Chicagoland Pizza Club
-          </h1>
-          <p className="text-xl md:text-2xl text-center text-yellow-100">
-            Dedicated to finding and rating the best pizza in Chicagoland
-          </p>
+          <div className="flex flex-col items-center">
+            <img 
+              src="/pizza/logo.png" 
+              alt="Greater Chicagoland Pizza Club Logo" 
+              className="h-45 w-45 md:h-60 md:w-60 lg:h-100 lg:w-100 rounded-full shadow-xl object-cover mb-6"
+            />
+            <h1 className="text-4xl md:text-6xl font-bold text-center mb-6">
+              Greater Chicagoland Pizza Club
+            </h1>
+            <p className="text-xl md:text-2xl text-center text-yellow-100 tracking-wide">
+              Nella pizza, il volto di Dio.
+            </p>
+          </div>
         </div>
       </section>
       

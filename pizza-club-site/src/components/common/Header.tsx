@@ -20,8 +20,13 @@ const Header: React.FC = () => {
     <header className="bg-checkered-border shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="text-white font-bold text-xl md:text-2xl">
-            🍕 GCPC
+          <Link to="/" className="flex items-center space-x-2 bg-red-800/90 md:bg-transparent px-3 py-1 rounded-lg backdrop-blur-sm ml-4">
+            <img 
+              src="/pizza/logo.png" 
+              alt="Greater Chicagoland Pizza Club Logo" 
+              className="h-8 w-8 md:h-10 md:w-10 rounded-full shadow-md object-cover"
+            />
+            <span className="text-white font-bold text-xl md:text-2xl">GCPC</span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -36,7 +41,7 @@ const Header: React.FC = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-white focus:outline-none"
+            className="md:hidden text-white focus:outline-none bg-red-800/90 p-2 rounded-lg backdrop-blur-sm mr-4"
             aria-label="Toggle menu"
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
