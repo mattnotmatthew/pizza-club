@@ -14,13 +14,21 @@ const Members: React.FC = () => {
       try {
         const fetchedMembers = await dataService.getMembers();
         // Map the data to ensure compatibility with components expecting old field names
-        const mappedMembers = fetchedMembers.map(member => ({
-          ...member,
-          // Provide backward compatibility for deprecated fields
-          photoUrl: member.photoUrl || member.photo,
-          joinDate: member.joinDate || (member.memberSince ? new Date(member.memberSince) : undefined),
-          favoriteStyle: member.favoriteStyle || member.favoritePizzaStyle,
-        }));
+        const mappedMembers = fetchedMembers.map(member => {
+          // Handle photo URL with base path
+          let photoUrl = member.photoUrl || member.photo;
+          if (photoUrl && photoUrl.startsWith('/images/')) {
+            photoUrl = import.meta.env.BASE_URL + photoUrl.slice(1); // Remove leading slash and prepend base URL
+          }
+          
+          return {
+            ...member,
+            // Provide backward compatibility for deprecated fields
+            photoUrl,
+            joinDate: member.joinDate || (member.memberSince ? new Date(member.memberSince) : undefined),
+            favoriteStyle: member.favoriteStyle || member.favoritePizzaStyle,
+          };
+        });
         setMembers(mappedMembers);
       } catch (error) {
         console.error('Failed to fetch members:', error);

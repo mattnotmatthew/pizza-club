@@ -30,19 +30,21 @@ const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
           {member.name}
         </h3>
         
+        {/* Favorite Style Badge */}
+        {member.favoriteStyle && (
+          <span className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-sm mb-3">
+            {member.favoriteStyle}
+          </span>
+        )}
+        
         {/* Bio Preview */}
         <p className="text-gray-600 text-sm line-clamp-3 mb-3">
           {member.bio}
         </p>
         
         {/* Meta Info */}
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="text-xs text-gray-500">
           <span>Member since {memberSince}</span>
-          {member.favoriteStyle && (
-            <span className="bg-red-50 text-red-700 px-2 py-1 rounded-full">
-              {member.favoriteStyle}
-            </span>
-          )}
         </div>
       </div>
     </Link>

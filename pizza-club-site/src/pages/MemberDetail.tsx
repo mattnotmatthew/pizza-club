@@ -1,75 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
+import { dataService } from '@/services/data';
 import type { Member, Restaurant } from '@/types';
 
-// Mock data - replace with CMS fetch
-const mockMembers: Member[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    bio: 'Pizza enthusiast since 1985. I believe the perfect pizza has a crispy crust, balanced sauce, and just the right amount of cheese. Always searching for the next great slice in Chicago.',
-    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-    joinDate: new Date('2020-01-15'),
-    favoriteStyle: 'Deep Dish',
-  },
-  {
-    id: '2',
-    name: 'Sarah Johnson',
-    bio: 'Lifelong Chicagoan with a passion for thin crust tavern-style pizza. I love exploring neighborhood pizza joints and discovering hidden gems across the city.',
-    photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
-    joinDate: new Date('2020-03-22'),
-    favoriteStyle: 'Tavern Style',
-  },
-  {
-    id: '3',
-    name: 'Mike Wilson',
-    bio: 'Former New Yorker converted to Chicago pizza. I appreciate all styles but have a special place in my heart for stuffed pizza. Weekend pizza hunter and amateur pizza historian.',
-    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
-    joinDate: new Date('2021-06-10'),
-    favoriteStyle: 'Stuffed',
-  },
-  {
-    id: '4',
-    name: 'Emily Davis',
-    bio: 'Food blogger and pizza aficionado. I document our pizza adventures and love trying unique toppings. Firm believer that pizza is the perfect food for any occasion.',
-    photoUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
-    joinDate: new Date('2020-11-05'),
-    favoriteStyle: 'Neapolitan',
-  },
-  {
-    id: '5',
-    name: 'Robert Martinez',
-    bio: 'Chef by profession, pizza lover by choice. I bring a culinary perspective to our tastings and enjoy analyzing the technical aspects of great pizza making.',
-    photoUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
-    joinDate: new Date('2021-02-28'),
-    favoriteStyle: 'Wood-Fired',
-  },
-  {
-    id: '6',
-    name: 'Lisa Anderson',
-    bio: 'Pizza purist who believes in quality ingredients and traditional techniques. I organize our monthly meetups and keep track of our ever-growing list of pizzerias to visit.',
-    photoUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop',
-    joinDate: new Date('2020-01-15'),
-    favoriteStyle: 'Classic',
-  },
-  {
-    id: '7',
-    name: 'David Thompson',
-    bio: 'Numbers guy who brings data to our pizza discussions. I maintain our rating spreadsheet and love finding correlations between pizza styles and neighborhood demographics.',
-    photoUrl: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&fit=crop',
-    joinDate: new Date('2022-04-12'),
-    favoriteStyle: 'Detroit Style',
-  },
-  {
-    id: '8',
-    name: 'Jennifer Chen',
-    bio: 'Adventurous eater who never says no to trying new pizza places. I love the community aspect of our club and the friendships formed over shared slices.',
-    photoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop',
-    joinDate: new Date('2021-09-20'),
-    favoriteStyle: 'Artisanal',
-  },
-];
 
 // Mock visited restaurants data
 const mockVisitedRestaurants: Restaurant[] = [
@@ -113,10 +47,24 @@ const MemberDetail: React.FC = () => {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // TODO: Replace with actual CMS fetch
-        const foundMember = mockMembers.find(m => m.id === id);
+        // Fetch member from data service
+        const foundMember = await dataService.getMemberById(id || '');
         if (foundMember) {
-          setMember(foundMember);
+          // Handle photo URL with base path
+          let photoUrl = foundMember.photoUrl || foundMember.photo;
+          if (photoUrl && photoUrl.startsWith('/images/')) {
+            photoUrl = import.meta.env.BASE_URL + photoUrl.slice(1);
+          }
+          
+          const mappedMember = {
+            ...foundMember,
+            photoUrl,
+            joinDate: foundMember.joinDate || (foundMember.memberSince ? new Date(foundMember.memberSince) : undefined),
+            favoriteStyle: foundMember.favoriteStyle || foundMember.favoritePizzaStyle,
+          };
+          
+          setMember(mappedMember);
+          // TODO: Fetch actual visited restaurants for this member
           setVisitedRestaurants(mockVisitedRestaurants);
         } else {
           // Member not found
@@ -184,11 +132,11 @@ const MemberDetail: React.FC = () => {
         {/* Member Profile Card */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
           {/* Hero Image Section */}
-          <div className="relative h-64 md:h-96 bg-gray-200">
+          <div className="relative h-64 md:h-80 bg-gray-200">
             <img
               src={member.photoUrl || '/api/placeholder/800/400'}
               alt={member.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-[center_15%]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
@@ -197,7 +145,7 @@ const MemberDetail: React.FC = () => {
               </h1>
               {member.favoriteStyle && (
                 <span className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-sm">
-                  {member.favoriteStyle} Lover
+                  {member.favoriteStyle}
                 </span>
               )}
             </div>
