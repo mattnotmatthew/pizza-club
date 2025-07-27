@@ -24,7 +24,7 @@ const Header: React.FC = () => {
             <img 
               src="/pizza/logo.png" 
               alt="Greater Chicagoland Pizza Club Logo" 
-              className="h-8 w-8 md:h-10 md:w-10 rounded-full shadow-md object-cover"
+              className="h-12 w-12 md:h-10 md:w-10 rounded-full shadow-md object-cover"
             />
             <span className="text-white font-bold text-xl md:text-2xl">GCPC</span>
           </Link>
