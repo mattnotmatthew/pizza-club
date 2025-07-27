@@ -31,6 +31,89 @@
       transform: translateY(0);
     }
   }
+  
+  .animate-breathing {
+    animation: breathing 3s ease-in-out infinite;
+  }
+  
+  @keyframes breathing {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  
+  .animate-rotate-slow {
+    animation: rotateSlow 120s linear infinite;
+  }
+  
+  @keyframes rotateSlow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-rotate-slow img {
+    animation: rotateSlowReverse 120s linear infinite !important;
+  }
+  
+  @keyframes rotateSlowReverse {
+    from {
+      transform: translateY(5px) rotate(0deg);
+    }
+    to {
+      transform: translateY(5px) rotate(-360deg);
+    }
+  }
+  
+  .animate-typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: typewriter 3s steps(30) 1s forwards;
+  }
+  
+  @keyframes typewriter {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+  
+  .animate-fade-in-delay {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-in-out 2s forwards;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .animate-breathing,
+    .animate-rotate-slow,
+    .animate-rotate-slow img,
+    .animate-typewriter,
+    .animate-fade-in,
+    .animate-fade-in-delay {
+      animation: none;
+    }
+    
+    .animate-typewriter {
+      width: 100%;
+    }
+    
+    .animate-fade-in-delay {
+      opacity: 1;
+    }
+    
+    .animate-rotate-slow img {
+      transform: translateY(5px);
+    }
+  }
 }
 
 @layer components {

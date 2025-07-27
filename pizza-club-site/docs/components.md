@@ -1,0 +1,174 @@
+# Components Guide
+
+## Component Architecture
+
+The application follows a consistent component pattern with TypeScript and React functional components.
+
+### Component Structure
+
+```typescript
+import React from 'react';
+
+interface ComponentNameProps {
+  // Props definition
+}
+
+const ComponentName: React.FC<ComponentNameProps> = ({ prop1, prop2 }) => {
+  // Component logic
+  return (
+    // JSX
+  );
+};
+
+export default ComponentName;
+```
+
+## Common Components
+
+### Layout (`components/common/Layout.tsx`)
+- Wraps all pages with Header and Footer
+- Uses React Router's `<Outlet />` for nested routing
+- Provides consistent page structure
+
+### Header (`components/common/Header.tsx`)
+- Navigation menu with responsive design
+- Logo and club name
+- Links to main sections
+
+### PizzaRating (`components/common/PizzaRating.tsx`)
+- Custom pizza slice-based rating visualization
+- Props:
+  - `rating`: number (0-5)
+  - `maxRating`: number (default: 5)
+  - `size`: 'small' | 'medium' | 'large'
+  - `showValue`: boolean
+- Uses SVG for custom pizza slice graphics
+
+### WholePizzaRating (`components/common/WholePizzaRating.tsx`)
+- Full pizza visualization for ratings
+- Similar to PizzaRating but shows a complete pizza
+
+### StarRating (`components/common/StarRating.tsx`)
+- Traditional star rating component
+- Fallback option for simpler rating display
+
+### Card (`components/common/Card.tsx`)
+- Reusable card container
+- Consistent shadow and padding
+
+### Button (`components/common/Button.tsx`)
+- Standardized button styles
+- Variants for different actions
+
+### Skeleton (`components/common/Skeleton.tsx`)
+- Loading placeholder animations
+- Used while data is fetching
+
+## Member Components
+
+### MemberCard (`components/members/MemberCard.tsx`)
+- Displays member information in a card format
+- Features:
+  - Profile image with hover effect
+  - Name, bio preview, favorite style
+  - Member since date
+  - Links to member detail page
+
+### VisitedList (`components/members/VisitedList.tsx`)
+- Shows restaurants visited by a member
+- Displays ratings and visit dates
+
+## Restaurant Components
+
+### RestaurantList (`components/restaurants/RestaurantList.tsx`)
+- Grid/list view of all restaurants
+- Features:
+  - Filtering and sorting
+  - Average ratings display
+  - Visit count
+  - Price range indicators
+
+## Map Components
+
+### MapContainer (`components/map/MapContainer.tsx`)
+- Google Maps integration wrapper
+- Manages map instance and controls
+
+### RestaurantMarker (`components/map/RestaurantMarker.tsx`)
+- Custom markers for restaurant locations
+- Shows:
+  - Restaurant name on hover
+  - Average rating
+  - Click to view details
+
+### PizzaMarker (`components/map/PizzaMarker.tsx`)
+- Pizza-themed map markers
+- Visual differentiation for restaurant types
+
+## Component Patterns
+
+### 1. Props Interface Pattern
+All components use TypeScript interfaces for props:
+```typescript
+interface ComponentProps {
+  required: string;
+  optional?: number;
+  callback?: () => void;
+}
+```
+
+### 2. Default Props
+Default values are set using ES6 destructuring:
+```typescript
+const Component: React.FC<Props> = ({ 
+  prop1, 
+  prop2 = 'default' 
+}) => { ... }
+```
+
+### 3. Conditional Rendering
+Uses short-circuit evaluation and ternary operators:
+```typescript
+{condition && <Component />}
+{condition ? <ComponentA /> : <ComponentB />}
+```
+
+### 4. Event Handlers
+Named functions for clarity:
+```typescript
+const handleClick = () => {
+  // logic
+};
+
+return <button onClick={handleClick}>Click</button>;
+```
+
+### 5. Loading States
+Consistent loading UI with Skeleton components:
+```typescript
+if (loading) return <Skeleton />;
+```
+
+### 6. Error Boundaries
+Not currently implemented but recommended for production
+
+## Styling Patterns
+
+- **Tailwind Classes**: Primary styling method
+- **Conditional Classes**: Using template literals
+- **Hover Effects**: `group` and `group-hover` utilities
+- **Responsive**: Mobile-first with `sm:`, `md:`, `lg:` prefixes
+
+## Performance Optimizations
+
+1. **Lazy Loading**: All page components are lazy loaded
+2. **Image Optimization**: `loading="lazy"` on images
+3. **Memoization**: Not currently used but recommended for expensive computations
+
+## Component Testing
+
+Currently no test files, but recommended structure:
+```
+ComponentName.tsx
+ComponentName.test.tsx
+```
