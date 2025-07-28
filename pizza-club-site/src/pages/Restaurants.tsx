@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import MapContainer from '@/components/map/MapContainer';
 import RestaurantList from '@/components/restaurants/RestaurantList';
 import Skeleton from '@/components/common/Skeleton';
+import SubNavigation from '@/components/common/SubNavigation';
 import { useSort } from '@/hooks/useSort';
+import { useSubNavigation } from '@/hooks/useSubNavigation';
 import { dataService } from '@/services/data';
 import type { Restaurant } from '@/types';
 
@@ -15,6 +17,15 @@ const Restaurants: React.FC = () => {
   const [isDesktop, setIsDesktop] = useState(false);
   
   const { sortedData, toggleSort } = useSort(restaurants, sortField);
+  
+  // Navigation items for future features
+  const navigationItems = [
+    { id: 'main', label: 'Restaurants' },
+    { id: 'infographs', label: 'Infographs' },
+    { id: 'compare', label: 'Compare' }
+  ];
+  
+  const { activeItem, handleItemClick } = useSubNavigation('main');
 
   useEffect(() => {
     const checkIsDesktop = () => {
@@ -73,6 +84,14 @@ const Restaurants: React.FC = () => {
             Explore all the amazing pizza places we've visited across Chicagoland
           </p>
         </div>
+        
+        {/* Sub Navigation */}
+        <SubNavigation
+          items={navigationItems}
+          activeItem={activeItem}
+          onItemClick={handleItemClick}
+          className="mb-8"
+        />
         
         {/* View Mode Toggle - Mobile Only */}
         <div className="flex justify-center mb-6 md:hidden">

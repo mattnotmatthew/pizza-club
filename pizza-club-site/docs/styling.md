@@ -143,8 +143,13 @@ Pizza-themed loading animation:
 ### Built-in Animations
 - `animate-spin` - Loading spinners
 - `animate-fade-in` - Custom fade-in effect
+- `animate-breathing` - Gentle scale pulsing effect
+- `animate-typewriter` - Text reveal animation
+- `animate-fade-in-delay` - Delayed fade-in effect
 
-### Custom Animation
+### Custom Animations
+
+#### Fade In
 ```css
 @keyframes fadeIn {
   from {
@@ -158,10 +163,46 @@ Pizza-themed loading animation:
 }
 ```
 
+#### Typewriter Effect
+```css
+.animate-typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  animation: typewriter 3s steps(30) 1s forwards;
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+```
+
+#### Breathing Animation
+```css
+@keyframes breathing {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+```
+
 ### Transition Effects
 - Hover transitions: `transition-all duration-300`
 - Color transitions: `transition-colors`
 - Transform transitions: `transition-transform duration-300`
+
+### Accessibility
+All animations respect `prefers-reduced-motion`:
+```css
+@media (prefers-reduced-motion: reduce) {
+  .animate-breathing,
+  .animate-typewriter,
+  .animate-fade-in,
+  .animate-fade-in-delay {
+    animation: none;
+  }
+}
+```
 
 ## Layout Patterns
 

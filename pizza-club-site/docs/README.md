@@ -4,13 +4,21 @@ Welcome to the Pizza Club Site documentation. This documentation provides a comp
 
 ## 📁 Documentation Structure
 
+### Core Documentation
 - **[Overview](./overview.md)** - High-level architecture and tech stack
 - **[Components Guide](./components.md)** - Component patterns and usage
 - **[Hooks & Utilities](./hooks-utilities.md)** - Custom hooks and utility functions
 - **[Data Flow](./data-flow.md)** - API patterns and data management
 - **[Routing](./routing.md)** - Page structure and navigation
-- **[Styling Guide](./styling.md)** - CSS patterns and Tailwind conventions
 - **[Development Setup](./development.md)** - Getting started and local development
+
+### Design & Implementation
+- **[Styling Guide](./styling.md)** - CSS patterns and Tailwind conventions
+- **[Homepage Redesign](./homepage-redesign.md)** - Homepage implementation details and patterns
+- **[Design Patterns](./patterns.md)** - Reusable patterns and best practices
+
+### Operations
+- **[Maintenance Guide](./maintenance.md)** - Maintenance tasks and troubleshooting
 
 ## 🚀 Quick Start
 
