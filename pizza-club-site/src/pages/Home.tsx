@@ -14,10 +14,10 @@ const Home: React.FC = () => {
     
     const width = window.innerWidth;
     if (width < 768) {
-      // Mobile - contain to fit without cutting off
+      // Mobile - contain to fit without cutting off, positioned higher
       return {
         size: 'contain',
-        position: 'center center'
+        position: 'center 20%'
       };
     } else if (width < 1024) {
       // Tablet
