@@ -14,9 +14,9 @@ const Home: React.FC = () => {
     
     const width = window.innerWidth;
     if (width < 768) {
-      // Mobile - smaller size, centered
+      // Mobile - contain to fit without cutting off
       return {
-        size: 'auto 98vh',
+        size: 'contain',
         position: 'center center'
       };
     } else if (width < 1024) {
