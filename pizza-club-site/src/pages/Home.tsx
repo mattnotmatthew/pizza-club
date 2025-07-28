@@ -16,13 +16,13 @@ const Home: React.FC = () => {
     if (width < 768) {
       // Mobile - smaller size, centered
       return {
-        size: 'auto 70vh',
+        size: 'auto 95vh',
         position: 'center center'
       };
     } else if (width < 1024) {
       // Tablet
       return {
-        size: 'auto 70vh',
+        size: 'auto 95vh',
         position: 'center center'
       };
     } else {
