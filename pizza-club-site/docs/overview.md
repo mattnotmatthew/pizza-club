@@ -47,9 +47,10 @@ src/
 
 1. **Member Management** - View club members, their profiles, and visited restaurants
 2. **Restaurant Directory** - Browse and rate pizza restaurants
-3. **Interactive Map** - Visual representation of restaurant locations
-4. **Event Tracking** - Manage and view club events
-5. **Rating System** - Pizza slice-based rating visualization
+3. **Restaurant Comparison** - Compare up to 4 restaurants side-by-side
+4. **Interactive Map** - Visual representation of restaurant locations
+5. **Event Tracking** - Manage and view club events
+6. **Rating System** - Pizza slice-based rating visualization
 
 ## Routing Structure
 
@@ -59,6 +60,7 @@ The app uses React Router with lazy loading for performance:
 - `/members` - Members list
 - `/members/:id` - Individual member details
 - `/restaurants` - Restaurant directory
+- `/restaurants/compare` - Restaurant comparison tool
 - `/events` - Events listing
 - `/test` - Development test page
 

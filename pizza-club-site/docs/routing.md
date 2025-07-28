@@ -33,6 +33,7 @@ Key features:
 | `/members` | `Members.tsx` | Grid view of all club members |
 | `/members/:id` | `MemberDetail.tsx` | Individual member profile and visited restaurants |
 | `/restaurants` | `Restaurants.tsx` | List/map view of all restaurants |
+| `/restaurants/compare` | `RestaurantsCompare.tsx` | Side-by-side restaurant comparison tool |
 | `/events` | `Events.tsx` | Upcoming and past club events |
 | `/test` | `Test.tsx` | Development testing page |
 
@@ -105,6 +106,28 @@ const upcoming = events.filter(e => new Date(e.date) > now);
 const past = events.filter(e => new Date(e.date) <= now);
 ```
 
+### Restaurants Compare Page (`pages/RestaurantsCompare.tsx`)
+**Features:**
+- Compare up to 4 restaurants side-by-side
+- Restaurant selection with visual feedback
+- URL state persistence for shareable links
+- Toggle individual rating categories
+- Responsive table with horizontal scroll
+- Average rating calculations
+
+**URL State Management:**
+```typescript
+// URL format: /restaurants/compare?ids=restaurant1,restaurant2
+const searchParams = new URLSearchParams(window.location.search);
+const urlIds = searchParams.get('ids')?.split(',') || [];
+```
+
+**Key Components:**
+- `RestaurantSelector`: Selection interface
+- `CompareTable`: Comparison display
+- `useCompareSelection`: Selection state management
+- `useCompareUrl`: URL synchronization
+
 ## Navigation Patterns
 
 ### Header Navigation
@@ -132,6 +155,15 @@ import { useNavigate } from 'react-router-dom';
 
 const navigate = useNavigate();
 navigate('/members/123');
+```
+
+### SubNavigation Pattern
+The restaurants page uses `useSubNavigation` hook for sub-page navigation:
+```typescript
+// In useSubNavigation hook
+if (itemId === 'compare') {
+  navigate('/restaurants/compare');
+}
 ```
 
 ## Loading States

@@ -36,6 +36,88 @@ const { sortedData, toggleSort } = useSort(members, 'name');
 </button>
 ```
 
+### useCompareSelection (`hooks/useCompareSelection.ts`)
+
+Manages restaurant selection state for the comparison feature.
+
+#### Usage
+```typescript
+const selection = useCompareSelection(initialIds);
+```
+
+#### Features
+- Enforces maximum selection limit (4 restaurants)
+- Toggle selection on/off
+- Clear all selections
+- Check if restaurant is selected
+- Check if more can be selected
+- Returns:
+  - `selectedIds`: Array of selected restaurant IDs
+  - `toggleSelection`: Add/remove restaurant from selection
+  - `clearSelection`: Clear all selections
+  - `isSelected`: Check if specific restaurant is selected
+  - `canSelectMore`: Whether selection limit allows more
+  - `maxSelections`: Maximum allowed selections (4)
+
+#### Example
+```typescript
+const selection = useCompareSelection([]);
+
+// Toggle selection
+selection.toggleSelection('restaurant-1');
+
+// Check if can select more
+if (selection.canSelectMore) {
+  // Show selection UI
+}
+```
+
+### useCompareUrl (`hooks/useCompareUrl.ts`)
+
+Synchronizes comparison selection with URL query parameters.
+
+#### Usage
+```typescript
+useCompareUrl(selectedIds, onUrlChange);
+```
+
+#### Features
+- Updates URL when selection changes
+- Parses URL on component mount
+- Enables shareable comparison links
+- URL format: `?ids=id1,id2,id3`
+- Handles browser back/forward navigation
+
+#### Example
+```typescript
+// In RestaurantsCompare component
+const selection = useCompareSelection(urlIds);
+
+useCompareUrl(selection.selectedIds, (ids) => {
+  // Handle URL changes
+  ids.forEach(id => {
+    if (!selection.isSelected(id)) {
+      selection.toggleSelection(id);
+    }
+  });
+});
+```
+
+### useSubNavigation (`hooks/useSubNavigation.ts`)
+
+Handles navigation to sub-pages within a main section.
+
+#### Usage
+```typescript
+const { items, activeItem, handleItemClick } = useSubNavigation();
+```
+
+#### Features
+- Defines navigation items for sub-sections
+- Handles click events with navigation
+- Tracks active item state
+- Currently used for restaurants sub-navigation
+
 ## Potential Custom Hooks (Not Yet Implemented)
 
 Based on the application patterns, these hooks would be beneficial:

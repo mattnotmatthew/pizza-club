@@ -88,6 +88,26 @@ export default ComponentName;
   - Visit count
   - Price range indicators
 
+### RestaurantSelector (`components/restaurants/RestaurantSelector.tsx`)
+- Restaurant selection interface for comparison feature
+- Features:
+  - Checkbox selection with visual feedback
+  - Maximum 4 restaurant limit enforcement
+  - Clear All functionality
+  - Responsive grid layout
+  - Selection count display
+  - Disabled state for unselectable items
+
+### CompareTable (`components/restaurants/CompareTable.tsx`)
+- Side-by-side comparison table for restaurants
+- Features:
+  - All rating categories with WholePizzaRating for overall
+  - Average rating calculations across visits
+  - Additional details (price range, visits, must-try)
+  - Horizontal scroll for mobile with sticky first column
+  - Dynamic show/hide for rating categories
+  - Links to website and directions
+
 ## Map Components
 
 ### MapContainer (`components/map/MapContainer.tsx`)

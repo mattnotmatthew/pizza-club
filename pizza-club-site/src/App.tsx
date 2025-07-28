@@ -7,6 +7,7 @@ const Home = lazy(() => import('@/pages/Home'));
 const Members = lazy(() => import('@/pages/Members'));
 const MemberDetail = lazy(() => import('@/pages/MemberDetail'));
 const Restaurants = lazy(() => import('@/pages/Restaurants'));
+const RestaurantsCompare = lazy(() => import('@/pages/RestaurantsCompare'));
 const Events = lazy(() => import('@/pages/Events'));
 const Test = lazy(() => import('@/pages/Test'));
 
@@ -30,6 +31,7 @@ function App() {
             <Route path="members" element={<Members />} />
             <Route path="members/:id" element={<MemberDetail />} />
             <Route path="restaurants" element={<Restaurants />} />
+            <Route path="restaurants/compare" element={<RestaurantsCompare />} />
             <Route path="events" element={<Events />} />
             <Route path="test" element={<Test />} />
           </Route>

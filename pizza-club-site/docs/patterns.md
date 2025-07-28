@@ -213,6 +213,41 @@ const updateFilter = (newFilter: string) => {
 };
 ```
 
+### Comparison Feature Pattern
+```typescript
+// URL-based state persistence for shareable comparisons
+const searchParams = new URLSearchParams(window.location.search);
+const urlIds = searchParams.get('ids')?.split(',').filter(id => id.length > 0) || [];
+
+// Sync selection with URL
+useEffect(() => {
+  const params = new URLSearchParams();
+  if (selectedIds.length > 0) {
+    params.set('ids', selectedIds.join(','));
+  }
+  const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+  window.history.replaceState({}, '', newUrl);
+}, [selectedIds]);
+```
+
+### Selection Limit Pattern
+```typescript
+// Enforce maximum selection limit
+const MAX_SELECTIONS = 4;
+
+const toggleSelection = (id: string) => {
+  setSelectedIds(prev => {
+    if (prev.includes(id)) {
+      return prev.filter(selectedId => selectedId !== id);
+    }
+    if (prev.length >= MAX_SELECTIONS) {
+      return prev; // Don't add if at limit
+    }
+    return [...prev, id];
+  });
+};
+```
+
 ### Optimistic Updates
 ```typescript
 const updateItem = async (id: string, data: UpdateData) => {
@@ -272,6 +307,58 @@ describe('Component', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 });
+```
+
+## Responsive Table Patterns
+
+### Horizontal Scroll with Sticky Column
+```tsx
+// Mobile-friendly comparison table
+<div className="overflow-x-auto">
+  <table className="min-w-full">
+    <tbody>
+      <tr>
+        <td className="sticky left-0 z-10 bg-white px-6 py-4">
+          Category Label
+        </td>
+        {/* Scrollable columns */}
+        {items.map(item => (
+          <td key={item.id} className="px-6 py-4 min-w-[200px]">
+            {item.value}
+          </td>
+        ))}
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+### Toggle Controls Pattern
+```tsx
+// Dynamic show/hide for table rows
+const [toggles, setToggles] = useState({
+  category1: true,
+  category2: true,
+  category3: false
+});
+
+// Toggle UI
+{Object.entries(toggles).map(([key, value]) => (
+  <label key={key} className="flex items-center">
+    <input
+      type="checkbox"
+      checked={value}
+      onChange={(e) => setToggles(prev => ({
+        ...prev,
+        [key]: e.target.checked
+      }))}
+    />
+    <span className="ml-2 capitalize">{key}</span>
+  </label>
+))}
+
+// Conditional rendering
+{toggles.category1 && <CategoryRow />}
 ```
 
 ## File Organization Patterns

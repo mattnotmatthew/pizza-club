@@ -12,6 +12,9 @@ Welcome to the Pizza Club Site documentation. This documentation provides a comp
 - **[Routing](./routing.md)** - Page structure and navigation
 - **[Development Setup](./development.md)** - Getting started and local development
 
+### Features
+- **[Restaurant Comparison](./restaurant-comparison.md)** - Side-by-side restaurant comparison feature
+
 ### Design & Implementation
 - **[Styling Guide](./styling.md)** - CSS patterns and Tailwind conventions
 - **[Homepage Redesign](./homepage-redesign.md)** - Homepage implementation details and patterns
