@@ -16,7 +16,7 @@ const Home: React.FC = () => {
     if (width < 768) {
       // Mobile - smaller size, centered
       return {
-        size: 'auto 60vh',
+        size: 'auto 70vh',
         position: 'center center'
       };
     } else if (width < 1024) {
