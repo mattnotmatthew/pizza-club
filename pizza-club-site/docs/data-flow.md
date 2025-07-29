@@ -36,12 +36,17 @@ All data is stored in static JSON files under `public/data/`:
   "visits": [{
     "date": "string",
     "ratings": {
+      // Dynamic rating categories - any key/value pairs
       "overall": number,
       "crust": number,
       "sauce": number,
       "cheese": number,
       "toppings": number,
-      "value": number
+      "value": number,
+      // Additional categories can be added dynamically
+      "consistency": number,
+      "ambiance": number,
+      // ... any other rating category
     },
     "attendees": ["memberId"],
     "notes": "string"
@@ -53,6 +58,8 @@ All data is stored in static JSON files under `public/data/`:
   "mustTry": "string"
 }]
 ```
+
+**Note**: The `ratings` object now uses `Record<string, number>` type, allowing any rating category to be added without code changes.
 
 ### events.json
 ```json
@@ -90,6 +97,8 @@ getUpcomingEvents(limit?: number): Promise<Event[]>
 getPastEvents(limit?: number): Promise<Event[]>
 getRestaurantsByMember(memberId: string): Promise<Restaurant[]>
 calculateAverageRating(restaurant: Restaurant): number
+getAvailableRatingCategories(): Promise<string[]>
+getCategoryAverage(restaurant: Restaurant, category: string): number
 ```
 
 ### Data Fetching Pattern
@@ -179,10 +188,80 @@ Currently, the app relies on browser caching for static files:
 ### Restaurant → Ratings
 - Embedded in `visits[]` array
 - Average calculated on fetch
+- **Dynamic categories**: Rating categories are discovered at runtime
 
 ### Event → Members
 - No direct relationship currently
 - Could add `attendees[]` to events
+
+## Dynamic Rating Categories
+
+### Overview
+The app now supports dynamic rating categories that are automatically discovered from the data:
+
+1. **Auto-discovery**: The `getAvailableRatingCategories()` function scans all restaurant visits to find unique rating keys
+2. **No code changes needed**: Add any new rating category to restaurants.json and it appears everywhere
+3. **Consistent ordering**: 'overall' always appears first, then others alphabetically
+
+### Implementation Details
+
+#### Discovery Function
+```typescript
+async getAvailableRatingCategories(): Promise<string[]> {
+  const restaurants = await this.getRestaurants();
+  const categories = new Set<string>();
+  
+  restaurants.forEach(restaurant => {
+    restaurant.visits?.forEach(visit => {
+      Object.keys(visit.ratings).forEach(category => {
+        categories.add(category);
+      });
+    });
+  });
+  
+  // Return categories with 'overall' first, then others alphabetically
+  const categoryArray = Array.from(categories);
+  const overall = categoryArray.filter(c => c === 'overall');
+  const others = categoryArray.filter(c => c !== 'overall').sort();
+  return [...overall, ...others];
+}
+```
+
+#### Category Average Calculation
+```typescript
+getCategoryAverage(restaurant: Restaurant, category: string): number {
+  if (!restaurant.visits || restaurant.visits.length === 0) return 0;
+  
+  const validRatings = restaurant.visits
+    .map(visit => visit.ratings[category])
+    .filter(rating => rating !== undefined && rating !== null);
+  
+  if (validRatings.length === 0) return 0;
+  
+  const sum = validRatings.reduce((acc, rating) => acc + rating, 0);
+  return Math.round((sum / validRatings.length) * 10) / 10;
+}
+```
+
+### Usage in Components
+
+Components that display ratings now:
+1. Load available categories on mount
+2. Dynamically render UI based on discovered categories
+3. Handle missing categories gracefully (show "N/A")
+
+Example from RestaurantsCompare:
+```typescript
+const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+
+useEffect(() => {
+  const fetchData = async () => {
+    const categories = await dataService.getAvailableRatingCategories();
+    setAvailableCategories(categories);
+  };
+  fetchData();
+}, []);
+```
 
 ## Future Data Enhancements
 

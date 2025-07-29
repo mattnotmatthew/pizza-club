@@ -9,6 +9,7 @@ const Header: React.FC = () => {
     { path: '/members', label: 'Members' },
     { path: '/restaurants', label: 'Restaurants' },
     { path: '/events', label: 'Events' },
+    { path: '/infographics', label: 'Infographics' },
   ];
   
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>

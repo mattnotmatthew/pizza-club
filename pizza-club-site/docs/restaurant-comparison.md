@@ -30,15 +30,14 @@ The main page component that orchestrates the comparison feature.
 ```typescript
 const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
 const [loading, setLoading] = useState(true);
-const [ratingToggles, setRatingToggles] = useState({
-  overall: true,
-  crust: true,
-  sauce: true,
-  cheese: true,
-  toppings: true,
-  value: true
-});
+const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+const [ratingToggles, setRatingToggles] = useState<Record<string, boolean>>({});
 ```
+
+**Dynamic Categories:**
+- Rating categories are now discovered from restaurant data at runtime
+- All available categories are loaded on component mount
+- Toggle states are initialized with all categories enabled
 
 #### RestaurantSelector (`/src/components/restaurants/RestaurantSelector.tsx`)
 Provides the interface for selecting restaurants to compare.
@@ -75,16 +74,16 @@ Displays the comparison table with all selected restaurants.
 
 **Rating calculation:**
 ```typescript
-const getAverageRating = (restaurant: Restaurant, category: keyof RestaurantVisit['ratings']) => {
-  if (!restaurant.visits || restaurant.visits.length === 0) return 0;
-  
-  const sum = restaurant.visits.reduce((acc, visit) => {
-    return acc + (visit.ratings[category] || 0);
-  }, 0);
-  
-  return sum / restaurant.visits.length;
+// Uses the service layer for dynamic category support
+const getAverageRating = (restaurant: Restaurant, category: string) => {
+  return dataService.getCategoryAverage(restaurant, category);
 };
 ```
+
+**Dynamic Features:**
+- Categories are discovered using `dataService.getAvailableRatingCategories()`
+- Handles any rating category without code changes
+- Shows "N/A" for missing category data
 
 ### Custom Hooks
 
@@ -180,6 +179,20 @@ RestaurantsCompare (Page)
 - **Efficient filtering**: Only selected restaurants are processed
 - **Minimal re-renders**: State updates are localized
 
+## Dynamic Rating Categories
+
+The comparison feature now supports dynamic rating categories:
+
+- **Auto-discovery**: Categories are loaded from restaurant data
+- **Flexible display**: Any new category added to restaurants.json appears automatically
+- **Toggle controls**: Each discovered category gets its own toggle
+- **Consistent ordering**: 'Overall' first, then alphabetical
+
+To add a new rating category:
+1. Add it to any restaurant visit in restaurants.json
+2. The category appears in the comparison table and toggles
+3. No code changes needed
+
 ## Future Enhancements
 
 1. **Saved comparisons**: Store favorite comparisons
@@ -190,6 +203,8 @@ RestaurantsCompare (Page)
 6. **Animation**: Smooth transitions for selection/deselection
 7. **Keyboard navigation**: Support keyboard-only usage
 8. **Print view**: Optimized layout for printing
+9. **Category grouping**: Group related rating categories
+10. **Category descriptions**: Tooltips explaining each rating category
 
 ## Testing Considerations
 

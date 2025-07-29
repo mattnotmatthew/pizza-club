@@ -11,14 +11,8 @@ import type { Restaurant } from '@/types';
 const RestaurantsCompare: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [ratingToggles, setRatingToggles] = useState({
-    overall: true,
-    crust: true,
-    sauce: true,
-    cheese: true,
-    toppings: true,
-    value: true
-  });
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [ratingToggles, setRatingToggles] = useState<Record<string, boolean>>({});
   
   // Parse initial IDs from URL
   const searchParams = new URLSearchParams(window.location.search);
@@ -44,25 +38,46 @@ const RestaurantsCompare: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetchRestaurants = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const fetchedRestaurants = await dataService.getRestaurants();
+        // Fetch restaurants and categories in parallel
+        const [fetchedRestaurants, categories] = await Promise.all([
+          dataService.getRestaurants(),
+          dataService.getAvailableRatingCategories()
+        ]);
+        
         // Map totalVisits for backward compatibility
         const mappedRestaurants = fetchedRestaurants.map(restaurant => ({
           ...restaurant,
           totalVisits: restaurant.totalVisits || restaurant.visits?.length || 0
         }));
         setRestaurants(mappedRestaurants);
+        
+        // Set available categories and initialize all toggles to true
+        setAvailableCategories(categories);
+        const initialToggles: Record<string, boolean> = {};
+        categories.forEach(category => {
+          initialToggles[category] = true;
+        });
+        setRatingToggles(initialToggles);
       } catch (error) {
-        console.error('Failed to fetch restaurants:', error);
+        console.error('Failed to fetch data:', error);
         setRestaurants([]);
+        // Fallback categories
+        const fallbackCategories = ['overall', 'crust', 'sauce', 'cheese', 'toppings', 'value'];
+        setAvailableCategories(fallbackCategories);
+        const fallbackToggles: Record<string, boolean> = {};
+        fallbackCategories.forEach(category => {
+          fallbackToggles[category] = true;
+        });
+        setRatingToggles(fallbackToggles);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRestaurants();
+    fetchData();
   }, []);
 
   return (
@@ -111,11 +126,11 @@ const RestaurantsCompare: React.FC = () => {
               <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Show/Hide Rating Categories</h3>
                 <div className="flex flex-wrap gap-3">
-                  {Object.entries(ratingToggles).map(([category, isEnabled]) => (
+                  {availableCategories.map((category) => (
                     <label key={category} className="flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={isEnabled}
+                        checked={ratingToggles[category] || false}
                         onChange={(e) => {
                           setRatingToggles(prev => ({
                             ...prev,
@@ -124,7 +139,9 @@ const RestaurantsCompare: React.FC = () => {
                         }}
                         className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
                       />
-                      <span className="text-sm text-gray-700 capitalize">{category}</span>
+                      <span className="text-sm text-gray-700 capitalize">
+                        {category === 'overall' ? 'Overall Rating' : category}
+                      </span>
                     </label>
                   ))}
                 </div>

@@ -13,14 +13,7 @@ export interface Member {
 
 export interface RestaurantVisit {
   date: string;
-  ratings: {
-    overall: number;
-    crust: number;
-    sauce: number;
-    cheese: number;
-    toppings: number;
-    value: number;
-  };
+  ratings: Record<string, number>;
   attendees: string[]; // member ids
   notes?: string;
 }

@@ -14,6 +14,12 @@ Welcome to the Pizza Club Site documentation. This documentation provides a comp
 
 ### Features
 - **[Restaurant Comparison](./restaurant-comparison.md)** - Side-by-side restaurant comparison feature
+- **[Dynamic Rating Categories](./dynamic-rating-categories.md)** - Flexible rating system that adapts to data
+- **[Infographics Generator](./features/infographics/overview.md)** - Admin tool for creating visit infographics
+  - [Authentication Setup](./features/infographics/authentication.md)
+  - [Data Model](./features/infographics/data-model.md)
+  - [Component Reference](./features/infographics/components.md)
+  - [Implementation Guide](./features/infographics/implementation-guide.md)
 
 ### Design & Implementation
 - **[Styling Guide](./styling.md)** - CSS patterns and Tailwind conventions
