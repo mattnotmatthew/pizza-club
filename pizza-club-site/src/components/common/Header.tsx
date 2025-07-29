@@ -6,6 +6,7 @@ const Header: React.FC = () => {
   
   const navItems = [
     { path: '/', label: 'Home' },
+    { path: '/about', label: 'About GCPC' },
     { path: '/members', label: 'Members' },
     { path: '/restaurants', label: 'Restaurants' },
     { path: '/events', label: 'Events' },

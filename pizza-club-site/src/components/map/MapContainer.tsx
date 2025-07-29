@@ -30,29 +30,34 @@ const MapContainer: React.FC<MapContainerProps> = ({
     console.log('Camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom);
   }, []);
 
+  // Debug logging
+  console.log('MapContainer render - API Key exists:', !!apiKey);
+  console.log('MapContainer className:', className);
+
   if (!apiKey) {
     return (
       <div className={`flex items-center justify-center bg-gray-100 rounded-lg ${className}`}>
-        <div className="text-center p-8">
-          <p className="text-gray-600 mb-2">Google Maps API key not configured</p>
-          <p className="text-sm text-gray-500">Please add VITE_GOOGLE_MAPS_API_KEY to your .env file</p>
+        <div className="text-center p-4 sm:p-8">
+          <p className="text-gray-600 mb-2 text-sm sm:text-base">Google Maps API key not configured</p>
+          <p className="text-xs sm:text-sm text-gray-500 px-4">Please add VITE_GOOGLE_MAPS_API_KEY to your .env file</p>
         </div>
       </div>
     );
   }
 
   return (
-    <APIProvider apiKey={apiKey}>
-      <Map
-        defaultCenter={defaultCenter}
-        defaultZoom={defaultZoom}
-        mapId={mapId}
-        onCameraChanged={handleCameraChange}
-        onTilesLoaded={() => setMapLoaded(true)}
-        className={`w-full h-full ${className}`}
-        disableDefaultUI={false}
-        clickableIcons={false}
-      >
+    <div className={className}>
+      <APIProvider apiKey={apiKey}>
+        <Map
+          style={{ width: '100%', height: '100%' }}
+          defaultCenter={defaultCenter}
+          defaultZoom={defaultZoom}
+          mapId={mapId}
+          onCameraChanged={handleCameraChange}
+          onTilesLoaded={() => setMapLoaded(true)}
+          disableDefaultUI={false}
+          clickableIcons={false}
+        >
         {mapLoaded && restaurants.map((restaurant) => (
           <RestaurantMarker
             key={restaurant.id}
@@ -61,8 +66,9 @@ const MapContainer: React.FC<MapContainerProps> = ({
             onClick={() => onRestaurantSelect?.(restaurant)}
           />
         ))}
-      </Map>
-    </APIProvider>
+        </Map>
+      </APIProvider>
+    </div>
   );
 };
 

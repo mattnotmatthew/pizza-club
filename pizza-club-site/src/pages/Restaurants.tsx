@@ -9,7 +9,15 @@ import { dataService } from '@/services/data';
 import type { Restaurant } from '@/types';
 
 const Restaurants: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+  // Determine initial view mode based on viewport width
+  const getInitialViewMode = (): 'map' | 'list' => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768 ? 'list' : 'map';
+    }
+    return 'map';
+  };
+  
+  const [viewMode, setViewMode] = useState<'map' | 'list'>(getInitialViewMode());
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>();
@@ -61,10 +69,6 @@ const Restaurants: React.FC = () => {
 
   const handleRestaurantSelect = (restaurant: Restaurant) => {
     setSelectedRestaurantId(restaurant.id);
-    // If on mobile and in list view, switch to map to show the selected restaurant
-    if (window.innerWidth < 768 && viewMode === 'list') {
-      setViewMode('map');
-    }
   };
 
   const handleSortChange = (field: keyof Restaurant) => {
@@ -164,7 +168,7 @@ const Restaurants: React.FC = () => {
                   restaurants={restaurants}
                   selectedRestaurantId={selectedRestaurantId}
                   onRestaurantSelect={handleRestaurantSelect}
-                  className="h-[60vh] rounded-lg shadow-lg"
+                  className="h-[500px] sm:h-[60vh] sm:min-h-[400px] rounded-lg shadow-lg"
                 />
               ) : (
                 <RestaurantList

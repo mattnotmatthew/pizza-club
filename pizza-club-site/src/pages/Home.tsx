@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import Button from '@/components/common/Button';
 
 const Home: React.FC = () => {
   // Calculate responsive background size and position
@@ -62,25 +60,6 @@ const Home: React.FC = () => {
               <p className="text-xl md:text-2xl text-center text-yellow-100 tracking-wide animate-typewriter">
                 Nella pizza, il volto di Dio.
               </p>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 mt-8 animate-fade-in-delay">
-              <Link to="/members" className="w-full sm:w-auto">
-                <Button 
-                  size="large" 
-                  className="w-full sm:w-[220px] bg-transparent text-white hover:bg-white hover:text-red-700 border-2 border-white transition-all cursor-pointer"
-                >
-                  Explore Members
-                </Button>
-              </Link>
-              <Link to="/restaurants" className="w-full sm:w-auto">
-                <Button 
-                  size="large" 
-                  className="w-full sm:w-[220px] bg-transparent text-white hover:bg-white hover:text-red-700 border-2 border-white transition-all cursor-pointer"
-                >
-                  Restaurants
-                </Button>
-              </Link>
             </div>
           </div>
         </div>

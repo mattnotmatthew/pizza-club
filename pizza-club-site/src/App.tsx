@@ -5,6 +5,7 @@ import AdminRoute from '@/components/admin/AdminRoute';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('@/pages/Home'));
+const About = lazy(() => import('@/pages/About'));
 const Members = lazy(() => import('@/pages/Members'));
 const MemberDetail = lazy(() => import('@/pages/MemberDetail'));
 const Restaurants = lazy(() => import('@/pages/Restaurants'));
@@ -36,6 +37,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
+            <Route path="about" element={<About />} />
             <Route path="members" element={<Members />} />
             <Route path="members/:id" element={<MemberDetail />} />
             <Route path="restaurants" element={<Restaurants />} />
