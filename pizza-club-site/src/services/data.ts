@@ -189,6 +189,7 @@ export const dataService = {
       ...infographic,
       restaurantName: restaurant.name,
       restaurantLocation: restaurant.location || '',
+      restaurantAddress: restaurant.address || '',
       visitData: {
         ratings: visit.ratings,
         attendees: visit.attendees,

@@ -18,27 +18,19 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
 
   return (
     <div className={`bg-white rounded-lg shadow-xl ${isPreview ? '' : 'max-w-4xl mx-auto'} print:shadow-none`}>
-      {/* Pizza pattern background */}
-      <div 
-        className="relative overflow-hidden rounded-t-lg"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fef3c7' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
-      >
-        {/* Header Section */}
-        <header className="relative text-center px-4 sm:px-6 md:px-8 pt-8 sm:pt-10 md:pt-12 pb-6 sm:pb-8 bg-gradient-to-b from-red-600 to-red-700">
-          <div className="relative z-10">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">
-              {data.content.title || data.restaurantName}
-            </h1>
-            {data.content.subtitle && (
-              <p className="text-lg sm:text-xl text-red-100">{data.content.subtitle}</p>
-            )}
-            <p className="text-base sm:text-lg text-red-100 mt-3 sm:mt-4">{data.restaurantLocation}</p>
-            <p className="text-sm sm:text-md text-red-200 mt-1 sm:mt-2">{formattedDate}</p>
-          </div>
-        </header>
-      </div>
+      {/* Header Section with checkerboard borders */}
+      <header className="relative text-center px-4 sm:px-6 md:px-8 pt-8 sm:pt-10 md:pt-12 pb-6 sm:pb-8 bg-gradient-to-b from-red-600 to-red-700 bg-checkered-border rounded-t-lg">
+        <div className="relative z-10">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">
+            {data.content.title || data.restaurantName}
+          </h1>
+          {data.content.subtitle && (
+            <p className="text-lg sm:text-xl text-red-100">{data.content.subtitle}</p>
+          )}
+          <p className="text-base sm:text-lg text-red-100 mt-3 sm:mt-4">{data.restaurantAddress}</p>
+          <p className="text-sm sm:text-md text-red-200 mt-1 sm:mt-2">{formattedDate}</p>
+        </div>
+      </header>
 
       <div className="px-4 sm:px-6 md:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {/* Ratings Section */}

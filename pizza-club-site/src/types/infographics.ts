@@ -39,6 +39,7 @@ export type UpdateInfographicInput = Partial<Omit<Infographic, 'id' | 'createdAt
 export interface InfographicWithData extends Infographic {
   restaurantName: string;
   restaurantLocation: string;
+  restaurantAddress: string;
   visitData: {
     ratings: Record<string, number>;
     attendees: string[];

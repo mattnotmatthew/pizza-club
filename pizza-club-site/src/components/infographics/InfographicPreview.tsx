@@ -66,6 +66,7 @@ const InfographicPreview: React.FC<InfographicPreviewProps> = ({
     updatedAt: new Date().toISOString(),
     restaurantName: restaurantData.name,
     restaurantLocation: restaurantData.location || '',
+    restaurantAddress: restaurantData.address || '',
     visitData: {
       ratings: visitData.ratings,
       attendees: visitData.attendees,
