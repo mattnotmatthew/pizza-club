@@ -9,6 +9,16 @@ export interface Quote {
   };
 }
 
+export interface InfographicPhoto {
+  id: string;
+  url: string;
+  position: { x: number; y: number }; // percentages (0-100)
+  size: { width: number; height: number }; // percentages (0-100)
+  opacity: number; // 0-1
+  layer: 'background' | 'foreground';
+  focalPoint?: { x: number; y: number }; // percentages (0-100) for object-position
+}
+
 export interface InfographicContent {
   title?: string;
   subtitle?: string;
@@ -17,6 +27,8 @@ export interface InfographicContent {
   customText?: Record<string, string>;
   // Display preferences
   showRatings?: Record<string, boolean>;
+  // Photo support
+  photos?: InfographicPhoto[];
 }
 
 export interface Infographic {

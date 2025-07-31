@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import VisitSelector from '@/components/infographics/VisitSelector';
 import QuoteSelector from '@/components/infographics/QuoteSelector';
+import PhotoUploader from '@/components/infographics/PhotoUploader';
+import PhotoPositioner from '@/components/infographics/PhotoPositioner';
 import InfographicPreview from '@/components/infographics/InfographicPreview';
 import Button from '@/components/common/Button';
 import { useInfographics } from '@/hooks/useInfographics';
+import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import { dataService } from '@/services/data';
 import type { Restaurant, RestaurantVisit, Member } from '@/types';
 import type { InfographicContent, CreateInfographicInput } from '@/types/infographics';
@@ -26,7 +29,8 @@ const InfographicsEditor: React.FC = () => {
   const [selectedVisitDate, setSelectedVisitDate] = useState('');
   const [content, setContent] = useState<InfographicContent>({
     selectedQuotes: [],
-    showRatings: {}
+    showRatings: {},
+    photos: []
   });
   
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -36,6 +40,12 @@ const InfographicsEditor: React.FC = () => {
   const [selectedVisit, setSelectedVisit] = useState<RestaurantVisit | undefined>();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
+  
+  // Photo management
+  const { photos, addPhoto, removePhoto, updatePhoto, setPhotos } = usePhotoUpload(
+    content.photos || []
+  );
 
   // Load initial data
   useEffect(() => {
@@ -121,8 +131,14 @@ const InfographicsEditor: React.FC = () => {
         
         setContent({
           ...infographic.content,
-          showRatings: mergedRatings
+          showRatings: mergedRatings,
+          photos: infographic.content.photos || []
         });
+        
+        // Set photos for the photo hook
+        if (infographic.content.photos) {
+          setPhotos(infographic.content.photos);
+        }
       } else {
         alert('Infographic not found');
         navigate('/admin/infographics');
@@ -149,6 +165,11 @@ const InfographicsEditor: React.FC = () => {
     }
   }, [selectedRestaurantId, selectedVisitDate, restaurants]);
 
+  // Update content when photos change
+  useEffect(() => {
+    setContent(prev => ({ ...prev, photos }));
+  }, [photos]);
+
   // Enable auto-save when content changes
   useEffect(() => {
     if (selectedRestaurantId && selectedVisitDate && !isEditing) {
@@ -156,11 +177,11 @@ const InfographicsEditor: React.FC = () => {
         restaurantId: selectedRestaurantId,
         visitDate: selectedVisitDate,
         status: 'draft',
-        content
+        content: { ...content, photos }
       };
       enableAutoSave(draft);
     }
-  }, [selectedRestaurantId, selectedVisitDate, content, isEditing]);
+  }, [selectedRestaurantId, selectedVisitDate, content, photos, isEditing]);
 
   const handleVisitSelect = (restaurantId: string, visitDate: string) => {
     setSelectedRestaurantId(restaurantId);
@@ -193,7 +214,7 @@ const InfographicsEditor: React.FC = () => {
         restaurantId: selectedRestaurantId,
         visitDate: selectedVisitDate,
         status: 'draft',
-        content
+        content: { ...content, photos }
       };
 
       if (isEditing && id) {
@@ -225,7 +246,7 @@ const InfographicsEditor: React.FC = () => {
         restaurantId: selectedRestaurantId,
         visitDate: selectedVisitDate,
         status: 'published',
-        content
+        content: { ...content, photos }
       };
 
       if (isEditing && id) {
@@ -294,6 +315,89 @@ const InfographicsEditor: React.FC = () => {
                   onQuotesChange={handleQuotesChange}
                   attendeeNames={attendeeNames.map(m => m.name)}
                 />
+              </div>
+            )}
+
+            {/* Photo Management */}
+            {selectedVisit && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <PhotoUploader
+                  infographicId={id || 'new-infographic'}
+                  photos={photos}
+                  onPhotoAdd={addPhoto}
+                  onPhotoRemove={(photoId) => {
+                    removePhoto(photoId);
+                    if (selectedPhotoId === photoId) {
+                      setSelectedPhotoId(null);
+                    }
+                  }}
+                />
+                
+                {/* Photo Positioning Controls */}
+                {selectedPhotoId && photos.find(p => p.id === selectedPhotoId) && (
+                  <div className="mt-4">
+                    <PhotoPositioner
+                      photo={photos.find(p => p.id === selectedPhotoId)!}
+                      onUpdate={updatePhoto}
+                    />
+                  </div>
+                )}
+                
+                {/* Photo Selection for Positioning */}
+                {photos.length > 0 && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-2">
+                      {selectedPhotoId 
+                        ? "Select a different photo or click the same photo to deselect:"
+                        : "Select a photo to adjust its position and settings:"}
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {photos.map((photo) => (
+                        <button
+                          key={photo.id}
+                          onClick={() => setSelectedPhotoId(
+                            photo.id === selectedPhotoId ? null : photo.id
+                          )}
+                          className={`
+                            relative group cursor-pointer border-2 rounded overflow-hidden transition-all bg-gray-100
+                            ${photo.id === selectedPhotoId 
+                              ? 'border-blue-500 ring-2 ring-blue-300' 
+                              : 'border-transparent hover:border-blue-500'
+                            }
+                          `}
+                        >
+                          <div className="relative w-full h-20">
+                            <img
+                              src={photo.url}
+                              alt=""
+                              className="absolute inset-0 w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error('Failed to load photo:', photo.url);
+                                const target = e.currentTarget as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.parentElement?.classList.add('bg-red-100');
+                              }}
+                            />
+                          </div>
+                          <div className={`
+                            absolute inset-0 transition-opacity pointer-events-none
+                            ${photo.id === selectedPhotoId 
+                              ? 'bg-blue-500 bg-opacity-20' 
+                              : 'bg-black bg-opacity-0 group-hover:bg-opacity-20'
+                            }
+                          `} />
+                          {photo.id === selectedPhotoId && (
+                            <div className="absolute top-1 right-1 bg-blue-500 text-white rounded-full p-1">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

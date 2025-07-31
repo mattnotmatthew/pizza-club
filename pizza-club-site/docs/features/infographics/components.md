@@ -98,6 +98,105 @@ interface QuoteSelectorProps {
 - Edit quote text and attribution
 - Scrollable quote list
 
+### PhotoUploader
+**Location**: `/src/components/infographics/PhotoUploader.tsx`
+
+Handles photo uploads with drag-and-drop and optimization.
+
+```typescript
+interface PhotoUploaderProps {
+  infographicId: string;
+  photos: InfographicPhoto[];
+  onPhotoAdd: (photo: InfographicPhoto) => void;
+  onPhotoRemove: (photoId: string) => void;
+  maxPhotos?: number;
+}
+```
+
+**Usage**:
+```typescript
+<PhotoUploader
+  infographicId={id || 'new-infographic'}
+  photos={photos}
+  onPhotoAdd={addPhoto}
+  onPhotoRemove={removePhoto}
+  maxPhotos={10}
+/>
+```
+
+**Features**:
+- Drag-and-drop file upload
+- Click to browse files
+- Automatic image optimization (WebP conversion)
+- File type validation
+- Progress indication during processing
+- Photo grid display with remove option
+- Maximum photo limit enforcement
+
+### PhotoPositioner
+**Location**: `/src/components/infographics/PhotoPositioner.tsx`
+
+Controls for adjusting photo properties.
+
+```typescript
+interface PhotoPositionerProps {
+  photo: InfographicPhoto;
+  onUpdate: (photoId: string, updates: Partial<InfographicPhoto>) => void;
+}
+```
+
+**Usage**:
+```typescript
+<PhotoPositioner
+  photo={selectedPhoto}
+  onUpdate={(photoId, updates) => {
+    updatePhoto(photoId, updates);
+  }}
+/>
+```
+
+**Features**:
+- X/Y position sliders (0-100%)
+- Width/height size controls (10-100%)
+- Focal point adjustment for smart cropping
+- Opacity slider (0-100%)
+- Layer toggle (background/foreground)
+- Quick position presets (corners, center)
+- Focal point presets (center, face, bottom)
+- Number inputs for precise control
+
+### PhotoDisplay
+**Location**: `/src/components/infographics/PhotoDisplay.tsx`
+
+Renders photos with positioning and effects.
+
+```typescript
+interface PhotoDisplayProps {
+  photo: InfographicPhoto;
+  containerWidth?: number;
+  containerHeight?: number;
+  isPreview?: boolean;
+}
+```
+
+**Usage**:
+```typescript
+<PhotoDisplay
+  photo={photo}
+  containerWidth={800}
+  containerHeight={600}
+  isPreview={true}
+/>
+```
+
+**Features**:
+- Percentage-based responsive positioning
+- Focal point application via CSS object-position
+- Automatic bounds checking
+- Layer-based z-index management
+- Lazy loading support
+- Responsive wrapper component available
+
 ### RatingDisplay (Planned)
 **Location**: `/src/components/infographics/RatingDisplay.tsx`
 
@@ -123,10 +222,10 @@ interface RatingDisplayProps {
 - Toggle visibility per category
 - Responsive layout
 
-### InfographicCanvas (Planned)
+### InfographicCanvas
 **Location**: `/src/components/infographics/InfographicCanvas.tsx`
 
-Main infographic display component.
+Main infographic display component with photo support.
 
 ```typescript
 interface InfographicCanvasProps {
@@ -135,13 +234,29 @@ interface InfographicCanvasProps {
 }
 ```
 
-**Planned Features**:
-- Restaurant name and visit date
+**Features**:
+- Restaurant name and visit date display
 - Rating visualizations
 - Quote display with positioning
 - Attendee list
+- **Photo rendering in layers**:
+  - Background photos rendered behind content
+  - Foreground photos rendered above content
 - Pizza-themed styling
 - Print-friendly layout
+
+**Photo Rendering**:
+```typescript
+{/* Background Photos */}
+{data.content.photos?.filter(p => p.layer === 'background')
+  .map(photo => <PhotoDisplay key={photo.id} photo={photo} />)}
+
+{/* Main content (ratings, quotes, etc.) */}
+
+{/* Foreground Photos */}
+{data.content.photos?.filter(p => p.layer === 'foreground')
+  .map(photo => <PhotoDisplay key={photo.id} photo={photo} />)}
+```
 
 ### InfographicPreview (Planned)
 **Location**: `/src/components/infographics/InfographicPreview.tsx`

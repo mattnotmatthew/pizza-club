@@ -9,6 +9,7 @@ The infographics feature allows administrators to create visual summaries of piz
 - **Admin-only access** with password protection
 - **Automatic data integration** from restaurant visits
 - **Quote extraction** from visit notes
+- **Photo support** with drag-and-drop upload and positioning
 - **Draft saving** with auto-save functionality
 - **Web-based display** (no export needed)
 - **Single template** focused on visit summaries
@@ -45,8 +46,11 @@ src/
 │   └── infographics/
 │       ├── VisitSelector.tsx     # Restaurant/visit picker
 │       ├── QuoteSelector.tsx     # Quote management
+│       ├── PhotoUploader.tsx     # Photo upload with optimization
+│       ├── PhotoPositioner.tsx   # Photo positioning controls
+│       ├── PhotoDisplay.tsx      # Photo rendering component
 │       ├── RatingDisplay.tsx     # Rating visualization
-│       ├── InfographicCanvas.tsx # Main display
+│       ├── InfographicCanvas.tsx # Main display with photo layers
 │       └── InfographicPreview.tsx # Preview wrapper
 └── pages/
     ├── admin/
@@ -68,21 +72,30 @@ public/data/
 - Draft management with auto-save
 - Visit selection component
 - Quote extraction and editing
+- **Photo upload with drag-and-drop**
+- **Image optimization (WebP conversion)**
+- **Photo positioning controls**
+- **Focal point adjustment**
+- **Layer management (background/foreground)**
 
 ### 🚧 In Progress
 - Visual components (canvas, ratings)
 - Editor page layout
 - Public viewing pages
+- Migration from base64 to file storage
 
 ### 📋 To Do
 - Complete visual components
 - Implement real data persistence
 - Add loading states and error handling
 - Ensure mobile responsiveness
+- Implement local file storage for photos
 
 ## Related Documentation
 
 - [Authentication](./authentication.md) - Admin access setup
 - [Data Model](./data-model.md) - Type definitions and structure
 - [Components](./components.md) - Component API reference
+- [Photo Support](./photo-support.md) - Photo upload and management
 - [Implementation Guide](./implementation-guide.md) - How to complete the feature
+- [Troubleshooting](../../troubleshooting/common-issues.md) - Common issues and solutions

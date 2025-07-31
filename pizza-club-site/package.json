@@ -12,8 +12,13 @@
     "clear-docs": "./clear-docs.sh"
   },
   "dependencies": {
+    "@rpldy/upload-button": "^1.11.0",
+    "@rpldy/upload-drop-zone": "^1.11.0",
+    "@rpldy/upload-preview": "^1.11.0",
+    "@rpldy/uploady": "^1.11.0",
     "@vis.gl/react-google-maps": "^1.5.4",
     "axios": "^1.11.0",
+    "browser-image-compression": "^2.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.7.1"

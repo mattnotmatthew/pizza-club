@@ -163,6 +163,144 @@ calculateAverageRating(restaurant: Restaurant): number
 #### Date Sorting
 Events are automatically sorted by date in the service layer.
 
+### usePhotoUpload (`hooks/usePhotoUpload.ts`)
+
+Manages photo state and operations for infographics.
+
+#### Usage
+```typescript
+const {
+  photos,
+  addPhoto,
+  removePhoto,
+  updatePhoto,
+  setPhotos
+} = usePhotoUpload(initialPhotos);
+```
+
+#### Features
+- Add photos with automatic ID generation
+- Remove photos by ID
+- Update photo properties (position, size, opacity, etc.)
+- Batch update photos
+- Returns:
+  - `photos`: Array of InfographicPhoto objects
+  - `addPhoto`: Add a new photo
+  - `removePhoto`: Remove photo by ID
+  - `updatePhoto`: Update specific photo properties
+  - `setPhotos`: Replace entire photos array
+
+#### Example
+```typescript
+// In InfographicsEditor
+const { photos, addPhoto, removePhoto, updatePhoto } = usePhotoUpload(
+  content.photos || []
+);
+
+// Add optimized photo
+const handlePhotoAdd = async (file: File) => {
+  const optimized = await optimizeImage(file);
+  const url = await fileToBase64(optimized);
+  addPhoto({
+    id: generateId(),
+    url,
+    position: { x: 50, y: 50 },
+    size: { width: 30, height: 30 },
+    opacity: 1,
+    layer: 'foreground'
+  });
+};
+
+// Update photo position
+updatePhoto(photoId, { position: { x: 75, y: 25 } });
+```
+
+### usePhotoPositioning (`hooks/usePhotoUpload.ts`)
+
+Provides positioning utilities for individual photos.
+
+#### Usage
+```typescript
+const {
+  updatePosition,
+  updateSize,
+  updateOpacity,
+  updateLayer
+} = usePhotoPositioning(photo, onUpdate);
+```
+
+#### Features
+- Granular update methods for photo properties
+- Automatic bounds checking
+- Percentage-based positioning
+- Returns:
+  - `updatePosition`: Update X/Y coordinates
+  - `updateSize`: Update width/height
+  - `updateOpacity`: Update transparency
+  - `updateLayer`: Toggle background/foreground
+
+#### Example
+```typescript
+// In PhotoPositioner component
+const positioning = usePhotoPositioning(photo, (updates) => {
+  onUpdate(photo.id, updates);
+});
+
+// Update position with bounds checking
+positioning.updatePosition(120, 50); // Will cap at 100
+
+// Change opacity
+positioning.updateOpacity(0.7); // 70% opacity
+```
+
+## Image Optimization Utilities (`utils/imageOptimization.ts`)
+
+### optimizeImage
+Compresses and converts images to WebP format.
+
+```typescript
+const optimizedFile = await optimizeImage(file, {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 2000,
+  targetFormat: 'webp'
+});
+```
+
+### validateImage
+Validates image files before processing.
+
+```typescript
+const validation = validateImage(file);
+if (!validation.valid) {
+  console.error(validation.errors);
+}
+```
+
+### fileToBase64
+Converts files to base64 data URLs.
+
+```typescript
+const dataUrl = await fileToBase64(file);
+```
+
+## Photo Storage Utilities (`utils/photoStorage.ts`)
+
+### getInfographicPhotoPath
+Generates consistent photo URLs.
+
+```typescript
+const photoUrl = getInfographicPhotoPath('infographic-123', 'photo-abc');
+// Returns: /images/infographics/infographic-123/photo-abc.webp
+```
+
+### createPhotoData
+Creates photo object with defaults.
+
+```typescript
+const photo = createPhotoData('photo-123', 'infographic-456');
+// Returns photo with default position, size, opacity, etc.
+```
+
 ## Recommended Utilities to Add
 
 ### Date Formatting

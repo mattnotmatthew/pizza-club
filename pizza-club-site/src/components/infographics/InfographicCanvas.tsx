@@ -1,5 +1,6 @@
 import React from 'react';
 import RatingDisplay from './RatingDisplay';
+import PhotoDisplay from './PhotoDisplay';
 import type { InfographicWithData } from '@/types/infographics';
 
 interface InfographicCanvasProps {
@@ -17,7 +18,19 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
   });
 
   return (
-    <div className={`bg-white rounded-lg shadow-xl ${isPreview ? '' : 'max-w-4xl mx-auto'} print:shadow-none`}>
+    <div className={`bg-white rounded-lg shadow-xl ${isPreview ? '' : 'max-w-4xl mx-auto'} print:shadow-none relative overflow-hidden`}>
+      {/* Background Photos */}
+      {data.content.photos && data.content.photos
+        .filter(photo => photo.layer === 'background')
+        .map(photo => (
+          <PhotoDisplay
+            key={photo.id}
+            photo={photo}
+            isPreview={isPreview}
+          />
+        ))
+      }
+
       {/* Header Section with checkerboard borders */}
       <header className="relative text-center px-4 sm:px-6 md:px-8 pt-8 sm:pt-10 md:pt-12 pb-6 sm:pb-8 bg-gradient-to-b from-red-600 to-red-700 bg-checkered-border rounded-t-lg">
         <div className="relative z-10">
@@ -32,7 +45,7 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
         </div>
       </header>
 
-      <div className="px-4 sm:px-6 md:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <div className="px-4 sm:px-6 md:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 relative">
         {/* Ratings Section */}
         <section>
           <RatingDisplay 
@@ -93,7 +106,7 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-50 px-4 sm:px-6 md:px-8 py-4 sm:py-6 rounded-b-lg">
+      <footer className="bg-gray-50 px-4 sm:px-6 md:px-8 py-4 sm:py-6 rounded-b-lg relative z-20">
         <div className="flex items-center justify-center gap-3 sm:gap-4">
           <img 
             src="/pizza/logo.png" 
@@ -106,6 +119,18 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
           </div>
         </div>
       </footer>
+
+      {/* Foreground Photos */}
+      {data.content.photos && data.content.photos
+        .filter(photo => photo.layer === 'foreground')
+        .map(photo => (
+          <PhotoDisplay
+            key={photo.id}
+            photo={photo}
+            isPreview={isPreview}
+          />
+        ))
+      }
     </div>
   );
 };
