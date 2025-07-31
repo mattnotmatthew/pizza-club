@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Pizza Club app now supports dynamic rating categories that are automatically discovered from restaurant data. This allows administrators to add new rating categories simply by updating the JSON data files, without requiring any code changes or rebuilds.
+The Pizza Club app supports dynamic rating categories that are automatically discovered from restaurant data. This allows administrators to add new rating categories simply by updating the JSON data files, without requiring any code changes or rebuilds.
+
+**Update**: The app now also supports a parent-child rating structure. See [Parent-Child Ratings](./parent-child-ratings.md) for details on the hierarchical organization of ratings.
 
 ## How It Works
 
@@ -10,7 +12,9 @@ The Pizza Club app now supports dynamic rating categories that are automatically
 When the app loads, it scans all restaurant visits in `restaurants.json` to discover all unique rating category keys. This happens through the `getAvailableRatingCategories()` service method.
 
 ### Adding New Categories
-To add a new rating category:
+
+#### For Flat Structure
+To add a new rating category in the flat structure:
 
 1. Edit `/public/data/restaurants.json`
 2. Add the new category to any restaurant visit's ratings object:
@@ -31,6 +35,28 @@ To add a new rating category:
   "notes": "Great experience overall"
 }
 ```
+
+#### For Parent-Child Structure
+To add categories in the parent-child structure:
+```json
+{
+  "ratings": {
+    "overall": 4.7,
+    "pizza-components": {
+      "crust": 4.8,
+      "sauce": 4.6,
+      "cheese": 4.5,      // New child category
+      "char": 4.7         // Another new child category
+    },
+    "the-other-stuff": {
+      "waitstaff": 4.5,
+      "atmosphere": 4.3,
+      "music": 4.4        // New child category
+    }
+  }
+}
+```
+
 3. The new categories will automatically appear in:
    - Restaurant comparison tables
    - Rating display components

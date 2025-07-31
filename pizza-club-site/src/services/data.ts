@@ -1,4 +1,5 @@
-import type { Event, Member, Restaurant } from '@/types';
+import type { Event, Member, Restaurant, NestedRatings, FlatRatings, PizzaRating } from '@/types';
+import { isNestedRatings, PARENT_CATEGORIES } from '@/types';
 import type { Infographic, CreateInfographicInput, UpdateInfographicInput, InfographicWithData } from '@/types/infographics';
 
 const DATA_BASE_URL = import.meta.env.BASE_URL + 'data';
@@ -93,14 +94,53 @@ export const dataService = {
   async getAvailableRatingCategories(): Promise<string[]> {
     const restaurants = await this.getRestaurants();
     const categories = new Set<string>();
+    let hasNestedStructure = false;
     
     restaurants.forEach(restaurant => {
       restaurant.visits?.forEach(visit => {
-        Object.keys(visit.ratings).forEach(category => {
-          categories.add(category);
-        });
+        if (isNestedRatings(visit.ratings)) {
+          hasNestedStructure = true;
+          // For nested structure, add parent categories and their children
+          const nestedRatings = visit.ratings as NestedRatings;
+          
+          // Add overall if present
+          if (nestedRatings.overall !== undefined) {
+            categories.add('overall');
+          }
+          
+          // Add pizza components children
+          if (nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS]) {
+            const components = nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS];
+            if (typeof components === 'object' && !Array.isArray(components)) {
+              Object.keys(components).forEach(key => categories.add(key));
+            }
+          }
+          
+          // Add other stuff children
+          if (nestedRatings[PARENT_CATEGORIES.OTHER_STUFF]) {
+            const other = nestedRatings[PARENT_CATEGORIES.OTHER_STUFF];
+            if (typeof other === 'object' && !Array.isArray(other)) {
+              Object.keys(other).forEach(key => categories.add(key));
+            }
+          }
+          
+          // Add pizzas if present
+          if (nestedRatings.pizzas && nestedRatings.pizzas.length > 0) {
+            categories.add(PARENT_CATEGORIES.PIZZAS);
+          }
+        } else {
+          // For flat structure, add all keys
+          Object.keys(visit.ratings).forEach(category => {
+            categories.add(category);
+          });
+        }
       });
     });
+    
+    // If we have mixed structures, we'll return parent categories
+    if (hasNestedStructure) {
+      return this.getParentCategories();
+    }
     
     // Return categories with 'overall' first, then others alphabetically
     const categoryArray = Array.from(categories);
@@ -113,14 +153,111 @@ export const dataService = {
   getCategoryAverage(restaurant: Restaurant, category: string): number {
     if (!restaurant.visits || restaurant.visits.length === 0) return 0;
     
-    const validRatings = restaurant.visits
-      .map(visit => visit.ratings[category])
-      .filter(rating => rating !== undefined && rating !== null);
+    const validRatings: number[] = [];
+    
+    restaurant.visits.forEach(visit => {
+      if (isNestedRatings(visit.ratings)) {
+        // Handle nested structure
+        const nestedRatings = visit.ratings as NestedRatings;
+        if (category === 'overall' && nestedRatings.overall !== undefined) {
+          validRatings.push(nestedRatings.overall);
+        } else if (category === PARENT_CATEGORIES.PIZZAS && nestedRatings.pizzas) {
+          // Calculate average of all pizzas for this visit
+          const pizzaAvg = this.getPizzaArrayAverage(nestedRatings.pizzas);
+          if (pizzaAvg > 0) validRatings.push(pizzaAvg);
+        } else if (nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] && typeof nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] === 'object') {
+          const componentRatings = nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] as Record<string, number>;
+          if (componentRatings[category] !== undefined) {
+            validRatings.push(componentRatings[category]);
+          }
+        } else if (nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] && typeof nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] === 'object') {
+          const otherRatings = nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] as Record<string, number>;
+          if (otherRatings[category] !== undefined) {
+            validRatings.push(otherRatings[category]);
+          }
+        }
+      } else {
+        // Handle flat structure
+        const rating = visit.ratings[category];
+        if (rating !== undefined && rating !== null && typeof rating === 'number') {
+          validRatings.push(rating);
+        }
+      }
+    });
     
     if (validRatings.length === 0) return 0;
     
     const sum = validRatings.reduce((acc, rating) => acc + rating, 0);
     return Math.round((sum / validRatings.length) * 10) / 10;
+  },
+
+  // New methods for parent-child structure
+  async getParentCategories(): Promise<string[]> {
+    // Return the predefined parent categories
+    return ['overall', ...Object.values(PARENT_CATEGORIES)];
+  },
+
+  async getChildCategories(parent: string): Promise<string[]> {
+    const restaurants = await this.getRestaurants();
+    const childCategories = new Set<string>();
+    
+    restaurants.forEach(restaurant => {
+      restaurant.visits?.forEach(visit => {
+        if (isNestedRatings(visit.ratings)) {
+          const nestedRatings = visit.ratings as NestedRatings;
+          
+          if (parent === PARENT_CATEGORIES.PIZZA_COMPONENTS && nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS]) {
+            const components = nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS];
+            if (typeof components === 'object' && !Array.isArray(components)) {
+              Object.keys(components).forEach(key => childCategories.add(key));
+            }
+          } else if (parent === PARENT_CATEGORIES.OTHER_STUFF && nestedRatings[PARENT_CATEGORIES.OTHER_STUFF]) {
+            const other = nestedRatings[PARENT_CATEGORIES.OTHER_STUFF];
+            if (typeof other === 'object' && !Array.isArray(other)) {
+              Object.keys(other).forEach(key => childCategories.add(key));
+            }
+          }
+        }
+      });
+    });
+    
+    return Array.from(childCategories).sort();
+  },
+
+  mapFlatToNested(ratings: FlatRatings): NestedRatings {
+    const nested: NestedRatings = {};
+    
+    // Predefined mappings
+    const pizzaComponentKeys = ['crust', 'bake', 'toppings', 'sauce', 'consistency'];
+    const otherStuffKeys = ['waitstaff', 'atmosphere'];
+    
+    Object.entries(ratings).forEach(([key, value]) => {
+      if (key === 'overall') {
+        nested.overall = value;
+      } else if (pizzaComponentKeys.includes(key)) {
+        if (!nested[PARENT_CATEGORIES.PIZZA_COMPONENTS]) {
+          nested[PARENT_CATEGORIES.PIZZA_COMPONENTS] = {};
+        }
+        (nested[PARENT_CATEGORIES.PIZZA_COMPONENTS] as Record<string, number>)[key] = value;
+      } else if (otherStuffKeys.includes(key)) {
+        if (!nested[PARENT_CATEGORIES.OTHER_STUFF]) {
+          nested[PARENT_CATEGORIES.OTHER_STUFF] = {};
+        }
+        (nested[PARENT_CATEGORIES.OTHER_STUFF] as Record<string, number>)[key] = value;
+      } else {
+        // Keep other ratings at top level for now
+        nested[key] = value;
+      }
+    });
+    
+    return nested;
+  },
+
+  getPizzaArrayAverage(pizzas: PizzaRating[]): number {
+    if (!pizzas || pizzas.length === 0) return 0;
+    
+    const sum = pizzas.reduce((acc, pizza) => acc + pizza.rating, 0);
+    return Math.round((sum / pizzas.length) * 10) / 10;
   },
 
   // Utility function for future use - when members want to add new data

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
 import { dataService } from '@/services/data';
 import type { Restaurant } from '@/types';
+import { PARENT_CATEGORIES } from '@/types';
 
 interface CompareTableProps {
   restaurants: Restaurant[];
@@ -12,18 +13,39 @@ const CompareTable: React.FC<CompareTableProps> = ({
   restaurants,
   ratingToggles
 }) => {
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [parentCategories, setParentCategories] = useState<string[]>([]);
+  const [childCategories, setChildCategories] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
-    // Load available categories
-    dataService.getAvailableRatingCategories().then(categories => {
-      setAvailableCategories(categories);
+    // Load parent categories
+    dataService.getParentCategories().then(categories => {
+      setParentCategories(categories);
+      
+      // Load child categories for each parent
+      const childPromises = categories.map(async parent => {
+        if (parent !== 'overall' && parent !== PARENT_CATEGORIES.PIZZAS) {
+          const children = await dataService.getChildCategories(parent);
+          return { parent, children };
+        }
+        return null;
+      });
+      
+      Promise.all(childPromises).then(results => {
+        const childMap: Record<string, string[]> = {};
+        results.forEach(result => {
+          if (result) {
+            childMap[result.parent] = result.children;
+          }
+        });
+        setChildCategories(childMap);
+      });
     }).catch(error => {
-      console.error('Failed to load rating categories:', error);
-      // Fallback to common categories
-      setAvailableCategories(['overall', 'crust', 'sauce', 'cheese', 'toppings', 'value']);
+      console.error('Failed to load categories:', error);
+      // Fallback
+      setParentCategories(['overall']);
     });
   }, []);
+  
   // Calculate average rating for a specific category across all visits
   const getAverageRating = (restaurant: Restaurant, category: string) => {
     return dataService.getCategoryAverage(restaurant, category);
@@ -56,43 +78,107 @@ const CompareTable: React.FC<CompareTableProps> = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {/* Dynamic Rating Categories */}
-            {availableCategories.map((category) => {
-              // Skip if toggles are provided and this category is disabled
-              if (ratingToggles && ratingToggles[category] === false) return null;
-              
-              const isOverall = category === 'overall';
-              const label = category.charAt(0).toUpperCase() + category.slice(1);
-              
-              return (
-                <tr key={category}>
-                  <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {isOverall ? 'Overall Rating' : label}
-                  </td>
-                  {restaurants.map((restaurant) => {
-                    const rating = isOverall 
-                      ? restaurant.averageRating 
-                      : getAverageRating(restaurant, category);
-                    
-                    return (
+            {/* Dynamic Rating Categories with Parent-Child Structure */}
+            {parentCategories.map((parentCategory) => {
+              if (parentCategory === 'overall') {
+                // Overall rating row
+                if (ratingToggles && ratingToggles.overall === false) return null;
+                
+                return (
+                  <tr key="overall">
+                    <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      Overall Rating
+                    </td>
+                    {restaurants.map((restaurant) => (
                       <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
-                        {isOverall ? (
-                          <div className="flex flex-col items-center">
-                            <WholePizzaRating rating={rating} size="small" />
-                            <span className="text-sm text-gray-600 mt-1">
-                              {rating.toFixed(1)}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-gray-600">
-                            {rating > 0 ? rating.toFixed(1) : 'N/A'}
+                        <div className="flex flex-col items-center">
+                          <WholePizzaRating rating={restaurant.averageRating} size="small" />
+                          <span className="text-sm text-gray-600 mt-1">
+                            {restaurant.averageRating.toFixed(1)}
                           </span>
-                        )}
+                        </div>
                       </td>
-                    );
-                  })}
-                </tr>
-              );
+                    ))}
+                  </tr>
+                );
+              } else if (parentCategory === PARENT_CATEGORIES.PIZZAS) {
+                // Pizzas parent category
+                if (ratingToggles && ratingToggles[PARENT_CATEGORIES.PIZZAS] === false) return null;
+                
+                return (
+                  <React.Fragment key={parentCategory}>
+                    {/* Parent header row */}
+                    <tr className="bg-gray-50">
+                      <td className="sticky left-0 z-10 bg-gray-50 px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        Pizzas
+                      </td>
+                      {restaurants.map((restaurant) => (
+                        <td key={restaurant.id} className="px-6 py-3"></td>
+                      ))}
+                    </tr>
+                    {/* Pizza average row */}
+                    <tr>
+                      <td className="sticky left-0 z-10 bg-white px-6 py-4 pl-10 whitespace-nowrap text-sm font-medium text-gray-700">
+                        Average
+                      </td>
+                      {restaurants.map((restaurant) => {
+                        const rating = getAverageRating(restaurant, PARENT_CATEGORIES.PIZZAS);
+                        return (
+                          <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="text-sm text-gray-600">
+                              {rating > 0 ? rating.toFixed(1) : 'N/A'}
+                            </span>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </React.Fragment>
+                );
+              } else {
+                // Other parent categories with children
+                const children = childCategories[parentCategory] || [];
+                const parentLabel = parentCategory.split('-').map(word => 
+                  word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ');
+                
+                return (
+                  <React.Fragment key={parentCategory}>
+                    {/* Parent header row */}
+                    <tr className="bg-gray-50">
+                      <td className="sticky left-0 z-10 bg-gray-50 px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        {parentLabel}
+                      </td>
+                      {restaurants.map((restaurant) => (
+                        <td key={restaurant.id} className="px-6 py-3"></td>
+                      ))}
+                    </tr>
+                    {/* Child category rows */}
+                    {children.map((childCategory) => {
+                      if (ratingToggles && ratingToggles[childCategory] === false) return null;
+                      
+                      const childLabel = childCategory.charAt(0).toUpperCase() + childCategory.slice(1);
+                      
+                      return (
+                        <tr key={childCategory}>
+                          <td className="sticky left-0 z-10 bg-white px-6 py-4 pl-10 whitespace-nowrap text-sm font-medium text-gray-700">
+                            {childLabel}
+                          </td>
+                          {restaurants.map((restaurant) => {
+                            const rating = getAverageRating(restaurant, childCategory);
+                            return (
+                              <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
+                                <span className="text-sm text-gray-600">
+                                  {rating > 0 ? rating.toFixed(1) : 'N/A'}
+                                </span>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                );
+              }
             })}
 
             {/* Additional Details */}

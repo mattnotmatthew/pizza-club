@@ -11,9 +11,58 @@ export interface Member {
   restaurantsVisited?: number;
 }
 
+// New rating structure types
+export interface PizzaRating {
+  order: string;
+  rating: number;
+}
+
+export interface NestedRatings {
+  overall?: number;
+  pizzas?: PizzaRating[];
+  'pizza-components'?: Record<string, number>;
+  'the-other-stuff'?: Record<string, number>;
+  [key: string]: number | PizzaRating[] | Record<string, number> | undefined;
+}
+
+// Flat rating structure (legacy)
+export type FlatRatings = Record<string, number>;
+
+// Union type to support both structures
+export type RatingStructure = FlatRatings | NestedRatings;
+
+// Parent category names
+export const PARENT_CATEGORIES = {
+  PIZZAS: 'pizzas',
+  PIZZA_COMPONENTS: 'pizza-components',
+  OTHER_STUFF: 'the-other-stuff',
+} as const;
+
+export type ParentCategory = typeof PARENT_CATEGORIES[keyof typeof PARENT_CATEGORIES];
+
+// Type guards
+export function isNestedRatings(ratings: RatingStructure): ratings is NestedRatings {
+  if (!ratings || typeof ratings !== 'object') return false;
+  
+  // Check if any value is an object or array (not just numbers)
+  return Object.values(ratings).some(value => 
+    typeof value === 'object' && value !== null
+  );
+}
+
+export function isPizzaRatingArray(value: unknown): value is PizzaRating[] {
+  return Array.isArray(value) && value.every(item => 
+    typeof item === 'object' && 
+    'order' in item && 
+    'rating' in item &&
+    typeof item.order === 'string' &&
+    typeof item.rating === 'number'
+  );
+}
+
 export interface RestaurantVisit {
   date: string;
-  ratings: Record<string, number>;
+  ratings: RatingStructure;
   attendees: string[]; // member ids
   notes?: string;
 }

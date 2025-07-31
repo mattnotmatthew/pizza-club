@@ -1,3 +1,5 @@
+import type { RatingStructure } from './index';
+
 export interface Quote {
   text: string;
   author: string;
@@ -41,7 +43,7 @@ export interface InfographicWithData extends Infographic {
   restaurantLocation: string;
   restaurantAddress: string;
   visitData: {
-    ratings: Record<string, number>;
+    ratings: RatingStructure;
     attendees: string[];
     notes?: string;
   };

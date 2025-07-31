@@ -38,39 +38,6 @@
         },
         "attendees": ["mike-rossi", "maria-santos", "raj-patel"],
         "notes": "Smaller group tonight. Raj was impressed with the spinach deep dish option."
-      },
-      {
-        "date": "2025-01-29",
-        "ratings": {
-          "overall": 4.8,
-          "pizzas": [
-            {
-              "order": "Pepperoni, Large",
-              "rating": 4.9
-            },
-            {
-              "order": "Margherita, Medium",
-              "rating": 4.7
-            },
-            {
-              "order": "BBQ Chicken, Large",
-              "rating": 4.8
-            }
-          ],
-          "pizza-components": {
-            "crust": 4.9,
-            "bake": 4.8,
-            "sauce": 4.7,
-            "toppings": 4.6,
-            "consistency": 4.8
-          },
-          "the-other-stuff": {
-            "waitstaff": 4.5,
-            "atmosphere": 4.6
-          }
-        },
-        "attendees": ["mike-rossi", "sarah-chen", "tony-martinez", "jessica-walsh"],
-        "notes": "Testing the new parent-child rating structure. Multiple pizzas ordered and everyone was happy!"
       }
     ],
     "averageRating": 4.65,

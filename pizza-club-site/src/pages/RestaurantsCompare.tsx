@@ -7,11 +7,12 @@ import { useCompareSelection } from '@/hooks/useCompareSelection';
 import { useCompareUrl } from '@/hooks/useCompareUrl';
 import { dataService } from '@/services/data';
 import type { Restaurant } from '@/types';
+import { PARENT_CATEGORIES } from '@/types';
 
 const RestaurantsCompare: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [toggleableCategories, setToggleableCategories] = useState<string[]>([]);
   const [ratingToggles, setRatingToggles] = useState<Record<string, boolean>>({});
   
   // Parse initial IDs from URL
@@ -41,10 +42,10 @@ const RestaurantsCompare: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch restaurants and categories in parallel
-        const [fetchedRestaurants, categories] = await Promise.all([
+        // Fetch restaurants and parent categories
+        const [fetchedRestaurants, parentCategories] = await Promise.all([
           dataService.getRestaurants(),
-          dataService.getAvailableRatingCategories()
+          dataService.getParentCategories()
         ]);
         
         // Map totalVisits for backward compatibility
@@ -54,19 +55,40 @@ const RestaurantsCompare: React.FC = () => {
         }));
         setRestaurants(mappedRestaurants);
         
-        // Set available categories and initialize all toggles to true
-        setAvailableCategories(categories);
+        // Get all toggleable categories (overall + pizzas + child categories)
+        const toggleable: string[] = [];
         const initialToggles: Record<string, boolean> = {};
-        categories.forEach(category => {
-          initialToggles[category] = true;
-        });
+        
+        // Add overall and pizzas as toggleable
+        if (parentCategories.includes('overall')) {
+          toggleable.push('overall');
+          initialToggles['overall'] = true;
+        }
+        
+        if (parentCategories.includes(PARENT_CATEGORIES.PIZZAS)) {
+          toggleable.push(PARENT_CATEGORIES.PIZZAS);
+          initialToggles[PARENT_CATEGORIES.PIZZAS] = true;
+        }
+        
+        // Get child categories for other parents
+        for (const parent of parentCategories) {
+          if (parent !== 'overall' && parent !== PARENT_CATEGORIES.PIZZAS) {
+            const children = await dataService.getChildCategories(parent);
+            children.forEach(child => {
+              toggleable.push(child);
+              initialToggles[child] = true;
+            });
+          }
+        }
+        
+        setToggleableCategories(toggleable);
         setRatingToggles(initialToggles);
       } catch (error) {
         console.error('Failed to fetch data:', error);
         setRestaurants([]);
         // Fallback categories
         const fallbackCategories = ['overall', 'crust', 'sauce', 'cheese', 'toppings', 'value'];
-        setAvailableCategories(fallbackCategories);
+        setToggleableCategories(fallbackCategories);
         const fallbackToggles: Record<string, boolean> = {};
         fallbackCategories.forEach(category => {
           fallbackToggles[category] = true;
@@ -126,24 +148,35 @@ const RestaurantsCompare: React.FC = () => {
               <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Show/Hide Rating Categories</h3>
                 <div className="flex flex-wrap gap-3">
-                  {availableCategories.map((category) => (
-                    <label key={category} className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={ratingToggles[category] || false}
-                        onChange={(e) => {
-                          setRatingToggles(prev => ({
-                            ...prev,
-                            [category]: e.target.checked
-                          }));
-                        }}
-                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
-                      />
-                      <span className="text-sm text-gray-700 capitalize">
-                        {category === 'overall' ? 'Overall Rating' : category}
-                      </span>
-                    </label>
-                  ))}
+                  {toggleableCategories.map((category) => {
+                    let label = category;
+                    if (category === 'overall') {
+                      label = 'Overall Rating';
+                    } else if (category === PARENT_CATEGORIES.PIZZAS) {
+                      label = 'Pizzas (Average)';
+                    } else {
+                      label = category.charAt(0).toUpperCase() + category.slice(1);
+                    }
+                    
+                    return (
+                      <label key={category} className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={ratingToggles[category] || false}
+                          onChange={(e) => {
+                            setRatingToggles(prev => ({
+                              ...prev,
+                              [category]: e.target.checked
+                            }));
+                          }}
+                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
+                        />
+                        <span className="text-sm text-gray-700">
+                          {label}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}
