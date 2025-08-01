@@ -42,8 +42,17 @@ abstract class BaseAPI {
      * Set CORS headers
      */
     protected function setCorsHeaders() {
-        // For development, allow all origins
-        // In production, you should restrict this to specific domains
+        // TODO: For production, update this to restrict to specific domains:
+        // $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        // $allowedOrigins = [
+        //     'https://greaterchicagolandpizza.club',
+        //     'https://www.greaterchicagolandpizza.club'
+        // ];
+        // if (in_array($origin, $allowedOrigins)) {
+        //     header("Access-Control-Allow-Origin: $origin");
+        // }
+        
+        // DEVELOPMENT ONLY - Remove for production
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
