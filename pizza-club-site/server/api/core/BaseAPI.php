@@ -42,6 +42,21 @@ abstract class BaseAPI {
      * Set CORS headers
      */
     protected function setCorsHeaders() {
+        // For development, allow all origins
+        // In production, you should restrict this to specific domains
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+        header('Access-Control-Max-Age: 86400');
+        
+        // Handle preflight
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            http_response_code(200);
+            exit();
+        }
+        
+        return; // Skip the origin checking below for now
+        
         $allowedOrigins = [
             'http://localhost:5173',
             'http://localhost:5174',
