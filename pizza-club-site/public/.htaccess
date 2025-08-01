@@ -1,16 +1,7 @@
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  
-  # Handle the /pizza subdirectory
-  RewriteBase /pizza/
-  
-  # Don't rewrite files or directories that exist
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  
-  # Rewrite everything else to index.html to allow React Router to handle routing
-  RewriteRule ^ index.html [L]
-</IfModule>
+Options -MultiViews
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.html [QSA,L]
 
 # Handle browser caching
 <IfModule mod_expires.c>
