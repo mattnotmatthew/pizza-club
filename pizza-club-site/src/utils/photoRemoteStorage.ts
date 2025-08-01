@@ -69,7 +69,7 @@ export async function uploadPhotoToServer(
     }
 
     // Create a promise to handle the async XHR request
-    const uploadPromise = new Promise<UploadResult>((resolve, reject) => {
+    const uploadPromise = new Promise<UploadResult>((resolve) => {
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
@@ -131,8 +131,8 @@ export async function uploadPhotoToServer(
  * @param photoId - The photo ID to delete
  */
 export async function deletePhotoFromServer(
-  infographicId: string,
-  photoId: string
+  _infographicId: string,
+  _photoId: string
 ): Promise<boolean> {
   // TODO: Implement when delete endpoint is available
   console.warn('Photo deletion not yet implemented on server');

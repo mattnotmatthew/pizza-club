@@ -9,7 +9,6 @@ import type {
   Event, 
   Member, 
   Restaurant, 
-  ApiResponse,
   PaginatedResponse 
 } from '@/types';
 import type { 
@@ -43,7 +42,7 @@ async function apiRequest<T>(
   
   // Add auth token if available
   if (API_TOKEN) {
-    headers['Authorization'] = `Bearer ${API_TOKEN}`;
+    (headers as any)['Authorization'] = `Bearer ${API_TOKEN}`;
   }
   
   try {

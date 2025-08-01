@@ -18,11 +18,11 @@ const CompareTable: React.FC<CompareTableProps> = ({
 
   useEffect(() => {
     // Load parent categories
-    dataService.getParentCategories().then(categories => {
+    dataService.getParentCategories().then((categories: string[]) => {
       setParentCategories(categories);
       
       // Load child categories for each parent
-      const childPromises = categories.map(async parent => {
+      const childPromises = categories.map(async (parent: string) => {
         if (parent !== 'overall' && parent !== PARENT_CATEGORIES.PIZZAS) {
           const children = await dataService.getChildCategories(parent);
           return { parent, children };
@@ -39,7 +39,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
         });
         setChildCategories(childMap);
       });
-    }).catch(error => {
+    }).catch((error: any) => {
       console.error('Failed to load categories:', error);
       // Fallback
       setParentCategories(['overall']);

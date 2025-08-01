@@ -91,7 +91,7 @@ const InfographicsEditor: React.FC = () => {
       
       // Initialize showRatings with all categories enabled
       const initialRatings: Record<string, boolean> = {};
-      categories.forEach(category => {
+      categories.forEach((category: string) => {
         initialRatings[category] = true;
       });
       setContent(prev => ({

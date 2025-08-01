@@ -12,8 +12,11 @@ import { apiService } from './api';
 export const dataService = {
   // Delegate calculation/utility methods to original service
   calculateAverageRating: originalDataService.calculateAverageRating,
-  flattenRatings: originalDataService.flattenRatings,
-  nestRatings: originalDataService.nestRatings,
+  getParentCategories: originalDataService.getParentCategories,
+  getChildCategories: originalDataService.getChildCategories,
+  getCategoryAverage: originalDataService.getCategoryAverage,
+  mapFlatToNested: originalDataService.mapFlatToNested,
+  getAvailableRatingCategories: originalDataService.getAvailableRatingCategories,
   
   // Override all data fetching methods to use API
   async getRestaurants(): Promise<Restaurant[]> {
@@ -89,6 +92,27 @@ export const dataService = {
     return await apiService.getQuotes();
   },
 
+  // Published infographics helper
+  async getPublishedInfographics(): Promise<Infographic[]> {
+    const infographics = await this.getInfographics();
+    return infographics.filter(ig => ig.status === 'published');
+  },
+
+  // Publish infographic helper
+  async publishInfographic(id: string): Promise<Infographic> {
+    const infographic = await this.getInfographicById(id);
+    if (!infographic) {
+      throw new Error('Infographic not found');
+    }
+    
+    const published = await this.saveInfographic({
+      ...infographic,
+      status: 'published',
+      publishedAt: new Date().toISOString()
+    });
+    return published;
+  },
+
   // Additional methods for infographics with data
   async getInfographicWithData(id: string): Promise<InfographicWithData | undefined> {
     const infographic = await this.getInfographicById(id);
@@ -103,9 +127,15 @@ export const dataService = {
 
     return {
       ...infographic,
-      restaurant,
-      visit
-    };
+      restaurantName: restaurant.name,
+      restaurantLocation: restaurant.location,
+      restaurantAddress: restaurant.address,
+      visitData: {
+        ratings: visit?.ratings || {},
+        attendees: visit?.attendees || [],
+        notes: visit?.notes
+      }
+    } as InfographicWithData;
   },
 
   // Add new methods for write operations
