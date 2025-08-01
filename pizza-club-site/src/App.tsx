@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from '@/components/common/Layout';
 import AdminRoute from '@/components/admin/AdminRoute';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('@/pages/Home'));
@@ -32,31 +33,33 @@ const Loading: React.FC = () => (
 
 function App() {
   return (
-    <Router basename="/pizza">
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="about" element={<About />} />
-            <Route path="members" element={<Members />} />
-            <Route path="members/:id" element={<MemberDetail />} />
-            <Route path="restaurants" element={<Restaurants />} />
-            <Route path="restaurants/compare" element={<RestaurantsCompare />} />
-            <Route path="events" element={<Events />} />
-            <Route path="infographics" element={<Infographics />} />
-            <Route path="infographics/:id" element={<InfographicView />} />
-            <Route path="test" element={<Test />} />
-          </Route>
-          
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-            <Route path="infographics" element={<InfographicsList />} />
-            <Route path="infographics/new" element={<InfographicsEditor />} />
-            <Route path="infographics/edit/:id" element={<InfographicsEditor />} />
-          </Route>
-        </Routes>
-      </Suspense>
-    </Router>
+    <ErrorBoundary>
+      <Router basename="/pizza">
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="about" element={<About />} />
+              <Route path="members" element={<Members />} />
+              <Route path="members/:id" element={<MemberDetail />} />
+              <Route path="restaurants" element={<Restaurants />} />
+              <Route path="restaurants/compare" element={<RestaurantsCompare />} />
+              <Route path="events" element={<Events />} />
+              <Route path="infographics" element={<Infographics />} />
+              <Route path="infographics/:id" element={<InfographicView />} />
+              <Route path="test" element={<Test />} />
+            </Route>
+            
+            {/* Admin routes */}
+            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+              <Route path="infographics" element={<InfographicsList />} />
+              <Route path="infographics/new" element={<InfographicsEditor />} />
+              <Route path="infographics/edit/:id" element={<InfographicsEditor />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

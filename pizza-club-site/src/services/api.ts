@@ -18,12 +18,12 @@ import type {
 } from '@/types/infographics';
 
 // API configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 const API_TOKEN = import.meta.env.VITE_UPLOAD_API_TOKEN || '';
 
-// Check if API is configured
-if (!API_BASE_URL) {
-  throw new Error('API URL not configured. Please set VITE_API_URL in your environment.');
+// Log warning if API is not configured (but don't throw error)
+if (!API_BASE_URL && typeof window !== 'undefined') {
+  console.error('API URL not configured. Please set VITE_API_URL in your environment.');
 }
 
 /**
@@ -33,6 +33,10 @@ async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  if (!API_BASE_URL) {
+    throw new Error('API URL not configured. The site needs to be rebuilt with VITE_API_URL environment variable set.');
+  }
+  
   const url = `${API_BASE_URL}/${endpoint}`;
   
   const headers: HeadersInit = {
