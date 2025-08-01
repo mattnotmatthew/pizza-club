@@ -2,457 +2,323 @@
 
 ## Architecture Overview
 
-The Pizza Club app uses a simple but effective data architecture:
-- **Static JSON files** as the data source
-- **Service layer** for data fetching and transformation
+The Pizza Club app uses a database-driven architecture:
+- **MySQL database** as the single source of truth
+- **PHP RESTful API** for all data operations
+- **Service layer** for API communication
 - **Component-level state** for UI management
 - **No global state management** (Redux, Context, etc.)
 
-## Data Sources
+## Data Architecture
 
-All data is stored in static JSON files under `public/data/`:
-
-### members.json
-```json
-[{
-  "id": "string",
-  "name": "string",
-  "bio": "string",
-  "photo": "string",
-  "memberSince": "string",
-  "favoritePizzaStyle": "string",
-  "restaurantsVisited": "number"
-}]
+```
+┌─────────────┐     ┌─────────────┐     ┌──────────────┐     ┌──────────┐
+│   Frontend  │────▶│  dataService │────▶│  apiService  │────▶│ PHP API  │
+│  Components │     │  (TypeScript)│     │  (TypeScript)│     │          │
+└─────────────┘     └─────────────┘     └──────────────┘     └────┬─────┘
+                                                                    │
+                                                              ┌─────▼─────┐
+                                                              │  MySQL DB │
+                                                              └───────────┘
 ```
 
-### restaurants.json
-```json
-[{
-  "id": "string",
-  "name": "string",
-  "address": "string",
-  "coordinates": { "lat": number, "lng": number },
-  "style": "string",
-  "visits": [{
-    "date": "string",
-    "ratings": {
-      // Dynamic rating categories - any key/value pairs
-      "overall": number,
-      "crust": number,
-      "sauce": number,
-      "cheese": number,
-      "toppings": number,
-      "value": number,
-      // Additional categories can be added dynamically
-      "consistency": number,
-      "ambiance": number,
-      // ... any other rating category
-    },
-    "attendees": ["memberId"],
-    "notes": "string"
-  }],
-  "averageRating": number,
-  "priceRange": "$|$$|$$$|$$$$",
-  "website": "string",
-  "phone": "string",
-  "mustTry": "string"
-}]
+## API Endpoints
+
+All data operations go through the REST API:
+
+### Core Endpoints
 ```
+GET    /restaurants      - List all restaurants
+GET    /restaurants?id=X - Get specific restaurant
+POST   /restaurants      - Create restaurant
+PUT    /restaurants      - Update restaurant
+DELETE /restaurants?id=X - Delete restaurant
 
-**Note**: The `ratings` object now uses `Record<string, number>` type, allowing any rating category to be added without code changes.
+GET    /members          - List all members
+GET    /members?id=X     - Get specific member
+POST   /members          - Create member
+PUT    /members          - Update member
+DELETE /members?id=X     - Delete member
 
-### events.json
-```json
-[{
-  "id": "string",
-  "title": "string",
-  "date": "string",
-  "location": "string",
-  "address": "string",
-  "description": "string",
-  "maxAttendees": number,
-  "rsvpLink": "string"
-}]
-```
+GET    /events           - List all events
+GET    /events?upcoming=1 - Get upcoming events
+GET    /events?past=1    - Get past events
 
-### infographics.json
-```json
-[{
-  "id": "string",
-  "title": "string",
-  "restaurantId": "string",
-  "visitDate": "string",
-  "createdDate": "string",
-  "createdBy": "string",
-  "content": {
-    "selectedQuotes": [{
-      "id": "string",
-      "memberId": "string",
-      "restaurantId": "string",
-      "text": "string",
-      "sentiment": "positive|negative|neutral"
-    }],
-    "showRatings": {
-      "overall": boolean,
-      "crust": boolean,
-      // ... dynamic rating categories
-    },
-    "photos": [{
-      "id": "string",
-      "url": "string", // Can be remote URL or base64 data URI
-      "position": { "x": number, "y": number },
-      "size": { "width": number, "height": number },
-      "opacity": number,
-      "layer": "background|foreground",
-      "focalPoint": { "x": number, "y": number }
-    }]
-  }
-}]
+GET    /quotes           - List all quotes
+POST   /quotes           - Create quote
+
+GET    /infographics     - List all infographics
+GET    /infographics?id=X - Get specific infographic
+POST   /infographics     - Create infographic
+PUT    /infographics     - Update infographic
+DELETE /infographics?id=X - Delete infographic
+
+GET    /ratings?visit_id=X - Get ratings for visit
+GET    /ratings?member_id=X - Get ratings by member
+POST   /ratings          - Save ratings
+DELETE /ratings          - Delete ratings
 ```
 
 ## Data Service Layer
 
-The `services/data.ts` file provides a centralized data access layer:
+The service layer provides a clean interface between components and the API:
 
-### Key Functions
-
-#### Basic Fetching
+### API Service (`api.ts`)
+Handles direct API communication:
 ```typescript
-getMembers(): Promise<Member[]>
-getMemberById(id: string): Promise<Member | undefined>
-getRestaurants(): Promise<Restaurant[]>
-getRestaurantById(id: string): Promise<Restaurant | undefined>
-getEvents(): Promise<Event[]>
-getEventById(id: string): Promise<Event | undefined>
+async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${API_BASE_URL}/${endpoint}`;
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_TOKEN}`,
+      ...options?.headers
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+  
+  const data = await response.json();
+  return data.data || data;
+}
 ```
 
-#### Computed Data
+### Data Service (`dataWithApi.ts`)
+Provides business logic and data transformation:
 ```typescript
-getUpcomingEvents(limit?: number): Promise<Event[]>
-getPastEvents(limit?: number): Promise<Event[]>
-getRestaurantsByMember(memberId: string): Promise<Restaurant[]>
-calculateAverageRating(restaurant: Restaurant): number
-getAvailableRatingCategories(): Promise<string[]>
-getCategoryAverage(restaurant: Restaurant, category: string): number
+export const dataService = {
+  // Basic fetching
+  async getRestaurants(): Promise<Restaurant[]> {
+    const restaurants = await apiService.getRestaurants();
+    return restaurants.map(restaurant => ({
+      ...restaurant,
+      averageRating: restaurant.averageRating || 
+        this.calculateAverageRating(restaurant)
+    }));
+  },
+
+  // Computed data
+  async getUpcomingEvents(limit?: number): Promise<Event[]> {
+    const events = await this.getEvents();
+    const now = new Date();
+    const upcoming = events.filter(event => new Date(event.date) > now);
+    return limit ? upcoming.slice(0, limit) : upcoming;
+  },
+
+  // Relationship queries
+  async getInfographicWithData(id: string): Promise<InfographicWithData> {
+    const infographic = await this.getInfographicById(id);
+    const restaurant = await this.getRestaurantById(infographic.restaurantId);
+    const visit = restaurant.visits?.find(v => v.date === infographic.visitDate);
+    return { ...infographic, restaurant, visit };
+  }
+}
 ```
-
-#### Infographics Data
-```typescript
-getInfographics(): Promise<Infographic[]>
-getInfographicById(id: string): Promise<Infographic | undefined>
-getInfographicsByRestaurant(restaurantId: string): Promise<Infographic[]>
-saveInfographic(infographic: Infographic): Promise<void>
-updateInfographic(id: string, infographic: Infographic): Promise<void>
-deleteInfographic(id: string): Promise<void>
-```
-
-### Data Fetching Pattern
-
-1. **Base URL Configuration**
-   ```typescript
-   const DATA_BASE_URL = import.meta.env.BASE_URL + 'data';
-   ```
-
-2. **Generic Fetch Function**
-   ```typescript
-   async function fetchJSON<T>(path: string): Promise<T>
-   ```
-
-3. **Error Handling**
-   - Catches fetch errors
-   - Logs to console
-   - Re-throws for component handling
 
 ## Component Data Flow
 
-### Page Components
+### Data Fetching Pattern
 
-Pages fetch data in their components using React hooks:
+Components fetch data using React hooks:
 
 ```typescript
-// Example from Members page
-const [members, setMembers] = useState<Member[]>([]);
+const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
 const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
 
 useEffect(() => {
-  const fetchMembers = async () => {
+  const fetchData = async () => {
     try {
-      const data = await dataService.getMembers();
-      setMembers(data);
-    } catch (error) {
-      console.error('Failed to fetch members:', error);
+      const data = await dataService.getRestaurants();
+      setRestaurants(data);
+    } catch (err) {
+      setError('Failed to load restaurants');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
   
-  fetchMembers();
+  fetchData();
 }, []);
 ```
 
 ### Data Flow Steps
 
 1. **Component Mount** → useEffect triggers
-2. **Service Call** → dataService fetches JSON
-3. **State Update** → Component state updated
-4. **Re-render** → UI reflects new data
-5. **Error Handling** → Catch blocks handle failures
+2. **Service Call** → dataService method invoked
+3. **API Request** → apiService makes HTTP request
+4. **Database Query** → PHP API queries MySQL
+5. **Response** → Data flows back through the layers
+6. **State Update** → Component state updated
+7. **Re-render** → UI reflects new data
 
-## Caching Strategy
+## Authentication & Security
 
-Currently, the app relies on browser caching for static files:
-- JSON files are cached by the browser
-- No application-level caching
-- Vite handles cache busting in production
+### API Token
+- Bearer token authentication for all requests
+- Token stored in environment variables
+- Never exposed in client-side code
 
-### Potential Improvements
-
-1. **Memory Cache**
-   ```typescript
-   const cache = new Map();
-   
-   async function fetchWithCache<T>(key: string, fetcher: () => Promise<T>) {
-     if (cache.has(key)) return cache.get(key);
-     const data = await fetcher();
-     cache.set(key, data);
-     return data;
-   }
-   ```
-
-2. **React Query Integration**
-   - Automatic caching
-   - Background refetching
-   - Optimistic updates
+### CORS Configuration
+- Configured in API to allow specific origins
+- Development mode allows localhost
+- Production restricts to actual domain
 
 ## Data Relationships
 
-### Member → Restaurant
-- Through `visits.attendees[]` array
-- `getRestaurantsByMember()` filters restaurants
+### Database Schema Overview
+```sql
+restaurants (id, name, address, ...)
+  └── restaurant_visits (id, restaurant_id, visit_date, ...)
+       ├── visit_attendees (visit_id, member_id)
+       └── ratings (id, visit_id, member_id, category_id, rating)
+            └── rating_categories (id, name, parent_category)
 
-### Restaurant → Ratings
-- Embedded in `visits[]` array
-- Average calculated on fetch
-- **Dynamic categories**: Rating categories are discovered at runtime
+members (id, name, bio, ...)
 
-### Event → Members
-- No direct relationship currently
-- Could add `attendees[]` to events
+events (id, title, event_date, ...)
 
-## Dynamic Rating Categories
+quotes (id, text, author, restaurant_id)
 
-### Overview
-The app now supports dynamic rating categories that are automatically discovered from the data:
+infographics (id, restaurant_id, visit_date, ...)
+  ├── infographic_photos (id, infographic_id, url, ...)
+  └── infographic_quotes (infographic_id, quote_id)
+```
 
-1. **Auto-discovery**: The `getAvailableRatingCategories()` function scans all restaurant visits to find unique rating keys
-2. **No code changes needed**: Add any new rating category to restaurants.json and it appears everywhere
-3. **Consistent ordering**: 'overall' always appears first, then others alphabetically
-
-### Implementation Details
-
-#### Discovery Function
+### Nested Rating Structure
+The app supports nested rating categories:
 ```typescript
-async getAvailableRatingCategories(): Promise<string[]> {
-  const restaurants = await this.getRestaurants();
-  const categories = new Set<string>();
-  
-  restaurants.forEach(restaurant => {
-    restaurant.visits?.forEach(visit => {
-      Object.keys(visit.ratings).forEach(category => {
-        categories.add(category);
-      });
-    });
-  });
-  
-  // Return categories with 'overall' first, then others alphabetically
-  const categoryArray = Array.from(categories);
-  const overall = categoryArray.filter(c => c === 'overall');
-  const others = categoryArray.filter(c => c !== 'overall').sort();
-  return [...overall, ...others];
+{
+  overall: 8.5,
+  crust: 7.0,
+  sauce: 9.0,
+  cheese: 8.0,
+  toppings: {
+    quality: 8.5,
+    distribution: 7.5
+  },
+  pizzas: [
+    { order: 1, rating: 8.0 },
+    { order: 2, rating: 7.5 }
+  ]
 }
 ```
-
-#### Category Average Calculation
-```typescript
-getCategoryAverage(restaurant: Restaurant, category: string): number {
-  if (!restaurant.visits || restaurant.visits.length === 0) return 0;
-  
-  const validRatings = restaurant.visits
-    .map(visit => visit.ratings[category])
-    .filter(rating => rating !== undefined && rating !== null);
-  
-  if (validRatings.length === 0) return 0;
-  
-  const sum = validRatings.reduce((acc, rating) => acc + rating, 0);
-  return Math.round((sum / validRatings.length) * 10) / 10;
-}
-```
-
-### Usage in Components
-
-Components that display ratings now:
-1. Load available categories on mount
-2. Dynamically render UI based on discovered categories
-3. Handle missing categories gracefully (show "N/A")
-
-Example from RestaurantsCompare:
-```typescript
-const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-
-useEffect(() => {
-  const fetchData = async () => {
-    const categories = await dataService.getAvailableRatingCategories();
-    setAvailableCategories(categories);
-  };
-  fetchData();
-}, []);
-```
-
-## Future Data Enhancements
-
-### GitHub Integration
-The service includes a placeholder for GitHub saves:
-```typescript
-async saveToGitHub(path: string, content: unknown, message: string)
-```
-
-This could enable:
-- User-submitted ratings
-- New restaurant additions
-- Member profile updates
-
-### Real-time Updates
-Could implement:
-- WebSocket for live updates
-- Service Worker for offline support
-- Optimistic UI updates
-
-### API Migration Path
-The current architecture makes it easy to migrate to a real API:
-1. Replace `fetchJSON` with API calls
-2. Keep same service interface
-3. Add authentication headers
-4. Components remain unchanged
 
 ## Photo Storage Flow
 
-### Hybrid Storage Strategy
-
-The application implements a hybrid approach for photo storage:
-
-1. **Server Upload (Primary)**
-   - When `VITE_UPLOAD_API_URL` is configured
-   - Photos uploaded to PHP endpoint
-   - Only URLs stored in JSON
-   - Benefits: Smaller JSON, faster loading, proper caching
-
-2. **Base64 Fallback (Secondary)**
-   - When server upload not configured
-   - Photos embedded as base64 in JSON
-   - Works without server infrastructure
-   - Trade-off: Larger JSON files
-
-### Upload Flow Diagram
-
+### Upload Process
 ```
 User Selects Image
        ↓
 Validate (type, size)
        ↓
-Optimize (compress, convert to WebP)
+Optimize (resize, compress)
        ↓
-Check Configuration
+Upload to Server
        ↓
-    ┌──────────────────┬─────────────────┐
-    │ Server Available  │  No Server      │
-    ↓                  ↓                 │
-Upload to PHP      Convert to Base64     │
-    ↓                  ↓                 │
-Get URL Response   Store Data URI        │
-    ↓                  ↓                 │
-    └──────────────────┴─────────────────┘
-                       ↓
-              Save to infographic.photos[]
+PHP processes & saves
+       ↓
+Returns URL
+       ↓
+Store URL in database
 ```
 
 ### Photo Data Structure
-
 ```typescript
 interface InfographicPhoto {
   id: string;
-  url: string;  // https://domain.com/path/image.webp OR data:image/webp;base64,...
+  url: string;  // Server URL
   position: { x: number; y: number };
   size: { width: number; height: number };
   opacity: number;
   layer: 'background' | 'foreground';
-  focalPoint?: { x: number; y: number };
 }
 ```
 
-### Server Upload Process
-
-1. **Client Side** (React)
-   - Create FormData with file, infographicId, photoId
-   - Send POST request with Bearer token
-   - Track upload progress via XMLHttpRequest
-
-2. **Server Side** (PHP)
-   - Validate authentication token
-   - Check file type and size
-   - Create directory structure: `/images/infographics/{id}/`
-   - Process image (resize if needed, convert to WebP)
-   - Return JSON with URL and relative path
-
-3. **Storage Result**
-   ```json
-   {
-     "url": "https://domain.com/images/infographics/ig-123/photo-456.webp"
-   }
-   ```
-
-## Performance Considerations
+## Performance Optimization
 
 ### Current Optimizations
+- Database indexes on frequently queried columns
+- Stored procedure for average rating calculation
+- Pagination support in API
 - Lazy loading of page components
-- Minimal data transformations
-- Browser caching of static files
-- Client-side image optimization before upload
-- WebP format for smaller file sizes
-- Progress tracking for better UX
+- Image optimization before upload
 
-### Potential Optimizations
-- Pagination for large lists
-- Virtual scrolling for long lists
-- Image CDN integration
-- Progressive image loading
-- Data prefetching on hover
+### Caching Strategy
+- Browser caches static assets
+- API can return cache headers
+- No application-level caching currently
 
-## Error Handling Patterns
+## Error Handling
 
-### Service Level
-```typescript
-try {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(response.statusText);
-  return await response.json();
-} catch (error) {
-  console.error('Fetch error:', error);
-  throw error;
+### API Error Response
+```json
+{
+  "success": false,
+  "error": "Error message"
 }
 ```
 
-### Component Level
+### Component Error Handling
 ```typescript
-const [error, setError] = useState<string | null>(null);
-
 try {
-  // fetch data
+  const data = await dataService.getRestaurants();
+  setRestaurants(data);
 } catch (err) {
-  setError('Failed to load data. Please try again.');
+  if (err instanceof Error) {
+    setError(err.message);
+  } else {
+    setError('An unexpected error occurred');
+  }
 }
 ```
 
 ### User Feedback
 - Loading states with Skeleton components
-- Error messages in UI
-- Retry mechanisms (not yet implemented)
+- Error messages displayed in UI
+- Toast notifications for actions
+- Fallback UI for critical errors
+
+## Data Validation
+
+### Frontend Validation
+- TypeScript interfaces enforce types
+- Form validation before submission
+- Business rule validation
+
+### Backend Validation
+- Input sanitization
+- Type checking
+- Business rule enforcement
+- SQL injection prevention
+
+## Future Enhancements
+
+### Planned Features
+- Real-time updates via WebSockets
+- Offline support with Service Workers
+- Advanced search and filtering
+- Bulk operations
+- Data export functionality
+
+### API Evolution
+- GraphQL endpoint option
+- Batch operations
+- Field-level permissions
+- Audit logging
+- Rate limiting
+
+## Best Practices
+
+1. **Always handle loading states** - Show skeletons or spinners
+2. **Provide error feedback** - Clear messages for users
+3. **Validate on both ends** - Frontend for UX, backend for security
+4. **Use TypeScript strictly** - Catch errors at compile time
+5. **Keep components focused** - Let services handle data logic
+6. **Cache strategically** - Balance freshness with performance
+7. **Monitor API performance** - Track slow queries
+8. **Document API changes** - Keep this documentation updated

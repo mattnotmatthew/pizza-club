@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import Card from '@/components/common/Card';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';

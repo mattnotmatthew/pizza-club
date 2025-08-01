@@ -7,7 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 htaccess-current
-server/
+# Server files - exclude sensitive configs but include API code
+server/api/config/db.config.php
+server/.htaccess
+server/uploads/
+server/logs/
 
 # Dependencies
 node_modules
@@ -118,6 +122,13 @@ ehthumbs_vista.db
 # Deployment specific
 .vercel
 .netlify
+
+# Test files with sensitive data
+test-api.html
+
+# Migration scripts (remove after use)
+server/database/run-migration*.php
+server/database/migrate.php
 
 # Debug
 debug/

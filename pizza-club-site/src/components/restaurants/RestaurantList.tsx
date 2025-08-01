@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Restaurant, SortOption } from '@/types';
 import type { Infographic } from '@/types/infographics';
 

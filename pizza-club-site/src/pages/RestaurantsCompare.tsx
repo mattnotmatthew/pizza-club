@@ -5,7 +5,7 @@ import RestaurantSelector from '@/components/restaurants/RestaurantSelector';
 import CompareTable from '@/components/restaurants/CompareTable';
 import { useCompareSelection } from '@/hooks/useCompareSelection';
 import { useCompareUrl } from '@/hooks/useCompareUrl';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 import { PARENT_CATEGORIES } from '@/types';
 
@@ -49,7 +49,7 @@ const RestaurantsCompare: React.FC = () => {
         ]);
         
         // Map totalVisits for backward compatibility
-        const mappedRestaurants = fetchedRestaurants.map(restaurant => ({
+        const mappedRestaurants = fetchedRestaurants.map((restaurant: any) => ({
           ...restaurant,
           totalVisits: restaurant.totalVisits || restaurant.visits?.length || 0
         }));
@@ -74,7 +74,7 @@ const RestaurantsCompare: React.FC = () => {
         for (const parent of parentCategories) {
           if (parent !== 'overall' && parent !== PARENT_CATEGORIES.PIZZAS) {
             const children = await dataService.getChildCategories(parent);
-            children.forEach(child => {
+            children.forEach((child: string) => {
               toggleable.push(child);
               initialToggles[child] = true;
             });

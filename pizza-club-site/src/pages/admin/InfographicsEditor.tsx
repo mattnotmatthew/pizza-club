@@ -8,7 +8,7 @@ import InfographicPreview from '@/components/infographics/InfographicPreview';
 import Button from '@/components/common/Button';
 import { useInfographics } from '@/hooks/useInfographics';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Restaurant, RestaurantVisit, Member } from '@/types';
 import type { InfographicContent, CreateInfographicInput } from '@/types/infographics';
 
@@ -91,7 +91,7 @@ const InfographicsEditor: React.FC = () => {
       
       // Initialize showRatings with all categories enabled
       const initialRatings: Record<string, boolean> = {};
-      categories.forEach(category => {
+      categories.forEach((category: string) => {
         initialRatings[category] = true;
       });
       setContent(prev => ({

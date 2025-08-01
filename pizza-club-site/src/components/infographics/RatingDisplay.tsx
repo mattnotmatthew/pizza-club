@@ -1,6 +1,6 @@
 import React from 'react';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { RatingStructure, NestedRatings } from '@/types';
 import { isNestedRatings, PARENT_CATEGORIES } from '@/types';
 

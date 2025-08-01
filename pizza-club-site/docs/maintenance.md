@@ -2,12 +2,19 @@
 
 ## Regular Maintenance Tasks
 
+### Daily
+- [ ] Monitor API health endpoint
+- [ ] Check database connection status
+- [ ] Review API error logs
+- [ ] Monitor disk space (database & images)
+
 ### Weekly
-- [ ] Review error logs for any recurring issues
-- [ ] Check for dependency security updates
+- [ ] Review API access logs for anomalies
+- [ ] Check database query performance
 - [ ] Verify all animations are performing smoothly
 - [ ] Test responsive layouts on various devices
 - [ ] Monitor uploaded image storage usage
+- [ ] Backup database
 
 ### Monthly
 - [ ] Update dependencies to latest patch versions
@@ -15,297 +22,352 @@
 - [ ] Check Google Maps API usage and quotas
 - [ ] Audit accessibility compliance
 - [ ] Clean up orphaned images in /images/infographics/
-- [ ] Review photo upload logs for errors
+- [ ] Review API response times
+- [ ] Optimize slow database queries
+- [ ] Rotate API logs
 
 ### Quarterly
 - [ ] Major dependency updates (with thorough testing)
 - [ ] Performance audit using Lighthouse
 - [ ] Review and update documentation
 - [ ] Clean up unused code and assets
-- [ ] Review server upload token security
-- [ ] Audit image storage structure
+- [ ] **Rotate API tokens**
+- [ ] Audit database indexes
+- [ ] Review security headers
+- [ ] Full database backup and restore test
 
-## Common Maintenance Scenarios
+## Database Maintenance
 
-### Updating the Homepage Background SVG
+### Daily Tasks
+```bash
+# Check database status
+mysql -u user -p -e "SHOW STATUS;"
 
-1. **Modify the SVG file**:
+# Monitor slow queries
+mysql -u user -p -e "SHOW PROCESSLIST;"
+```
+
+### Weekly Tasks
+1. **Backup Database**:
    ```bash
-   # Location
-   /public/images/cook-county/cook-county.svg
+   mysqldump -u user -p pizza_club > backup_$(date +%Y%m%d).sql
    ```
 
-2. **Update opacity values**:
-   ```xml
-   <!-- For Illinois outline -->
-   <g stroke="#ffffff" fill="#ffffff" opacity="0.25">
+2. **Check Table Sizes**:
+   ```sql
+   SELECT 
+     table_name AS `Table`,
+     round(((data_length + index_length) / 1024 / 1024), 2) AS `Size (MB)`
+   FROM information_schema.TABLES
+   WHERE table_schema = 'pizza_club'
+   ORDER BY (data_length + index_length) DESC;
+   ```
+
+3. **Optimize Tables**:
+   ```sql
+   OPTIMIZE TABLE restaurants, restaurant_visits, ratings;
+   ```
+
+### Monthly Tasks
+1. **Review Slow Query Log**:
+   ```bash
+   # Enable if not already
+   SET GLOBAL slow_query_log = 'ON';
+   SET GLOBAL long_query_time = 2;
+   ```
+
+2. **Update Statistics**:
+   ```sql
+   ANALYZE TABLE restaurants, restaurant_visits, ratings, members;
+   ```
+
+## API Maintenance
+
+### Security Updates
+
+1. **Rotate API Token** (quarterly):
+   ```bash
+   # Generate new token
+   openssl rand -hex 32
+   ```
    
-   <!-- For Cook County -->
-   <use xlink:href="#Cook" class="cook-county-animate"/>
+   Update in:
+   - `/server/api/config/config.php`
+   - `.env` file (VITE_UPLOAD_API_TOKEN)
+   - GitHub Secrets
+   - Production server
+
+2. **Update CORS** (as needed):
+   ```php
+   // In BaseAPI.php
+   $allowedOrigins = [
+       'https://greaterchicagolandpizza.club',
+       'https://www.greaterchicagolandpizza.club'
+   ];
    ```
 
-3. **Adjust animation**:
-   ```css
-   @keyframes pulse {
-     0%, 100% { opacity: 0.3; }
-     50% { opacity: 0.6; }
-   }
+3. **Disable Debug Mode**:
+   ```php
+   // In index.php
+   ini_set('display_errors', 0);
+   error_reporting(0);
    ```
 
-### Adding New Animations
+### Performance Monitoring
 
-1. **Define keyframes in index.css**:
-   ```css
-   @keyframes newAnimation {
-     from { /* initial state */ }
-     to { /* final state */ }
-   }
-   ```
-
-2. **Create utility class**:
-   ```css
-   .animate-new {
-     animation: newAnimation 1s ease-in-out;
-   }
-   ```
-
-3. **Add accessibility support**:
-   ```css
-   @media (prefers-reduced-motion: reduce) {
-     .animate-new {
-       animation: none;
-     }
-   }
-   ```
-
-### Adjusting Responsive Breakpoints
-
-1. **Update background calculation**:
-   ```typescript
-   // In Home.tsx
-   const getBackgroundStyles = () => {
-     const width = window.innerWidth;
-     if (width < 768) { /* mobile */ }
-     else if (width < 1024) { /* tablet */ }
-     else { /* desktop */ }
-   };
-   ```
-
-2. **Test across devices**:
-   - Mobile: 375px, 414px
-   - Tablet: 768px, 1024px
-   - Desktop: 1280px, 1920px
-
-### Managing Photo Storage
-
-1. **Monitor disk usage**:
+1. **Check API Response Times**:
    ```bash
-   # Check image directory size on server
-   du -sh /public_html/images/infographics/
+   # Test endpoints
+   time curl -H "Authorization: Bearer TOKEN" https://domain.com/pizza_api/restaurants
    ```
 
-2. **Clean up orphaned images**:
+2. **Monitor Error Logs**:
    ```bash
-   # Find infographic directories not in JSON
-   # Compare /images/infographics/* with infographics.json IDs
+   tail -f /var/log/apache2/error.log
+   grep "pizza_api" /var/log/apache2/access.log
    ```
 
-3. **Rotate upload token** (quarterly):
-   - Generate new secure token
-   - Update in upload.php on server
-   - Update VITE_UPLOAD_API_TOKEN in .env
-   - Update in GitHub Secrets
+## Migration Management
 
-4. **Backup images**:
+### Running Migrations
+
+1. **Upload Migration Script**:
    ```bash
-   # Download all infographic images
-   scp -r user@host:/public_html/images/infographics/ ./backup/
+   scp server/database/run-migration-complete.php user@host:/public_html/pizza_api/
    ```
 
-### Updating Dependencies
+2. **Execute Migration**:
+   ```
+   https://domain.com/pizza_api/run-migration-complete.php?token=YOUR_TOKEN
+   ```
 
-1. **Check for updates**:
+3. **IMPORTANT: Delete After Use**:
    ```bash
-   npm outdated
+   rm /public_html/pizza_api/run-migration*.php
    ```
 
-2. **Update minor versions**:
-   ```bash
-   npm update
-   ```
+### Data Integrity Checks
 
-3. **Update major versions** (test thoroughly):
-   ```bash
-   npm install package@latest
-   ```
+```sql
+-- Check for orphaned records
+SELECT * FROM restaurant_visits 
+WHERE restaurant_id NOT IN (SELECT id FROM restaurants);
 
-4. **Key dependencies to monitor**:
-   - React & React DOM
-   - Vite
-   - TypeScript
-   - Tailwind CSS
-   - React Router DOM
-   - browser-image-compression
+SELECT * FROM ratings 
+WHERE visit_id NOT IN (SELECT id FROM restaurant_visits);
 
-## Troubleshooting Guide
-
-### Animation Issues
-
-**Problem**: Animations not playing
-- Check if `prefers-reduced-motion` is enabled
-- Verify animation classes are applied correctly
-- Check for CSS conflicts
-
-**Problem**: Choppy animations
-- Reduce animation complexity
-- Use `transform` and `opacity` for better performance
-- Consider `will-change` property for heavy animations
-
-### SVG Background Issues
-
-**Problem**: SVG not displaying
-- Verify file path is correct
-- Check if SVG file is valid
-- Ensure proper MIME type is served
-
-**Problem**: SVG positioning issues
-- Review `getBackgroundStyles()` function
-- Test window.innerWidth calculations
-- Check background-attachment property
-
-### Build Issues
-
-**Problem**: Build fails with type errors
-```bash
-# Run type check
-npm run typecheck
-
-# Fix common issues
-- Missing type definitions
-- Incorrect import paths
-- Unused variables
+-- Verify average ratings
+CALL update_all_restaurant_ratings();
 ```
 
-**Problem**: Large bundle size
-```bash
-# Analyze bundle
-npm run build
-npm run preview
+## Photo Storage Management
 
-# Common solutions
-- Lazy load routes
-- Tree-shake unused imports
-- Optimize images
+### Monitor Disk Usage
+```bash
+# Check image directory size
+du -sh /public_html/images/infographics/
+
+# Find large images
+find /public_html/images -type f -size +2M -ls
+
+# Count total images
+find /public_html/images/infographics -type f | wc -l
 ```
 
-## Performance Optimization
+### Clean Orphaned Images
+```php
+// Script to find orphaned images
+$db_photos = []; // Get from database
+$disk_photos = glob('/public_html/images/infographics/*/*.webp');
+
+$orphaned = array_diff($disk_photos, $db_photos);
+// Review before deleting!
+```
 
 ### Image Optimization
-1. Convert PNGs to WebP where possible
-2. Use appropriate image sizes
-3. Implement lazy loading for off-screen images
-4. Monitor server-uploaded images:
+```bash
+# Convert large images to WebP
+for img in *.jpg *.png; do
+  cwebp -q 80 "$img" -o "${img%.*}.webp"
+done
+```
+
+## Deployment Process
+
+### Pre-deployment Checklist
+- [ ] Generate new API token if needed
+- [ ] Update production environment variables
+- [ ] Run linting: `npm run lint`
+- [ ] Build successfully: `npm run build`
+- [ ] Test API endpoints
+- [ ] Backup database
+- [ ] Document any schema changes
+
+### Deployment Steps
+
+1. **Frontend Deployment**:
    ```bash
-   # Find large images that need optimization
-   find /public_html/images -type f -size +1M
-   ```
-5. Configure PHP image processing limits:
-   ```ini
-   memory_limit = 256M
-   max_execution_time = 60
+   npm run build
+   # Upload dist/ to /public_html/pizza/
    ```
 
-### Code Splitting
-```typescript
-// Route-based splitting
-const Members = lazy(() => import('./pages/Members'));
-const Restaurants = lazy(() => import('./pages/Restaurants'));
-```
+2. **API Deployment**:
+   ```bash
+   # Upload server/api/ to /public_html/pizza_api/
+   # Exclude config files with credentials
+   ```
 
-### CSS Optimization
-1. Remove unused Tailwind classes
-2. Minimize custom CSS
-3. Use CSS-in-JS sparingly
+3. **Database Updates**:
+   ```sql
+   -- Run any schema changes
+   -- Update stored procedures if needed
+   ```
 
-## Deployment Checklist
-
-### Pre-deployment
-- [ ] Run full test suite
-- [ ] Check TypeScript compilation
-- [ ] Verify environment variables
-- [ ] Test production build locally
-- [ ] Update version number
-- [ ] Verify upload token in GitHub Secrets
-
-### Post-deployment
+### Post-deployment Verification
+- [ ] Test API health: `/pizza_api/health`
 - [ ] Verify all routes work
-- [ ] Check animations perform well
-- [ ] Test responsive layouts
+- [ ] Check CORS headers
+- [ ] Test data operations (CRUD)
 - [ ] Monitor error logs
-- [ ] Verify API connections
-- [ ] Test photo upload functionality
-- [ ] Check CORS configuration for uploads
+- [ ] Test photo uploads
+- [ ] Verify performance
 
-## Emergency Procedures
+## Troubleshooting
 
-### Rollback Process
-1. Identify the issue
-2. Revert to previous deployment
-3. Investigate root cause
-4. Fix and test thoroughly
-5. Re-deploy with fix
+### Database Issues
 
-### Common Quick Fixes
-
-**Broken animations**: Add fallback styles
-```css
-.animate-fade-in {
-  opacity: 1; /* Fallback */
-  animation: fadeIn 0.8s ease-in-out;
-}
+**Connection Failed**:
+```php
+// Check credentials in config/Database.php
+// Verify MySQL service is running
+// Check firewall rules
 ```
 
-**SVG loading issues**: Provide fallback
-```tsx
-<div 
-  className="min-h-screen bg-red-700"
-  style={{
-    backgroundImage: 'url("/images/cook-county/cook-county.svg")',
-    backgroundColor: '#b91c1c' /* Fallback */
-  }}
->
+**Slow Queries**:
+```sql
+-- Check missing indexes
+EXPLAIN SELECT * FROM your_slow_query;
+
+-- Add index if needed
+CREATE INDEX idx_visit_date ON restaurant_visits(visit_date);
 ```
 
-## Monitoring
+### API Issues
 
-### Key Metrics to Track
-- Page load time
-- Time to interactive
-- Animation frame rate
-- API response times
-- Error rates
+**CORS Errors**:
+- Check BaseAPI.php headers
+- Verify .htaccess rules
+- Ensure OPTIONS requests handled
 
-### Tools
-- Browser DevTools Performance tab
-- Lighthouse CI
-- Web Vitals monitoring
-- Error tracking service
+**Authentication Failed**:
+- Verify token in request header
+- Check token in config
+- Ensure Bearer format used
+
+**404 Errors**:
+- Check .htaccess in pizza_api/
+- Verify mod_rewrite enabled
+- Test with direct index.php access
+
+### Performance Issues
+
+**Slow API Response**:
+1. Enable query profiling
+2. Check database indexes
+3. Review N+1 queries
+4. Consider caching
+
+**High Memory Usage**:
+```ini
+; In php.ini
+memory_limit = 256M
+max_execution_time = 30
+```
+
+## Monitoring Setup
+
+### Health Checks
+```bash
+# Cron job for monitoring
+*/5 * * * * curl -f https://domain.com/pizza_api/health || echo "API Down" | mail -s "Pizza API Alert" admin@domain.com
+```
+
+### Performance Metrics
+- API response time < 200ms
+- Database queries < 50ms
+- Page load time < 3s
+- Error rate < 1%
+
+### Logging
+```php
+// In BaseAPI.php
+error_log(sprintf(
+    "[%s] %s %s - %dms",
+    date('Y-m-d H:i:s'),
+    $_SERVER['REQUEST_METHOD'],
+    $_SERVER['REQUEST_URI'],
+    $responseTime
+));
+```
+
+## Backup Strategy
+
+### Automated Backups
+```bash
+#!/bin/bash
+# Daily backup script
+DATE=$(date +%Y%m%d)
+BACKUP_DIR="/backups/pizza_club"
+
+# Database
+mysqldump -u user -p pizza_club > $BACKUP_DIR/db_$DATE.sql
+
+# Images
+tar -czf $BACKUP_DIR/images_$DATE.tar.gz /public_html/images/
+
+# Keep last 30 days
+find $BACKUP_DIR -name "*.sql" -mtime +30 -delete
+find $BACKUP_DIR -name "*.tar.gz" -mtime +30 -delete
+```
+
+### Restore Process
+```bash
+# Database
+mysql -u user -p pizza_club < backup.sql
+
+# Images
+tar -xzf images_backup.tar.gz -C /
+```
+
+## Security Best Practices
+
+1. **Regular Updates**:
+   - Keep PHP updated (8.2+)
+   - Update MySQL/MariaDB
+   - Monitor for vulnerabilities
+
+2. **Access Control**:
+   - Restrict API endpoints by IP if possible
+   - Use strong tokens
+   - Implement rate limiting
+
+3. **Data Protection**:
+   - Use prepared statements
+   - Sanitize all inputs
+   - Escape output
+   - Regular backups
 
 ## Future Improvements
 
-### Planned Enhancements
-1. Implement service worker for offline support
-2. Add dark mode support
-3. Enhance animation performance
-4. Implement image optimization pipeline
-5. Add automated testing for animations
+### Short Term
+- [ ] Implement API rate limiting
+- [ ] Add comprehensive logging
+- [ ] Create automated backup system
+- [ ] Set up monitoring dashboard
 
-### Technical Debt
-1. Consolidate animation utilities
-2. Standardize component patterns
-3. Improve type safety
-4. Add comprehensive test coverage
-5. Document API contracts
-6. Implement image CDN for better performance
-7. Add server-side image cleanup automation
-8. Create migration tool for base64 → server images
+### Long Term
+- [ ] Implement caching layer (Redis)
+- [ ] Add WebSocket support
+- [ ] Create admin dashboard
+- [ ] Implement CI/CD pipeline
+- [ ] Add automated testing

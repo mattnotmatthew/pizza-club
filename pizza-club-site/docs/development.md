@@ -6,6 +6,8 @@
 - **npm**: v8+ (comes with Node.js)
 - **Git**: For version control
 - **Code Editor**: VS Code recommended
+- **PHP**: v8.2+ (for local API development)
+- **MySQL/MariaDB**: For database backend
 
 ## Initial Setup
 
@@ -20,7 +22,30 @@ cd pizza-club-site
 npm install
 ```
 
-### 3. Start Development Server
+### 3. Environment Configuration
+Create `.env` file from example:
+```bash
+cp .env.example .env
+```
+
+Update with your values:
+```env
+# API Configuration (Required)
+VITE_API_URL=https://greaterchicagolandpizza.club/pizza_api
+VITE_UPLOAD_API_TOKEN=your-api-token
+
+# Google Maps
+VITE_GOOGLE_MAPS_API_KEY=your-google-maps-key
+VITE_GOOGLE_MAPS_ID=your-map-id
+
+# Upload API
+VITE_UPLOAD_API_URL=https://greaterchicagolandpizza.club/pizza_upload/upload.php
+
+# Admin Access
+VITE_ADMIN_PASSWORD=your-admin-password
+```
+
+### 4. Start Development Server
 ```bash
 npm run dev
 ```
@@ -54,9 +79,13 @@ npm run preview    # Preview production build locally
 ```
 pizza-club-site/
 ├── public/              # Static assets
-│   ├── data/           # JSON data files
+│   ├── data/           # Legacy JSON files (not used)
 │   ├── images/         # Static images
 │   └── logo.png        # Club logo
+├── server/              # Backend code
+│   ├── api/            # PHP API
+│   ├── database/       # Database scripts
+│   └── upload/         # Photo upload handler
 ├── src/
 │   ├── components/     # React components
 │   ├── pages/          # Route pages
@@ -104,10 +133,11 @@ const NewPage = lazy(() => import('@/pages/NewPage'));
 
 ### 3. Working with Data
 
-Add/modify JSON files in `public/data/`:
-- `members.json` - Club member data
-- `restaurants.json` - Restaurant information
-- `events.json` - Club events
+All data is managed through the API. The frontend uses:
+- `src/services/api.ts` - API communication layer
+- `src/services/dataWithApi.ts` - Data service using API
+
+**Note**: JSON files in `public/data/` are legacy and not used in production.
 
 ### 4. TypeScript Types
 
@@ -164,6 +194,36 @@ Configured in `vite.config.ts`:
 base: '/pizza'  // App served from /pizza path
 ```
 
+### API Development
+
+#### Local API Setup
+1. Install PHP 8.2+ with MySQL extension
+2. Set up local MySQL database
+3. Import schema:
+   ```bash
+   mysql -u root -p pizza_club < server/database/schema/complete-schema.sql
+   ```
+4. Update `server/api/config/Database.php` with local credentials
+5. Run local PHP server:
+   ```bash
+   cd server/api
+   php -S localhost:8000
+   ```
+6. Update `.env` for local API:
+   ```env
+   VITE_API_URL=http://localhost:8000
+   ```
+
+#### API Testing
+Test API endpoints:
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Get restaurants
+curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:8000/restaurants
+```
+
 ## Debugging
 
 ### Browser DevTools
@@ -212,7 +272,19 @@ npm install
 ### 4. Build Failures
 - Check for TypeScript errors first
 - Ensure all imports are correct
-- Verify JSON data files are valid
+- Verify environment variables are set
+- Check API connectivity
+
+### 5. API Connection Issues
+- Verify `VITE_API_URL` is set correctly
+- Check CORS configuration if using local API
+- Ensure API token is valid
+- Test API health endpoint directly
+
+### 6. CORS Errors
+For local development with production API:
+- API includes CORS headers for common local ports
+- If issues persist, use local API setup
 
 ## Performance Tips
 
@@ -252,11 +324,16 @@ npm run build
 Creates optimized build in `dist/` directory.
 
 ### Deployment Checklist
+- [ ] Generate new API token for production
+- [ ] Update production environment variables
 - [ ] Run linting: `npm run lint`
 - [ ] Build successfully: `npm run build`
 - [ ] Test production build: `npm run preview`
-- [ ] Update data files if needed
-- [ ] Verify base path configuration
+- [ ] Deploy API to server
+- [ ] Run database migrations
+- [ ] **Delete migration scripts after use**
+- [ ] Update CORS for production domains only
+- [ ] Verify API health endpoint
 
 ### Static Hosting
 The build output can be deployed to any static hosting:

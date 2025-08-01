@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';
 import { useInfographics } from '@/hooks/useInfographics';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 
 const InfographicsList: React.FC = () => {

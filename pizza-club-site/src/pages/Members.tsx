@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MemberCard from '@/components/members/MemberCard';
 import { MemberCardSkeleton } from '@/components/common/Skeleton';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Member } from '@/types';
 
 const Members: React.FC = () => {

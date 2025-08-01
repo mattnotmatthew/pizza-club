@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Infographic } from '@/types/infographics';
 import type { Restaurant } from '@/types';
 
