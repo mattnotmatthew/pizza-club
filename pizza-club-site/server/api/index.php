@@ -46,6 +46,10 @@ try {
             require_once __DIR__ . '/endpoints/members.php';
             break;
             
+        case 'events':
+            require_once __DIR__ . '/endpoints/events.php';
+            break;
+            
         case 'ratings':
             require_once __DIR__ . '/endpoints/ratings.php';
             break;
@@ -68,7 +72,28 @@ try {
             echo json_encode([
                 'success' => true,
                 'message' => 'API is running',
-                'timestamp' => date('c')
+                'timestamp' => date('c'),
+                'available_endpoints' => [
+                    'restaurants', 'members', 'events', 'quotes', 
+                    'infographics', 'ratings', 'migrate'
+                ]
+            ]);
+            break;
+            
+        case '':
+            // Root endpoint - show API info
+            echo json_encode([
+                'success' => true,
+                'message' => 'Pizza Club API v1.0',
+                'endpoints' => [
+                    'GET /health' => 'Health check',
+                    'GET /restaurants' => 'List all restaurants',
+                    'GET /members' => 'List all members',
+                    'GET /events' => 'List all events',
+                    'GET /quotes' => 'List all quotes',
+                    'GET /infographics' => 'List all infographics',
+                    'GET /ratings?visit_id=X' => 'Get ratings for a visit'
+                ]
             ]);
             break;
             

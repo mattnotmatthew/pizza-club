@@ -5,7 +5,7 @@ import RestaurantSelector from '@/components/restaurants/RestaurantSelector';
 import CompareTable from '@/components/restaurants/CompareTable';
 import { useCompareSelection } from '@/hooks/useCompareSelection';
 import { useCompareUrl } from '@/hooks/useCompareUrl';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 import { PARENT_CATEGORIES } from '@/types';
 

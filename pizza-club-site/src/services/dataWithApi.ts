@@ -1,8 +1,7 @@
 /**
  * Data Service with API Integration
  * 
- * This service extends the original data service to use the API
- * while maintaining backward compatibility
+ * This service uses the API exclusively for all data operations
  */
 
 import type { Event, Member, Restaurant } from '@/types';
@@ -11,90 +10,102 @@ import { dataService as originalDataService } from './data';
 import { apiService } from './api';
 
 export const dataService = {
-  // Delegate most methods to original service
-  ...originalDataService,
-
-  // Override methods that should use API
+  // Delegate calculation/utility methods to original service
+  calculateAverageRating: originalDataService.calculateAverageRating,
+  flattenRatings: originalDataService.flattenRatings,
+  nestRatings: originalDataService.nestRatings,
+  
+  // Override all data fetching methods to use API
   async getRestaurants(): Promise<Restaurant[]> {
-    try {
-      const restaurants = await apiService.getRestaurants();
-      // Calculate average ratings if not pre-calculated
-      return restaurants.map(restaurant => ({
-        ...restaurant,
-        averageRating: restaurant.averageRating || 
-          originalDataService.calculateAverageRating(restaurant)
-      }));
-    } catch (error) {
-      console.warn('API failed, using original data service:', error);
-      return originalDataService.getRestaurants();
-    }
+    const restaurants = await apiService.getRestaurants();
+    // Calculate average ratings if not pre-calculated
+    return restaurants.map(restaurant => ({
+      ...restaurant,
+      averageRating: restaurant.averageRating || 
+        originalDataService.calculateAverageRating(restaurant)
+    }));
   },
 
   async getRestaurantById(id: string): Promise<Restaurant | undefined> {
-    try {
-      return await apiService.getRestaurantById(id);
-    } catch (error) {
-      console.warn('API failed, using original data service:', error);
-      return originalDataService.getRestaurantById(id);
-    }
+    return await apiService.getRestaurantById(id);
   },
 
   async getMembers(): Promise<Member[]> {
-    try {
-      return await apiService.getMembers();
-    } catch (error) {
-      console.warn('API failed, using original data service:', error);
-      return originalDataService.getMembers();
-    }
+    return await apiService.getMembers();
   },
 
   async getMemberById(id: string): Promise<Member | undefined> {
-    try {
-      return await apiService.getMemberById(id);
-    } catch (error) {
-      console.warn('API failed, using original data service:', error);
-      return originalDataService.getMemberById(id);
-    }
+    return await apiService.getMemberById(id);
   },
 
   async getInfographics(): Promise<Infographic[]> {
-    try {
-      const infographics = await apiService.getInfographics();
-      // Sort by most recently updated first
-      return infographics.sort((a, b) => 
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      );
-    } catch (error) {
-      console.warn('API failed, using original data service:', error);
-      return originalDataService.getInfographics();
-    }
+    const infographics = await apiService.getInfographics();
+    // Sort by most recently updated first
+    return infographics.sort((a, b) => 
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
   },
 
   async getInfographicById(id: string): Promise<Infographic | undefined> {
-    try {
-      return await apiService.getInfographicById(id);
-    } catch (error) {
-      console.warn('API failed, using original data service:', error);
-      return originalDataService.getInfographicById(id);
-    }
+    return await apiService.getInfographicById(id);
   },
 
   async saveInfographic(infographic: any): Promise<Infographic> {
-    try {
-      return await apiService.saveInfographic(infographic);
-    } catch (error) {
-      console.warn('API failed, using original data service:', error);
-      return originalDataService.saveInfographic(infographic);
-    }
+    return await apiService.saveInfographic(infographic);
   },
 
   async deleteInfographic(id: string): Promise<void> {
-    try {
-      await apiService.deleteInfographic(id);
-    } catch (error) {
-      console.warn('API failed, using original data service:', error);
-      await originalDataService.deleteInfographic(id);
-    }
+    await apiService.deleteInfographic(id);
+  },
+
+  // Events methods
+  async getEvents(): Promise<Event[]> {
+    return await apiService.getEvents();
+  },
+
+  async getUpcomingEvents(limit?: number): Promise<Event[]> {
+    const events = await this.getEvents();
+    const now = new Date();
+    const upcoming = events.filter(event => new Date(event.date) > now);
+    return limit ? upcoming.slice(0, limit) : upcoming;
+  },
+
+  async getPastEvents(limit?: number): Promise<Event[]> {
+    const events = await this.getEvents();
+    const now = new Date();
+    const past = events
+      .filter(event => new Date(event.date) <= now)
+      .reverse(); // Most recent first
+    return limit ? past.slice(0, limit) : past;
+  },
+
+  async getEventById(id: string): Promise<Event | undefined> {
+    const events = await this.getEvents();
+    return events.find(event => event.id === id);
+  },
+
+  // Quotes
+  async getQuotes(): Promise<Array<{ text: string; author: string; restaurantId?: string }>> {
+    return await apiService.getQuotes();
+  },
+
+  // Additional methods for infographics with data
+  async getInfographicWithData(id: string): Promise<InfographicWithData | undefined> {
+    const infographic = await this.getInfographicById(id);
+    if (!infographic) return undefined;
+
+    const restaurant = await this.getRestaurantById(infographic.restaurantId);
+    if (!restaurant) return undefined;
+
+    // Find the matching visit
+    const visit = restaurant.visits?.find(v => v.date === infographic.visitDate);
+    if (!visit) return undefined;
+
+    return {
+      ...infographic,
+      restaurant,
+      visit
+    };
   },
 
   // Add new methods for write operations

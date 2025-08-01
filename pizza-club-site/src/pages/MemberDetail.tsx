@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Member, Restaurant } from '@/types';
 
 

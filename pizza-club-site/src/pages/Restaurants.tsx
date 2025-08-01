@@ -5,7 +5,7 @@ import Skeleton from '@/components/common/Skeleton';
 import SubNavigation from '@/components/common/SubNavigation';
 import { useSort } from '@/hooks/useSort';
 import { useSubNavigation } from '@/hooks/useSubNavigation';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 
 const Restaurants: React.FC = () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { Infographic, CreateInfographicInput, UpdateInfographicInput } from '@/types/infographics';
 
 const DRAFT_STORAGE_KEY = 'infographic-draft';

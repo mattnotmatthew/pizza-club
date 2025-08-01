@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import InfographicCanvas from '@/components/infographics/InfographicCanvas';
 import Skeleton from '@/components/common/Skeleton';
-import { dataService } from '@/services/data';
+import { dataService } from '@/services/dataWithApi';
 import type { InfographicWithData } from '@/types/infographics';
 
 const InfographicView: React.FC = () => {

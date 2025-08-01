@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Club API Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .endpoint {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .data {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        pre {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pizza Club API Test</h1>
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'https://greaterchicagolandpizza.club/pizza_api';
+        const API_TOKEN = 'ca5eeb6889def145f7561b0612e89258ed64c70e2577c3c225a90d0cd074740a';
+
+        const endpoints = [
+            { name: 'Health Check', url: '/health' },
+            { name: 'Restaurants', url: '/restaurants?limit=5' },
+            { name: 'Members', url: '/members' },
+            { name: 'Events', url: '/events' },
+            { name: 'Quotes', url: '/quotes' },
+            { name: 'Infographics', url: '/infographics' }
+        ];
+
+        async function testEndpoint(endpoint) {
+            const startTime = performance.now();
+            
+            try {
+                const response = await fetch(API_URL + endpoint.url, {
+                    headers: {
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+                
+                const data = await response.json();
+
+                return {
+                    name: endpoint.name,
+                    status: response.status,
+                    success: response.ok,
+                    duration,
+                    data: data
+                };
+            } catch (error) {
+                return {
+                    name: endpoint.name,
+                    status: 'error',
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            
+            for (const endpoint of endpoints) {
+                const result = await testEndpoint(endpoint);
+                
+                const div = document.createElement('div');
+                div.className = 'endpoint';
+                
+                const statusClass = result.success ? 'success' : 'error';
+                const statusText = result.success ? '✓ Success' : '✗ Failed';
+                
+                div.innerHTML = `
+                    <h3>${result.name}</h3>
+                    <p class="${statusClass}">
+                        ${statusText} - Status: ${result.status}
+                        ${result.duration ? ` - Duration: ${result.duration}ms` : ''}
+                    </p>
+                    ${result.data ? `
+                        <div class="data">
+                            <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                        </div>
+                    ` : ''}
+                    ${result.error ? `
+                        <p class="error">Error: ${result.error}</p>
+                    ` : ''}
+                `;
+                
+                resultsDiv.appendChild(div);
+            }
+        }
+
+        // Run tests on page load
+        runTests();
+    </script>
+</body>
+</html>
