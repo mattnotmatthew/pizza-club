@@ -108,33 +108,77 @@ InfographicsEditor
 
 ## Storage Approaches
 
-### Current: Base64 in JSON
+### Current Implementation: Hybrid Storage
 
-Photos are stored as base64 data URLs in the infographics.json file.
+The application now supports both storage methods with automatic detection:
 
-**Pros:**
-- Simple, no additional infrastructure
-- Self-contained infographic data
-- Works with current JSON-based system
+1. **Server Upload (When Configured)**
+   - Photos uploaded to PHP endpoint on shared hosting
+   - Automatic WebP conversion and optimization
+   - Progress tracking during upload
+   - Secure token-based authentication
 
-**Cons:**
-- Large file sizes
-- Slower loading times
-- Not ideal for many/large images
+2. **Base64 Fallback (Default)**
+   - Used when server upload not configured
+   - Maintains backward compatibility
+   - Works for local development
 
-### Recommended: Local File Storage
+### Server Upload Configuration
 
-Store images in public directory, save paths in JSON.
-
-```typescript
-// Instead of base64 URL
-photo.url = "data:image/webp;base64,..."
-
-// Use file path
-photo.url = "/images/infographics/abc123/photo-1.webp"
+```env
+# Enable server upload by setting these in .env
+VITE_UPLOAD_API_URL=https://yourdomain.com/pizza_upload/upload.php
+VITE_UPLOAD_API_TOKEN=your-secret-token-here
 ```
 
-See [photo-storage.md](../../api-reference/photo-storage.md) for implementation details.
+When configured, the PhotoUploader component automatically:
+- Uploads optimized images to your server
+- Shows upload progress with percentage
+- Stores only the URL in JSON (not base64)
+- Handles CORS for local development
+- Preserves original filenames (converted to .webp)
+
+### Storage Comparison
+
+| Feature | Base64 Storage | Server Upload |
+|---------|---------------|---------------|
+| JSON Size | Large (33% overhead) | Small (URLs only) |
+| Loading Speed | Slow (parse JSON) | Fast (parallel loading) |
+| Caching | No browser caching | Full HTTP caching |
+| Infrastructure | None needed | PHP hosting required |
+| Setup | Zero config | One-time server setup |
+
+See [photo-storage.md](../../api-reference/photo-storage.md) for detailed implementation.
+
+## Implementation Details
+
+### Client-Side Upload Flow
+
+1. **File Selection**: User selects image via drag-drop or file input
+2. **Validation**: Check file type and size limits
+3. **Optimization**: Compress and convert to WebP using browser-image-compression
+4. **Upload Decision**: 
+   - If server configured → Upload to PHP endpoint
+   - If not configured → Convert to base64
+5. **Progress Tracking**: Show upload percentage (server only)
+6. **Storage**: Save URL (server) or base64 data (local)
+
+### Server-Side Processing (PHP)
+
+1. **Authentication**: Verify Bearer token
+2. **CORS Handling**: Allow configured origins
+3. **File Validation**: Check MIME type and size
+4. **Directory Creation**: Create infographic-specific folder
+5. **Image Processing**: Resize if needed, convert to WebP
+6. **Response**: Return URL and relative path
+
+### Key Files
+
+- **Client**: `src/utils/photoRemoteStorage.ts` - Upload logic
+- **Client**: `src/utils/imageOptimization.ts` - Image processing
+- **Client**: `src/components/infographics/PhotoUploader.tsx` - UI component
+- **Server**: `server/upload.php` - PHP upload handler
+- **Server**: `server/.htaccess` - Security configuration
 
 ## Hooks
 
@@ -175,11 +219,23 @@ const {
 6. **Layer appropriately** - Background photos behind content
 7. **Preview in real-time** - Show changes immediately
 
-## Common Issues
+## Common Issues and Solutions
 
+### Upload Issues
+- **401 Unauthorized**: Token mismatch between .env and server upload.php
+- **400 Bad Request**: Usually means filename is "blob" - fixed by preserving original filename
+- **CORS errors**: Add localhost origins to allowed list in upload.php
+- **Empty $_FILES**: Check PHP upload limits (upload_max_filesize, post_max_size)
+
+### Display Issues
 - **Drag-and-drop not working**: Native implementation required (React-Uploady had issues)
 - **Photos showing as black boxes**: Ensure proper image loading and error handling
 - **Large file sizes**: Implement proper compression and format conversion
+
+### Server Setup Issues
+- **404 on upload endpoint**: Check directory name (pizza_upload vs pizza-upload)
+- **Can't write files**: Verify directory permissions (755) on hosting
+- **Images not accessible**: Check .htaccess configuration in images directory
 
 ## Related Documentation
 

@@ -107,6 +107,60 @@ export async function savePhotoToPublic(
 }
 ```
 
+## Implemented: PHP Server Upload (Namecheap Shared Hosting)
+
+### Overview
+
+The application now supports uploading photos to a PHP server endpoint on shared hosting. This implementation provides a secure, efficient alternative to base64 storage.
+
+### Implementation Details
+
+#### PHP Upload Handler (`/server/upload.php`)
+
+```php
+// Key features:
+- Token-based authentication
+- File type validation (JPG, PNG, GIF, WebP)
+- Size limit enforcement (10MB)
+- Automatic image optimization
+- WebP conversion for all uploads
+- CORS support for cross-origin requests
+```
+
+#### Client Integration
+
+```typescript
+// src/utils/photoRemoteStorage.ts
+export async function uploadPhotoToServer(
+  file: File,
+  infographicId: string,
+  photoId: string,
+  onProgress?: (progress: UploadProgress) => void
+): Promise<UploadResult>
+```
+
+#### Configuration
+
+```env
+# .env file
+VITE_UPLOAD_API_URL=https://yourdomain.com/api/upload.php
+VITE_UPLOAD_API_TOKEN=your-secret-token-here
+```
+
+### Security Features
+
+1. **Token Authentication**: Bearer token required for all uploads
+2. **File Validation**: MIME type and extension checking
+3. **Directory Security**: .htaccess prevents PHP execution
+4. **CORS Headers**: Restricts uploads to authorized domains
+5. **Input Sanitization**: Prevents directory traversal attacks
+
+### Automatic Fallback
+
+The system automatically detects if server upload is configured:
+- If configured: Uses server upload with progress tracking
+- If not configured: Falls back to base64 storage
+
 ## Cloud Storage Alternatives
 
 ### 1. AWS S3

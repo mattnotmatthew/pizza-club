@@ -27,7 +27,19 @@ export async function optimizeImage(
     };
 
     // Compress the image
-    const compressedFile = await imageCompression(file, compressionOptions);
+    const compressedBlob = await imageCompression(file, compressionOptions);
+    
+    // Preserve the original filename (change extension to .webp if converted)
+    const originalName = file.name;
+    const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+    const newName = compressionOptions.fileType === 'image/webp' 
+      ? `${nameWithoutExt}.webp` 
+      : originalName;
+    
+    // Create a new File object with the proper name
+    const compressedFile = new File([compressedBlob], newName, {
+      type: compressedBlob.type || compressionOptions.fileType || file.type
+    });
     
     return compressedFile;
   } catch (error) {
@@ -38,13 +50,13 @@ export async function optimizeImage(
 }
 
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  const maxSizeMB = 5;
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+  const maxSizeMB = 10; // Increased to 10MB to match server limit
   
   if (!validTypes.includes(file.type)) {
     return { 
       valid: false, 
-      error: 'Invalid file type. Please upload JPG, PNG, or WebP images.' 
+      error: 'Invalid file type. Please upload JPG, PNG, GIF, or WebP images.' 
     };
   }
   
@@ -80,4 +92,22 @@ export async function createImagePreview(file: File): Promise<string> {
     
     reader.readAsDataURL(file);
   });
+}
+
+/**
+ * Convert base64 data URL to File object
+ * Useful for migrating existing base64 images to server storage
+ */
+export function base64ToFile(base64: string, filename: string): File {
+  const arr = base64.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/webp';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  
+  return new File([u8arr], filename, { type: mime });
 }

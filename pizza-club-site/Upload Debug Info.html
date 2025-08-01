@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Debug Info</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        .section { margin: 20px 0; padding: 10px; background: #f0f0f0; }
+        .good { color: green; }
+        .bad { color: red; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>PHP Upload Configuration Debug</h1>
+    
+    <div class="section">
+        <h2>PHP Configuration</h2>
+        <p>PHP Version: 8.1.33</p>
+        <p>upload_max_filesize: <span class="bad">1024M</span></p>
+        <p>post_max_size: <span class="bad">1024M</span></p>
+        <p>max_execution_time: 1500</p>
+        <p>memory_limit: 1024M</p>
+        <p>file_uploads: <span class="good">On</span></p>
+    </div>
+    
+    <div class="section">
+        <h2>Directory Permissions</h2>
+        <p>Images directory:<br>Path: /home/greacspm/public_html/images<br>Exists: <span class='good'>Yes</span><br>Writable: <span class='good'>Yes</span><br>Permissions: 0755</p><p>Infographics directory:<br>Path: /home/greacspm/public_html/images/infographics<br>Exists: <span class='good'>Yes</span><br>Writable: <span class='good'>Yes</span><br>Permissions: 0755</p><p>Current directory:<br>Path: /home/greacspm/public_html/pizza_upload<br>Exists: <span class='good'>Yes</span><br>Writable: <span class='good'>Yes</span><br>Permissions: 0755</p>    </div>
+    
+    <div class="section">
+        <h2>Test Upload Form</h2>
+        <form method="POST" enctype="multipart/form-data" action="upload.php">
+            <input type="hidden" name="infographicId" value="test-123">
+            <input type="hidden" name="photoId" value="photo-456">
+            <p>Select an image to test upload:</p>
+            <input type="file" name="file" accept="image/*" required>
+            <br><br>
+            <p>Auth Token: <input type="text" name="token" placeholder="Your API token" required></p>
+            <br><br>
+            <button type="submit">Test Upload</button>
+        </form>
+    </div>
+    
+    <div class="section">
+        <h2>$_SERVER Variables</h2>
+        <pre>Array
+(
+    [REQUEST_METHOD] => GET
+    [CONTENT_TYPE] => not set
+    [CONTENT_LENGTH] => not set
+    [HTTP_ORIGIN] => not set
+)
+</pre>
+    </div>
+    
+    <div class="section">
+        <h2>POST Test Results</h2>
+                    <p>Submit the form above to see POST data</p>
+            </div>
+</body>
+</html>

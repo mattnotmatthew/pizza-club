@@ -75,6 +75,41 @@ All data is stored in static JSON files under `public/data/`:
 }]
 ```
 
+### infographics.json
+```json
+[{
+  "id": "string",
+  "title": "string",
+  "restaurantId": "string",
+  "visitDate": "string",
+  "createdDate": "string",
+  "createdBy": "string",
+  "content": {
+    "selectedQuotes": [{
+      "id": "string",
+      "memberId": "string",
+      "restaurantId": "string",
+      "text": "string",
+      "sentiment": "positive|negative|neutral"
+    }],
+    "showRatings": {
+      "overall": boolean,
+      "crust": boolean,
+      // ... dynamic rating categories
+    },
+    "photos": [{
+      "id": "string",
+      "url": "string", // Can be remote URL or base64 data URI
+      "position": { "x": number, "y": number },
+      "size": { "width": number, "height": number },
+      "opacity": number,
+      "layer": "background|foreground",
+      "focalPoint": { "x": number, "y": number }
+    }]
+  }
+}]
+```
+
 ## Data Service Layer
 
 The `services/data.ts` file provides a centralized data access layer:
@@ -99,6 +134,16 @@ getRestaurantsByMember(memberId: string): Promise<Restaurant[]>
 calculateAverageRating(restaurant: Restaurant): number
 getAvailableRatingCategories(): Promise<string[]>
 getCategoryAverage(restaurant: Restaurant, category: string): number
+```
+
+#### Infographics Data
+```typescript
+getInfographics(): Promise<Infographic[]>
+getInfographicById(id: string): Promise<Infographic | undefined>
+getInfographicsByRestaurant(restaurantId: string): Promise<Infographic[]>
+saveInfographic(infographic: Infographic): Promise<void>
+updateInfographic(id: string, infographic: Infographic): Promise<void>
+deleteInfographic(id: string): Promise<void>
 ```
 
 ### Data Fetching Pattern
@@ -289,17 +334,97 @@ The current architecture makes it easy to migrate to a real API:
 3. Add authentication headers
 4. Components remain unchanged
 
+## Photo Storage Flow
+
+### Hybrid Storage Strategy
+
+The application implements a hybrid approach for photo storage:
+
+1. **Server Upload (Primary)**
+   - When `VITE_UPLOAD_API_URL` is configured
+   - Photos uploaded to PHP endpoint
+   - Only URLs stored in JSON
+   - Benefits: Smaller JSON, faster loading, proper caching
+
+2. **Base64 Fallback (Secondary)**
+   - When server upload not configured
+   - Photos embedded as base64 in JSON
+   - Works without server infrastructure
+   - Trade-off: Larger JSON files
+
+### Upload Flow Diagram
+
+```
+User Selects Image
+       ↓
+Validate (type, size)
+       ↓
+Optimize (compress, convert to WebP)
+       ↓
+Check Configuration
+       ↓
+    ┌──────────────────┬─────────────────┐
+    │ Server Available  │  No Server      │
+    ↓                  ↓                 │
+Upload to PHP      Convert to Base64     │
+    ↓                  ↓                 │
+Get URL Response   Store Data URI        │
+    ↓                  ↓                 │
+    └──────────────────┴─────────────────┘
+                       ↓
+              Save to infographic.photos[]
+```
+
+### Photo Data Structure
+
+```typescript
+interface InfographicPhoto {
+  id: string;
+  url: string;  // https://domain.com/path/image.webp OR data:image/webp;base64,...
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  opacity: number;
+  layer: 'background' | 'foreground';
+  focalPoint?: { x: number; y: number };
+}
+```
+
+### Server Upload Process
+
+1. **Client Side** (React)
+   - Create FormData with file, infographicId, photoId
+   - Send POST request with Bearer token
+   - Track upload progress via XMLHttpRequest
+
+2. **Server Side** (PHP)
+   - Validate authentication token
+   - Check file type and size
+   - Create directory structure: `/images/infographics/{id}/`
+   - Process image (resize if needed, convert to WebP)
+   - Return JSON with URL and relative path
+
+3. **Storage Result**
+   ```json
+   {
+     "url": "https://domain.com/images/infographics/ig-123/photo-456.webp"
+   }
+   ```
+
 ## Performance Considerations
 
 ### Current Optimizations
 - Lazy loading of page components
 - Minimal data transformations
 - Browser caching of static files
+- Client-side image optimization before upload
+- WebP format for smaller file sizes
+- Progress tracking for better UX
 
 ### Potential Optimizations
 - Pagination for large lists
 - Virtual scrolling for long lists
-- Image optimization/lazy loading
+- Image CDN integration
+- Progressive image loading
 - Data prefetching on hover
 
 ## Error Handling Patterns

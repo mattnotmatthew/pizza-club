@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import type { InfographicPhoto } from '@/types/infographics';
 import { optimizeImage, validateImageFile, generatePhotoId } from '@/utils/imageOptimization';
 import { createPhotoData } from '@/utils/photoStorage';
+import { uploadPhotoToServer, shouldUseRemoteStorage, updatePhotoWithRemoteUrl } from '@/utils/photoRemoteStorage';
+import type { UploadProgress } from '@/utils/photoRemoteStorage';
 
 interface PhotoUploaderProps {
   infographicId: string;
@@ -21,11 +23,14 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const canAddMore = photos.length < maxPhotos;
+  const useRemoteStorage = shouldUseRemoteStorage();
 
   const processFile = async (file: File) => {
     try {
       setIsProcessing(true);
+      setUploadProgress(null);
       
       // Validate file
       const validation = validateImageFile(file);
@@ -40,24 +45,42 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       const photoId = generatePhotoId();
       const newPhoto = createPhotoData(photoId, infographicId);
       
-      // Convert to data URL for preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          newPhoto.url = e.target.result as string;
-          onPhotoAdd(newPhoto);
+      if (useRemoteStorage) {
+        // Upload to server
+        const uploadResult = await uploadPhotoToServer(
+          optimizedFile,
+          infographicId,
+          photoId,
+          (progress) => setUploadProgress(progress)
+        );
+
+        if (uploadResult.success && uploadResult.url) {
+          const photoWithRemoteUrl = updatePhotoWithRemoteUrl(newPhoto, uploadResult.url);
+          onPhotoAdd(photoWithRemoteUrl);
+        } else {
+          throw new Error(uploadResult.error || 'Upload failed');
         }
-      };
-      reader.onerror = () => {
-        console.error('Failed to read file');
-        alert('Failed to read image file');
-      };
-      reader.readAsDataURL(optimizedFile);
+      } else {
+        // Fallback to base64 for local storage
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            newPhoto.url = e.target.result as string;
+            onPhotoAdd(newPhoto);
+          }
+        };
+        reader.onerror = () => {
+          console.error('Failed to read file');
+          alert('Failed to read image file');
+        };
+        reader.readAsDataURL(optimizedFile);
+      }
     } catch (error) {
       console.error('Failed to process image:', error);
-      alert('Failed to process image');
+      alert(error instanceof Error ? error.message : 'Failed to process image');
     } finally {
       setIsProcessing(false);
+      setUploadProgress(null);
     }
   };
 
@@ -147,7 +170,19 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
               <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-sm text-gray-600 mt-2">Processing image...</p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    {uploadProgress 
+                      ? `Uploading... ${uploadProgress.percentage}%`
+                      : 'Processing image...'}
+                  </p>
+                  {uploadProgress && (
+                    <div className="w-32 bg-gray-200 rounded-full h-2 mt-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress.percentage}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             )}

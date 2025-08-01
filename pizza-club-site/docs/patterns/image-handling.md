@@ -18,20 +18,30 @@ export async function optimizeImage(
   file: File,
   options: ImageOptimizationOptions = {}
 ): Promise<File> {
-  const {
-    maxSizeMB = 1,
-    maxWidthOrHeight = 2000,
-    targetFormat = 'webp'
-  } = options;
+  try {
+    const compressionOptions = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 2000,
+      useWebWorker: true,
+      fileType: 'image/webp'
+    };
 
-  const compressionOptions = {
-    maxSizeMB,
-    maxWidthOrHeight,
-    useWebWorker: true,
-    fileType: `image/${targetFormat}`
-  };
-
-  return await imageCompression(file, compressionOptions);
+    // Compress the image
+    const compressedBlob = await imageCompression(file, compressionOptions);
+    
+    // IMPORTANT: Preserve original filename with new extension
+    const originalName = file.name;
+    const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+    const newName = `${nameWithoutExt}.webp`;
+    
+    // Create new File with proper name (not "blob")
+    return new File([compressedBlob], newName, {
+      type: compressedBlob.type || 'image/webp'
+    });
+  } catch (error) {
+    console.error('Optimization failed:', error);
+    return file; // Return original if optimization fails
+  }
 }
 ```
 
@@ -235,7 +245,81 @@ const PhotoDisplay = ({ photo, containerWidth, containerHeight }) => {
 
 ## Storage Strategies
 
-### Base64 Data URLs (Current)
+### Hybrid Storage Implementation (Current)
+
+The application now supports automatic detection and switching between storage methods:
+
+```typescript
+// src/utils/photoRemoteStorage.ts
+export function shouldUseRemoteStorage(): boolean {
+  return !!import.meta.env.VITE_UPLOAD_API_URL;
+}
+
+// In PhotoUploader component
+if (useRemoteStorage) {
+  // Upload to server with progress tracking
+  const uploadResult = await uploadPhotoToServer(
+    optimizedFile,
+    infographicId,
+    photoId,
+    (progress) => setUploadProgress(progress)
+  );
+} else {
+  // Fallback to base64
+  const dataUrl = await fileToBase64(optimizedFile);
+}
+```
+
+### Server Upload with Progress
+
+```typescript
+// Upload with XMLHttpRequest for progress tracking
+export async function uploadPhotoToServer(
+  file: File,
+  infographicId: string,
+  photoId: string,
+  onProgress?: (progress: UploadProgress) => void
+): Promise<UploadResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('infographicId', infographicId);
+  formData.append('photoId', photoId);
+
+  const xhr = new XMLHttpRequest();
+  
+  // Track upload progress
+  xhr.upload.addEventListener('progress', (event) => {
+    if (event.lengthComputable) {
+      const progress = {
+        loaded: event.loaded,
+        total: event.total,
+        percentage: Math.round((event.loaded / event.total) * 100)
+      };
+      onProgress?.(progress);
+    }
+  });
+  
+  // Configure request
+  xhr.open('POST', uploadUrl);
+  xhr.setRequestHeader('Authorization', `Bearer ${apiToken}`);
+  
+  // Handle response
+  return new Promise((resolve, reject) => {
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const response = JSON.parse(xhr.responseText);
+        resolve({ success: true, url: response.data.url });
+      } else {
+        reject(new Error(`Upload failed: ${xhr.status}`));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Network error'));
+    xhr.send(formData);
+  });
+}
+```
+
+### Base64 Fallback (Local Development)
 
 ```typescript
 const fileToBase64 = (file: File): Promise<string> => {
@@ -245,36 +329,6 @@ const fileToBase64 = (file: File): Promise<string> => {
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = reject;
   });
-};
-
-// Store in JSON
-const photo = {
-  id: generateId(),
-  url: await fileToBase64(optimizedFile),
-  // ... other properties
-};
-```
-
-### Local File System (Recommended)
-
-```typescript
-// Save to public directory
-const saveImageToPublic = async (
-  file: File,
-  infographicId: string,
-  photoId: string
-): Promise<string> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('path', `/images/infographics/${infographicId}/${photoId}.webp`);
-  
-  const response = await fetch('/api/upload', {
-    method: 'POST',
-    body: formData
-  });
-  
-  const { url } = await response.json();
-  return url; // Returns: /images/infographics/abc123/photo-1.webp
 };
 ```
 
@@ -333,6 +387,65 @@ const handleImageError = (photoId: string) => {
 )}
 ```
 
+## Common Pitfalls and Solutions
+
+### The "blob" Filename Issue
+
+**Problem**: browser-image-compression returns files named "blob"
+```typescript
+// This creates a file named "blob"
+const compressed = await imageCompression(file, options);
+```
+
+**Solution**: Always recreate the File object with proper name
+```typescript
+const compressedBlob = await imageCompression(file, options);
+const properName = file.name.replace(/\.[^/.]+$/, '.webp');
+const compressedFile = new File([compressedBlob], properName, {
+  type: 'image/webp'
+});
+```
+
+### CORS Configuration
+
+**Problem**: Localhost blocked by server
+```
+Access-Control-Allow-Origin: https://yourdomain.com // Too restrictive
+```
+
+**Solution**: Dynamic origin checking
+```php
+$allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://yourdomain.com'
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+```
+
+### Empty $_FILES Array
+
+**Problem**: File upload appears to work but $_FILES is empty
+
+**Common Causes**:
+1. Missing multipart encoding
+2. File too large for PHP limits
+3. Content-Type header manually set
+
+**Solution**: Let browser set Content-Type
+```typescript
+// DON'T do this:
+xhr.setRequestHeader('Content-Type', 'multipart/form-data');
+
+// DO this (browser sets boundary automatically):
+const formData = new FormData();
+xhr.send(formData);
+```
+
 ## Anti-Patterns to Avoid
 
 1. **Don't store large base64 strings in state** - Use URLs instead
@@ -340,6 +453,8 @@ const handleImageError = (photoId: string) => {
 3. **Don't forget cleanup** - Remove orphaned images
 4. **Don't use synchronous operations** - Always async for file operations
 5. **Don't ignore memory** - Revoke object URLs when done
+6. **Don't hardcode tokens** - Use environment variables
+7. **Don't trust client-side validation alone** - Always validate server-side too
 
 ## Related Documentation
 

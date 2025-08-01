@@ -301,6 +301,46 @@ const photo = createPhotoData('photo-123', 'infographic-456');
 // Returns photo with default position, size, opacity, etc.
 ```
 
+## Photo Remote Storage Utilities (`utils/photoRemoteStorage.ts`)
+
+### uploadPhotoToServer
+Uploads photo to PHP server endpoint with progress tracking.
+
+```typescript
+const result = await uploadPhotoToServer(
+  file,
+  'infographic-123',
+  'photo-abc',
+  (progress) => {
+    console.log(`${progress.percentage}% uploaded`);
+  }
+);
+
+if (result.success) {
+  console.log('Photo URL:', result.url);
+}
+```
+
+### shouldUseRemoteStorage
+Detects if server upload is configured.
+
+```typescript
+if (shouldUseRemoteStorage()) {
+  // Use server upload
+} else {
+  // Use base64 storage
+}
+```
+
+### validateServerConfiguration
+Tests if upload server is reachable.
+
+```typescript
+const isServerReady = await validateServerConfiguration();
+if (!isServerReady) {
+  console.warn('Server not configured, using base64');
+}
+
 ## Recommended Utilities to Add
 
 ### Date Formatting

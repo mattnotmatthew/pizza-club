@@ -125,6 +125,86 @@ export default ComponentName;
 - Pizza-themed map markers
 - Visual differentiation for restaurant types
 
+## Infographic Components
+
+### InfographicCanvas (`components/infographics/InfographicCanvas.tsx`)
+- Main canvas for rendering infographics
+- Features:
+  - Fixed 800x600 aspect ratio
+  - Responsive scaling with container width
+  - Layer management (background → photos → content → foreground)
+  - Preview and editor modes
+  - Real-time updates in editor mode
+
+### PhotoUploader (`components/infographics/PhotoUploader.tsx`)
+- Handles image upload and optimization
+- Features:
+  - Drag-and-drop interface with visual feedback
+  - File validation (type, size)
+  - Automatic WebP conversion and compression
+  - Server upload with progress tracking (when configured)
+  - Base64 fallback for local development
+  - Supports up to 10 photos per infographic
+- Props:
+  ```typescript
+  interface PhotoUploaderProps {
+    infographicId: string;
+    photos: InfographicPhoto[];
+    onPhotoAdd: (photo: InfographicPhoto) => void;
+    onPhotoRemove: (photoId: string) => void;
+    maxPhotos?: number;
+  }
+  ```
+
+### PhotoDisplay (`components/infographics/PhotoDisplay.tsx`)
+- Renders photos with positioning and effects
+- Features:
+  - Percentage-based positioning for responsiveness
+  - Focal point support for smart cropping
+  - Opacity control
+  - Layer ordering (background/foreground)
+  - Error handling with fallback UI
+
+### PhotoPositioner (`components/infographics/PhotoPositioner.tsx`)
+- UI controls for photo positioning and effects
+- Features:
+  - X/Y position sliders (0-100%)
+  - Width/Height size controls (10-100%)
+  - Opacity slider (0-100%)
+  - Layer toggle (background/foreground)
+  - Focal point adjustment
+  - Real-time preview
+
+### RatingDisplay (`components/infographics/RatingDisplay.tsx`)
+- Displays restaurant ratings in infographic
+- Features:
+  - Dynamic visibility based on content selection
+  - Supports all rating categories
+  - Pizza slice visualization
+  - Responsive text sizing
+
+### QuoteSelector (`components/infographics/QuoteSelector.tsx`)
+- Interface for selecting member quotes
+- Features:
+  - Multi-select with checkboxes
+  - Shows member photos and names
+  - Real-time preview updates
+
+### VisitSelector (`components/infographics/VisitSelector.tsx`)
+- Select restaurant visit for infographic
+- Features:
+  - Dropdown with all restaurant visits
+  - Shows visit date and ratings
+  - Auto-populates quotes for selected visit
+
+### InfographicPreview (`components/infographics/InfographicPreview.tsx`)
+- Thumbnail preview of infographics
+- Features:
+  - Scaled-down canvas view
+  - Hover effects
+  - Click to view full size
+  - Used in grid listings
+
 ## Component Patterns
 
 ### 1. Props Interface Pattern

@@ -7,18 +7,23 @@
 - [ ] Check for dependency security updates
 - [ ] Verify all animations are performing smoothly
 - [ ] Test responsive layouts on various devices
+- [ ] Monitor uploaded image storage usage
 
 ### Monthly
 - [ ] Update dependencies to latest patch versions
 - [ ] Review and optimize bundle size
 - [ ] Check Google Maps API usage and quotas
 - [ ] Audit accessibility compliance
+- [ ] Clean up orphaned images in /images/infographics/
+- [ ] Review photo upload logs for errors
 
 ### Quarterly
 - [ ] Major dependency updates (with thorough testing)
 - [ ] Performance audit using Lighthouse
 - [ ] Review and update documentation
 - [ ] Clean up unused code and assets
+- [ ] Review server upload token security
+- [ ] Audit image storage structure
 
 ## Common Maintenance Scenarios
 
@@ -91,6 +96,32 @@
    - Tablet: 768px, 1024px
    - Desktop: 1280px, 1920px
 
+### Managing Photo Storage
+
+1. **Monitor disk usage**:
+   ```bash
+   # Check image directory size on server
+   du -sh /public_html/images/infographics/
+   ```
+
+2. **Clean up orphaned images**:
+   ```bash
+   # Find infographic directories not in JSON
+   # Compare /images/infographics/* with infographics.json IDs
+   ```
+
+3. **Rotate upload token** (quarterly):
+   - Generate new secure token
+   - Update in upload.php on server
+   - Update VITE_UPLOAD_API_TOKEN in .env
+   - Update in GitHub Secrets
+
+4. **Backup images**:
+   ```bash
+   # Download all infographic images
+   scp -r user@host:/public_html/images/infographics/ ./backup/
+   ```
+
 ### Updating Dependencies
 
 1. **Check for updates**:
@@ -114,6 +145,7 @@
    - TypeScript
    - Tailwind CSS
    - React Router DOM
+   - browser-image-compression
 
 ## Troubleshooting Guide
 
@@ -172,6 +204,16 @@ npm run preview
 1. Convert PNGs to WebP where possible
 2. Use appropriate image sizes
 3. Implement lazy loading for off-screen images
+4. Monitor server-uploaded images:
+   ```bash
+   # Find large images that need optimization
+   find /public_html/images -type f -size +1M
+   ```
+5. Configure PHP image processing limits:
+   ```ini
+   memory_limit = 256M
+   max_execution_time = 60
+   ```
 
 ### Code Splitting
 ```typescript
@@ -193,6 +235,7 @@ const Restaurants = lazy(() => import('./pages/Restaurants'));
 - [ ] Verify environment variables
 - [ ] Test production build locally
 - [ ] Update version number
+- [ ] Verify upload token in GitHub Secrets
 
 ### Post-deployment
 - [ ] Verify all routes work
@@ -200,6 +243,8 @@ const Restaurants = lazy(() => import('./pages/Restaurants'));
 - [ ] Test responsive layouts
 - [ ] Monitor error logs
 - [ ] Verify API connections
+- [ ] Test photo upload functionality
+- [ ] Check CORS configuration for uploads
 
 ## Emergency Procedures
 
@@ -261,3 +306,6 @@ const Restaurants = lazy(() => import('./pages/Restaurants'));
 3. Improve type safety
 4. Add comprehensive test coverage
 5. Document API contracts
+6. Implement image CDN for better performance
+7. Add server-side image cleanup automation
+8. Create migration tool for base64 → server images
