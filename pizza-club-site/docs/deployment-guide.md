@@ -44,8 +44,9 @@ Create the new directory structure on your hosting:
 ```
 public_html/
 ├── .htaccess (updated to point to /pizza)
-├── pizza/              # New directory for your site
-├── pizza-upload/       # Upload handler (already exists)
+├── pizza/              # New directory for your React app
+├── pizza_api/          # NEW: PHP API backend
+├── pizza_upload/       # Upload handler (already exists)
 ├── images/             # Uploaded images storage
 └── ncsitebuilder/      # Old site (can keep for rollback)
 ```
@@ -79,6 +80,7 @@ jobs:
     - name: Build project
       run: npm run build
       env:
+        VITE_API_URL: ${{ secrets.VITE_API_URL }}
         VITE_UPLOAD_API_URL: ${{ secrets.VITE_UPLOAD_API_URL }}
         VITE_UPLOAD_API_TOKEN: ${{ secrets.VITE_UPLOAD_API_TOKEN }}
         VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
@@ -115,7 +117,8 @@ Ensure these secrets are set in your GitHub repository (Settings → Secrets →
 FTP_SERVER=your-namecheap-server.com
 FTP_USERNAME=your-ftp-username
 FTP_PASSWORD=your-ftp-password
-VITE_UPLOAD_API_URL=https://myclub.com/pizza-upload/upload.php
+VITE_API_URL=https://myclub.com/pizza_api
+VITE_UPLOAD_API_URL=https://myclub.com/pizza_upload/upload.php
 VITE_UPLOAD_API_TOKEN=your-secret-token
 VITE_GOOGLE_MAPS_API_KEY=your-google-maps-key
 VITE_GOOGLE_MAPS_ID=your-map-id
@@ -141,7 +144,8 @@ export default defineConfig({
 Create `.env.production` for production builds:
 
 ```env
-VITE_UPLOAD_API_URL=https://myclub.com/pizza-upload/upload.php
+VITE_API_URL=https://myclub.com/pizza_api
+VITE_UPLOAD_API_URL=https://myclub.com/pizza_upload/upload.php
 VITE_UPLOAD_API_TOKEN=your-production-token
 VITE_GOOGLE_MAPS_API_KEY=your-production-key
 VITE_GOOGLE_MAPS_ID=your-production-map-id
@@ -231,9 +235,15 @@ If issues occur, you can quickly rollback:
 - Ensure build completes locally
 
 ### Images not uploading
-- Verify `/pizza-upload/` is accessible
+- Verify `/pizza_upload/` is accessible
 - Check CORS configuration
 - Confirm environment variables are set
+
+### API not working
+- Check `/pizza_api/` is accessible
+- Verify database credentials in config/Database.php
+- Test API health: `https://myclub.com/pizza_api/health`
+- Check CORS headers are properly set
 
 ## Directory Structure After Deployment
 
@@ -245,9 +255,14 @@ public_html/
 │   ├── assets/
 │   │   ├── index-[hash].js
 │   │   └── index-[hash].css
-│   └── data/
-│       └── restaurants.json
-├── pizza-upload/             # PHP upload handler
+│   └── data/                # Legacy JSON files (not used)
+├── pizza_api/                # PHP API backend
+│   ├── index.php
+│   ├── .htaccess
+│   ├── core/
+│   ├── config/
+│   └── endpoints/
+├── pizza_upload/             # PHP upload handler
 │   └── upload.php
 ├── images/                   # Uploaded photos
 │   └── infographics/
@@ -256,19 +271,74 @@ public_html/
 └── ncsitebuilder/           # Old site (for rollback)
 ```
 
+## API Deployment
+
+### Step 1: Database Setup
+
+1. Create MySQL database via cPanel
+2. Import schema:
+   ```sql
+   mysql -u username -p database_name < server/database/schema/complete-schema.sql
+   ```
+
+### Step 2: Deploy API Files
+
+1. Upload `/server/api/` to `/public_html/pizza_api/`
+2. Update database credentials in `/pizza_api/config/Database.php`
+3. Set permissions:
+   ```bash
+   chmod 755 /public_html/pizza_api
+   chmod 644 /public_html/pizza_api/.htaccess
+   ```
+
+### Step 3: Run Migration
+
+1. Upload migration script temporarily
+2. Access: `https://myclub.com/pizza_api/database/run-migration-complete.php?token=YOUR_TOKEN`
+3. **DELETE migration scripts immediately after use**
+
+### Step 4: Security Configuration
+
+1. Generate new API token:
+   ```bash
+   openssl rand -hex 32
+   ```
+
+2. Update production CORS in `/pizza_api/core/BaseAPI.php`:
+   ```php
+   $allowedOrigins = [
+       'https://greaterchicagolandpizza.club',
+       'https://www.greaterchicagolandpizza.club'
+   ];
+   ```
+
+3. Disable error display in `/pizza_api/index.php`:
+   ```php
+   ini_set('display_errors', 0);
+   ```
+
 ## Maintenance Notes
 
 1. **Regular backups**:
+   - Backup MySQL database weekly
    - Backup `/images/` directory weekly
-   - Keep database exports if applicable
+   - Keep database exports
 
 2. **Monitor disk usage**:
    - Uploaded images accumulate over time
+   - Database size grows with usage
    - Set up cleanup for old/unused images
 
 3. **Security updates**:
-   - Keep PHP version updated
+   - Keep PHP version updated (8.2+)
    - Monitor for security advisories
+   - Rotate API tokens periodically
+   - Review access logs
+
+4. **Performance monitoring**:
+   - Check API response times
+   - Monitor database query performance
+   - Optimize indexes if needed
 
 ## Additional GitHub Actions Features
 
