@@ -20,7 +20,7 @@ import type {
 
 // API configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
-const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
+const API_TOKEN = import.meta.env.VITE_UPLOAD_API_TOKEN || ''; // Reuse the upload token
 const USE_API = !!API_BASE_URL;
 
 // Fallback to JSON files

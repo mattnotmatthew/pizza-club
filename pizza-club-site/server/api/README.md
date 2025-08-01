@@ -99,13 +99,13 @@ Query parameters for GET:
    ```
 
 3. **Set up authentication**:
-   - Generate a secure API token
-   - Add to your hosting environment or config file
+   - Uses the same token as your photo upload (VITE_UPLOAD_API_TOKEN)
+   - Update the token in `api/core/BaseAPI.php` line 95
 
 4. **Configure frontend**:
    ```env
    VITE_API_URL=https://yourdomain.com/api
-   VITE_API_TOKEN=your-api-token
+   VITE_UPLOAD_API_TOKEN=your-existing-token  # Same token for both APIs
    ```
 
 ## Authentication

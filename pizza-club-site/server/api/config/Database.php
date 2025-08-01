@@ -28,20 +28,13 @@ class Database {
      * Load database configuration from environment
      */
     private function loadConfiguration() {
-        // Try to load from environment variables first
-        $this->host = $_ENV['DB_HOST'] ?? getenv('DB_HOST');
-        $this->db_name = $_ENV['DB_NAME'] ?? getenv('DB_NAME');
-        $this->username = $_ENV['DB_USER'] ?? getenv('DB_USER');
-        $this->password = $_ENV['DB_PASS'] ?? getenv('DB_PASS');
-        
-        // If environment variables are not set, try loading from config file
-        if (!$this->host || !$this->db_name || !$this->username) {
-            $this->loadFromConfigFile();
-        }
+        // On shared hosting, environment variables don't work
+        // So we go directly to the config file
+        $this->loadFromConfigFile();
         
         // Validate configuration
         if (!$this->host || !$this->db_name || !$this->username) {
-            throw new Exception('Database configuration is incomplete. Please check environment variables or config file.');
+            throw new Exception('Database configuration is incomplete. Please check config file.');
         }
     }
     

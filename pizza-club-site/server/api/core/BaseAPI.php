@@ -90,15 +90,9 @@ abstract class BaseAPI {
         
         $token = substr($authHeader, 7);
         
-        // For now, use environment variable for token
-        // In production, you might want to use the api_keys table
-        $validToken = $_ENV['API_TOKEN'] ?? getenv('API_TOKEN');
-        
-        if (!$validToken) {
-            // Fallback to hardcoded token for development
-            // IMPORTANT: Change this in production!
-            $validToken = 'your-secret-api-token-here';
-        }
+        // Use the same token as upload API for consistency
+        // On shared hosting, environment variables don't work, so hardcode it
+        $validToken = 'your-actual-upload-token-here'; // Replace with your actual VITE_UPLOAD_API_TOKEN value
         
         return $token === $validToken;
     }

@@ -60,11 +60,11 @@ FLUSH PRIVILEGES;
 mysql -u pizza_user -p pizza_club < server/database/schema.sql
 ```
 
-## Step 4: Configure Environment Variables
+## Step 4: Configure Database Connection
 
-### For Production (Namecheap Shared Hosting)
+### For Namecheap Shared Hosting (Required)
 
-1. Create `server/api/config/db.config.php`:
+1. Create `/public_html/api/config/db.config.php`:
 
 ```php
 <?php
@@ -76,19 +76,21 @@ return [
 ];
 ```
 
-2. Protect the config file with `.htaccess` (already included)
+**Important**: Replace with your actual database credentials from cPanel.
 
-### For Local Development
+2. The `.htaccess` file (already included) will protect this file from web access.
 
-1. Create `.env` file in project root:
-
-```env
-DB_HOST=localhost
-DB_NAME=pizza_club
-DB_USER=pizza_user
-DB_PASS=your_password
-API_TOKEN=your-secret-api-token-here
+3. Update the API token in `/public_html/api/core/BaseAPI.php` (line 95):
+```php
+$validToken = 'your-actual-token-here'; // Same token as your upload.php
 ```
+
+### Why No Environment Variables?
+
+Shared hosting doesn't support environment variables or `.env` files. All configuration must be hardcoded in PHP files, which is why we:
+- Use `db.config.php` for database credentials
+- Hardcode the API token in `BaseAPI.php`
+- Protect sensitive files with `.htaccess`
 
 ## Step 5: Set Up API Access
 

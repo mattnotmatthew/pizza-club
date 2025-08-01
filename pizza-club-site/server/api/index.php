@@ -17,11 +17,19 @@ header('Content-Type: application/json; charset=UTF-8');
 $requestUri = $_SERVER['REQUEST_URI'];
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
-// Remove base path and query string
-$basePath = '/api/';
-$path = parse_url($requestUri, PHP_URL_PATH);
-$path = str_replace($basePath, '', $path);
-$path = trim($path, '/');
+// Extract the path after /pizza_api/
+$scriptDir = dirname($_SERVER['SCRIPT_NAME']); // Should be /pizza_api
+$requestPath = parse_url($requestUri, PHP_URL_PATH);
+
+// Remove the base directory from the path
+if (strpos($requestPath, $scriptDir) === 0) {
+    $path = substr($requestPath, strlen($scriptDir));
+    $path = ltrim($path, '/');
+} else {
+    // Fallback: try removing /pizza_api/ directly
+    $path = str_replace('/pizza_api/', '', $requestPath);
+    $path = trim($path, '/');
+}
 
 // Parse endpoint and resource
 $parts = explode('/', $path);
