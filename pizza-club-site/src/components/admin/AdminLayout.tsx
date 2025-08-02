@@ -34,6 +34,36 @@ const AdminLayout: React.FC = () => {
                 >
                   Infographics
                 </Link>
+                <Link
+                  to="/admin/events"
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/admin/events')
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  }`}
+                >
+                  Events
+                </Link>
+                <Link
+                  to="/admin/members"
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/admin/members')
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  }`}
+                >
+                  Members
+                </Link>
+                <Link
+                  to="/admin/restaurants"
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/admin/restaurants')
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  }`}
+                >
+                  Restaurants
+                </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">

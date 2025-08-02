@@ -20,6 +20,13 @@ const InfographicView = lazy(() => import('@/pages/InfographicView'));
 const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'));
 const InfographicsList = lazy(() => import('@/pages/admin/InfographicsList'));
 const InfographicsEditor = lazy(() => import('@/pages/admin/InfographicsEditor'));
+const EventsList = lazy(() => import('@/pages/admin/EventsList'));
+const EventsEditor = lazy(() => import('@/pages/admin/EventsEditor'));
+const MembersList = lazy(() => import('@/pages/admin/MembersList'));
+const MembersEditor = lazy(() => import('@/pages/admin/MembersEditor'));
+const RestaurantsList = lazy(() => import('@/pages/admin/RestaurantsList'));
+const RestaurantsEditor = lazy(() => import('@/pages/admin/RestaurantsEditor'));
+const RestaurantVisits = lazy(() => import('@/pages/admin/RestaurantVisits'));
 
 // Loading component for Suspense fallback
 const Loading: React.FC = () => (
@@ -55,6 +62,16 @@ function App() {
               <Route path="infographics" element={<InfographicsList />} />
               <Route path="infographics/new" element={<InfographicsEditor />} />
               <Route path="infographics/edit/:id" element={<InfographicsEditor />} />
+              <Route path="events" element={<EventsList />} />
+              <Route path="events/new" element={<EventsEditor />} />
+              <Route path="events/edit/:id" element={<EventsEditor />} />
+              <Route path="members" element={<MembersList />} />
+              <Route path="members/new" element={<MembersEditor />} />
+              <Route path="members/edit/:id" element={<MembersEditor />} />
+              <Route path="restaurants" element={<RestaurantsList />} />
+              <Route path="restaurants/new" element={<RestaurantsEditor />} />
+              <Route path="restaurants/edit/:id" element={<RestaurantsEditor />} />
+              <Route path="restaurants/:id/visits" element={<RestaurantVisits />} />
             </Route>
           </Routes>
         </Suspense>

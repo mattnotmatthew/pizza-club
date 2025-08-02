@@ -171,6 +171,35 @@ export const apiService = {
   },
 
   /**
+   * Get event by ID
+   */
+  async getEventById(id: string): Promise<Event | undefined> {
+    return await apiRequest<Event>(`events?id=${id}`);
+  },
+
+  /**
+   * Create or update event
+   */
+  async saveEvent(event: Partial<Event> & { id: string }): Promise<Event> {
+    const isNew = !event.date;
+    const method = isNew ? 'POST' : 'PUT';
+    
+    return await apiRequest<Event>('events', {
+      method,
+      body: JSON.stringify(event)
+    });
+  },
+
+  /**
+   * Delete event
+   */
+  async deleteEvent(id: string): Promise<void> {
+    await apiRequest(`events?id=${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  /**
    * Get infographics
    */
   async getInfographics(): Promise<Infographic[]> {

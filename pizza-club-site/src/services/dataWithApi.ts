@@ -83,8 +83,15 @@ export const dataService = {
   },
 
   async getEventById(id: string): Promise<Event | undefined> {
-    const events = await this.getEvents();
-    return events.find(event => event.id === id);
+    return await apiService.getEventById(id);
+  },
+
+  async saveEvent(event: Partial<Event> & { id: string }): Promise<Event> {
+    return apiService.saveEvent(event);
+  },
+
+  async deleteEvent(id: string): Promise<void> {
+    return apiService.deleteEvent(id);
   },
 
   // Quotes
