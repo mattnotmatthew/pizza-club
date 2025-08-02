@@ -106,10 +106,12 @@ export const apiService = {
    * Create or update restaurant
    */
   async saveRestaurant(restaurant: Partial<Restaurant> & { id: string }): Promise<Restaurant> {
-    const isNew = !restaurant.visits;
+    const existingRestaurant = await this.getRestaurantById(restaurant.id).catch(() => null);
+    const isNew = !existingRestaurant;
     const method = isNew ? 'POST' : 'PUT';
+    const endpoint = isNew ? 'restaurants' : `restaurants?id=${restaurant.id}`;
     
-    return await apiRequest<Restaurant>('restaurants', {
+    return await apiRequest<Restaurant>(endpoint, {
       method,
       body: JSON.stringify(restaurant)
     });
@@ -142,10 +144,12 @@ export const apiService = {
    * Create or update member
    */
   async saveMember(member: Partial<Member> & { id: string }): Promise<Member> {
-    const isNew = !member.bio;
+    const existingMember = await this.getMemberById(member.id).catch(() => null);
+    const isNew = !existingMember;
     const method = isNew ? 'POST' : 'PUT';
+    const endpoint = isNew ? 'members' : `members?id=${member.id}`;
     
-    return await apiRequest<Member>('members', {
+    return await apiRequest<Member>(endpoint, {
       method,
       body: JSON.stringify(member)
     });
@@ -181,10 +185,12 @@ export const apiService = {
    * Create or update event
    */
   async saveEvent(event: Partial<Event> & { id: string }): Promise<Event> {
-    const isNew = !event.date;
+    const existingEvent = await this.getEventById(event.id).catch(() => null);
+    const isNew = !existingEvent;
     const method = isNew ? 'POST' : 'PUT';
+    const endpoint = isNew ? 'events' : `events?id=${event.id}`;
     
-    return await apiRequest<Event>('events', {
+    return await apiRequest<Event>(endpoint, {
       method,
       body: JSON.stringify(event)
     });
