@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
+import MemberPhotoUploader from '@/components/admin/MemberPhotoUploader';
 import { dataService } from '@/services/dataWithApi';
 import type { Member } from '@/types';
 
@@ -138,36 +139,12 @@ const MembersEditor: React.FC = () => {
               </p>
             </div>
 
-            {/* Photo URL */}
-            <div>
-              <label htmlFor="photo" className="block text-sm font-medium text-gray-700">
-                Photo URL
-              </label>
-              <input
-                type="url"
-                id="photo"
-                value={formData.photo}
-                onChange={(e) => setFormData({ ...formData, photo: e.target.value })}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                placeholder="https://example.com/photo.jpg"
-              />
-              {formData.photo && (
-                <div className="mt-2">
-                  <img
-                    src={formData.photo}
-                    alt="Preview"
-                    className="w-32 h-32 object-cover rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '';
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                    onLoad={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'block';
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+            {/* Photo Upload */}
+            <MemberPhotoUploader
+              memberId={isEditing ? id : `new-${Date.now()}`}
+              currentPhotoUrl={formData.photo}
+              onPhotoChange={(url) => setFormData({ ...formData, photo: url || '' })}
+            />
 
             {/* Member Since */}
             <div>
