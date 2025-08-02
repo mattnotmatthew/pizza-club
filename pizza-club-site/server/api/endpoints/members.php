@@ -38,6 +38,7 @@ class MemberAPI extends BaseAPI {
         // Format member data
         foreach ($members as &$member) {
             $member['restaurants_visited'] = (int)$member['restaurants_visited'];
+            $member = $this->transformMemberData($member);
         }
         
         $this->sendResponse($members);
@@ -61,6 +62,9 @@ class MemberAPI extends BaseAPI {
         
         $member['restaurants_visited'] = (int)$member['restaurants_visited'];
         
+        // Transform database fields to API format
+        $member = $this->transformMemberData($member);
+        
         // Get member's visit history
         $member['visits'] = $this->getMemberVisits($id);
         
@@ -68,6 +72,29 @@ class MemberAPI extends BaseAPI {
         $member['statistics'] = $this->getMemberStatistics($id);
         
         $this->sendResponse($member);
+    }
+    
+    /**
+     * Transform member data from database format to API format
+     */
+    private function transformMemberData($member) {
+        // Transform snake_case to camelCase for specific fields
+        if (isset($member['member_since'])) {
+            $member['memberSince'] = $member['member_since'];
+            unset($member['member_since']);
+        }
+        
+        if (isset($member['favorite_pizza_style'])) {
+            $member['favoritePizzaStyle'] = $member['favorite_pizza_style'];
+            unset($member['favorite_pizza_style']);
+        }
+        
+        if (isset($member['restaurants_visited'])) {
+            $member['restaurantsVisited'] = $member['restaurants_visited'];
+            unset($member['restaurants_visited']);
+        }
+        
+        return $member;
     }
     
     /**

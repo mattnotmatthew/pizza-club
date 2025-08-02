@@ -1,0 +1,74 @@
+# Enhanced .htaccess for images/infographics directory and all subdirectories
+# Deploy this file to: /public_html/images/infographics/.htaccess
+# This version ensures proper access to dynamically created subdirectories
+
+# Enable the rewrite engine
+RewriteEngine On
+
+# Security: Disable PHP execution in this directory and all subdirectories
+<FilesMatch "\.(?:php|php3|php4|php5|php7|phtml)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes
+
+# Allow access to image files (including in subdirectories)
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg)$">
+    Order Allow,Deny
+    Allow from all
+    
+    # Ensure proper permissions
+    Require all granted
+</FilesMatch>
+
+# Block access to non-image files
+<FilesMatch "\.(?!jpg|jpeg|png|gif|webp|svg)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Set proper MIME types
+AddType image/webp .webp
+AddType image/jpeg .jpg .jpeg
+AddType image/png .png
+AddType image/gif .gif
+AddType image/svg+xml .svg
+
+# Enable caching for images (1 year)
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+# Prevent hotlinking (update with your actual domain)
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?greaterchicagolandpizza\.club [NC]
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?localhost [NC]
+RewriteRule \.(jpg|jpeg|png|gif|webp)$ - [F,L]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Ensure subdirectories inherit these rules
+<IfModule mod_rewrite.c>
+    # Apply rules recursively to subdirectories
+    RewriteOptions inherit
+</IfModule>
+
+# Fix for some shared hosting environments
+# This ensures PHP-created files are accessible
+<IfModule mod_authz_core.c>
+    <RequireAll>
+        Require all granted
+    </RequireAll>
+</IfModule>
+
+# Alternative for older Apache versions
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>

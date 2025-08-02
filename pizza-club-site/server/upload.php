@@ -105,6 +105,8 @@ if (!file_exists($uploadPath)) {
     if (!mkdir($uploadPath, 0755, true)) {
         sendError('Failed to create upload directory');
     }
+    // Ensure directory is readable by web server
+    chmod($uploadPath, 0755);
 }
 
 // Generate filename with .webp extension (we'll convert if needed)
@@ -162,6 +164,9 @@ try {
     }
 
     imagedestroy($image);
+    
+    // Ensure file has proper permissions for web server access
+    chmod($filePath, 0644);
 
     // Return success response with URL
     $baseUrl = 'https://' . $_SERVER['HTTP_HOST'];
