@@ -311,6 +311,8 @@ public_html/
        'https://www.greaterchicagolandpizza.club'
    ];
    ```
+   
+   **Note**: The API supports all HTTP methods including PATCH for member reordering.
 
 3. Disable error display in `/pizza_api/index.php`:
    ```php

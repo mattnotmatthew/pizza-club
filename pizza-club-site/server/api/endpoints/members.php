@@ -30,7 +30,7 @@ class MemberAPI extends BaseAPI {
         $sql = "SELECT m.*,
                 (SELECT COUNT(DISTINCT va.visit_id) FROM visit_attendees va WHERE va.member_id = m.id) as restaurants_visited
                 FROM members m
-                ORDER BY m.name ASC";
+                ORDER BY m.display_order ASC, m.name ASC";
         
         $stmt = $this->db->execute($sql);
         $members = $stmt->fetchAll();
@@ -92,6 +92,11 @@ class MemberAPI extends BaseAPI {
         if (isset($member['restaurants_visited'])) {
             $member['restaurantsVisited'] = $member['restaurants_visited'];
             unset($member['restaurants_visited']);
+        }
+        
+        if (isset($member['display_order'])) {
+            $member['displayOrder'] = (int)$member['display_order'];
+            unset($member['display_order']);
         }
         
         return $member;
@@ -158,6 +163,11 @@ class MemberAPI extends BaseAPI {
         // Validate required fields
         $this->validateRequired($data, ['id', 'name']);
         
+        // Get the next display order (add at the end)
+        $maxOrderStmt = $this->db->execute("SELECT MAX(display_order) as max_order FROM members");
+        $maxOrder = $maxOrderStmt->fetch()['max_order'] ?? 0;
+        $nextOrder = $maxOrder + 10;
+        
         // Prepare data
         $params = [
             ':id' => $this->sanitize($data['id']),
@@ -165,13 +175,14 @@ class MemberAPI extends BaseAPI {
             ':bio' => $this->sanitize($data['bio'] ?? ''),
             ':photo' => $this->sanitize($data['photo'] ?? ''),
             ':member_since' => $this->sanitize($data['memberSince'] ?? date('Y')),
-            ':favorite_pizza_style' => $this->sanitize($data['favoritePizzaStyle'] ?? '')
+            ':favorite_pizza_style' => $this->sanitize($data['favoritePizzaStyle'] ?? ''),
+            ':display_order' => $nextOrder
         ];
         
         $sql = "INSERT INTO members 
-                (id, name, bio, photo, member_since, favorite_pizza_style)
+                (id, name, bio, photo, member_since, favorite_pizza_style, display_order)
                 VALUES 
-                (:id, :name, :bio, :photo, :member_since, :favorite_pizza_style)";
+                (:id, :name, :bio, :photo, :member_since, :favorite_pizza_style, :display_order)";
         
         try {
             $this->db->execute($sql, $params);
@@ -226,6 +237,49 @@ class MemberAPI extends BaseAPI {
         }
         
         $this->sendResponse(['message' => 'Member updated successfully']);
+    }
+    
+    /**
+     * PATCH /api/members - Update member order
+     */
+    protected function patch() {
+        $data = $this->getRequestBody();
+        
+        // Check if this is a reorder action
+        if (isset($data['action']) && $data['action'] === 'reorder') {
+            $this->updateMemberOrder($data['memberIds'] ?? []);
+            return;
+        }
+        
+        $this->sendError('Invalid PATCH action');
+    }
+    
+    /**
+     * Update member display order
+     */
+    private function updateMemberOrder($memberIds) {
+        if (!is_array($memberIds) || empty($memberIds)) {
+            $this->sendError('Member IDs array is required');
+        }
+        
+        try {
+            // Update each member's display order
+            $order = 10;
+            $sql = "UPDATE members SET display_order = :order WHERE id = :id";
+            
+            foreach ($memberIds as $memberId) {
+                $this->db->execute($sql, [
+                    ':order' => $order,
+                    ':id' => $memberId
+                ]);
+                $order += 10;
+            }
+            
+            $this->sendResponse(['message' => 'Member order updated successfully']);
+            
+        } catch (Exception $e) {
+            $this->sendError('Failed to update member order: ' . $e->getMessage());
+        }
     }
     
     /**

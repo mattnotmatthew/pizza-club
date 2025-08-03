@@ -158,6 +158,7 @@ const EventsEditor: React.FC = () => {
                   value={formData.time}
                   onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                  step="900"
                   required
                 />
               </div>

@@ -54,7 +54,7 @@ abstract class BaseAPI {
         
         // DEVELOPMENT ONLY - Remove for production
         header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
         header('Access-Control-Max-Age: 86400');
         
@@ -80,7 +80,7 @@ abstract class BaseAPI {
             header("Access-Control-Allow-Origin: $origin");
         }
         
-        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS");
         header("Access-Control-Allow-Headers: Content-Type, Authorization");
         header("Access-Control-Allow-Credentials: true");
         header("Content-Type: application/json; charset=UTF-8");
@@ -98,7 +98,7 @@ abstract class BaseAPI {
      */
     protected function requiresAuth() {
         // By default, write operations require auth
-        return in_array($this->method, ['POST', 'PUT', 'DELETE']);
+        return in_array($this->method, ['POST', 'PUT', 'DELETE', 'PATCH']);
     }
     
     /**
@@ -239,6 +239,9 @@ abstract class BaseAPI {
                     break;
                 case 'DELETE':
                     $this->delete();
+                    break;
+                case 'PATCH':
+                    $this->patch();
                     break;
                 default:
                     $this->sendError('Method not allowed', 405);

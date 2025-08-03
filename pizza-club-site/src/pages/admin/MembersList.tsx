@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';
+import SortableContainer from '@/components/common/SortableContainer';
+import DraggableMemberCard from '@/components/admin/DraggableMemberCard';
 import { dataService } from '@/services/dataWithApi';
 import type { Member } from '@/types';
 
@@ -9,6 +11,7 @@ const MembersList: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   useEffect(() => {
     loadMembers();
@@ -43,6 +46,25 @@ const MembersList: React.FC = () => {
     }
   };
 
+  const handleReorder = async (reorderedMembers: Member[]) => {
+    // Optimistically update the UI
+    setMembers(reorderedMembers);
+    setReordering(true);
+
+    try {
+      // Send the new order to the server
+      const memberIds = reorderedMembers.map(m => m.id);
+      await dataService.updateMemberOrder(memberIds);
+    } catch (error) {
+      console.error('Failed to update member order:', error);
+      alert('Failed to save new order. Please refresh and try again.');
+      // Reload to get the correct order from server
+      await loadMembers();
+    } finally {
+      setReordering(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -69,61 +91,37 @@ const MembersList: React.FC = () => {
             <p className="text-gray-600">No members yet. Add your first one!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {members.map((member) => (
-              <div key={member.id} className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      {member.photo && (
-                        <img
-                          src={member.photo}
-                          alt={member.name}
-                          className="w-16 h-16 rounded-full object-cover mb-4"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      )}
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                        {member.name}
-                      </h3>
-                      {member.memberSince && (
-                        <p className="text-sm text-gray-500 mb-2">
-                          Member since {member.memberSince}
-                        </p>
-                      )}
-                      {member.restaurantsVisited !== undefined && (
-                        <p className="text-sm text-gray-600">
-                          {member.restaurantsVisited} restaurants visited
-                        </p>
-                      )}
-                      {member.favoritePizzaStyle && (
-                        <p className="text-sm text-gray-600 mt-2">
-                          Favorite: {member.favoritePizzaStyle}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between">
-                    <Link
-                      to={`/admin/members/edit/${member.id}`}
-                      className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(member.id)}
-                      disabled={deleting === member.id}
-                      className="text-red-600 hover:text-red-900 text-sm font-medium disabled:opacity-50"
-                    >
-                      {deleting === member.id ? 'Deleting...' : 'Delete'}
-                    </button>
-                  </div>
-                </div>
+          <>
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>Tip:</strong> Drag the handles on the left of each card to reorder members. 
+                Changes are saved automatically.
+              </p>
+            </div>
+            
+            {reordering && (
+              <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">Saving new order...</p>
               </div>
-            ))}
-          </div>
+            )}
+            
+            <SortableContainer
+              items={members}
+              onReorder={handleReorder}
+              getItemId={(member) => member.id}
+              strategy="grid"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              disabled={reordering}
+              renderItem={(member) => (
+                <DraggableMemberCard
+                  key={member.id}
+                  member={member}
+                  onDelete={handleDelete}
+                  isDeleting={deleting === member.id}
+                />
+              )}
+            />
+          </>
         )}
       </div>
     </div>

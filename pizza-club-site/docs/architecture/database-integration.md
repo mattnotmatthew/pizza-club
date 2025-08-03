@@ -117,7 +117,7 @@ POST   /migrate          - Run data migration
 ### Core Tables
 - `restaurants` - Restaurant information
 - `restaurant_visits` - Visit records with dates
-- `members` - Club member profiles
+- `members` - Club member profiles with custom ordering via `display_order`
 - `ratings` - All rating data
 - `rating_categories` - Dynamic rating structure
 - `events` - Club events calendar

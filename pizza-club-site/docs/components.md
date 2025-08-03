@@ -265,6 +265,32 @@ Not currently implemented but recommended for production
 2. **Image Optimization**: `loading="lazy"` on images
 3. **Memoization**: Not currently used but recommended for expensive computations
 
+## Drag and Drop Components
+
+### SortableContainer (`components/common/SortableContainer.tsx`)
+- Generic wrapper for making any list sortable via drag-and-drop
+- Features:
+  - Supports both vertical and grid layouts
+  - Customizable drag overlay
+  - Keyboard accessibility
+  - Touch support
+  - Error handling and callbacks
+
+### SortableItem (`components/common/SortableItem.tsx`)
+- Wrapper component to make individual items draggable
+- Features:
+  - Visual drag handle in top-right corner
+  - Opacity feedback during drag
+  - Smooth transitions
+  - Optional handle visibility
+
+### DraggableMemberCard (`components/admin/DraggableMemberCard.tsx`)
+- Member-specific implementation of draggable cards
+- Features:
+  - Integrated member display
+  - Edit/delete actions
+  - Drag handle integration
+
 ## Component Testing
 
 Currently no test files, but recommended structure:

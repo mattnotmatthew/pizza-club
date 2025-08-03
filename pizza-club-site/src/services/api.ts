@@ -165,6 +165,19 @@ export const apiService = {
   },
 
   /**
+   * Update member display order
+   */
+  async updateMemberOrder(memberIds: string[]): Promise<void> {
+    await apiRequest('members', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        action: 'reorder',
+        memberIds
+      })
+    });
+  },
+
+  /**
    * Get all events
    */
   async getEvents(): Promise<Event[]> {

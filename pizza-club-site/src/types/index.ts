@@ -9,6 +9,7 @@ export interface Member {
   favoritePizzaStyle?: string;
   favoriteStyle?: string; // Deprecated: use favoritePizzaStyle
   restaurantsVisited?: number;
+  displayOrder?: number;
 }
 
 // New rating structure types

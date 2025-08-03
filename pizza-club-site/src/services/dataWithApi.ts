@@ -162,6 +162,10 @@ export const dataService = {
     return apiService.deleteMember(id);
   },
 
+  async updateMemberOrder(memberIds: string[]): Promise<void> {
+    return apiService.updateMemberOrder(memberIds);
+  },
+
   // Check API availability
   async isApiAvailable(): Promise<boolean> {
     return apiService.isApiAvailable();

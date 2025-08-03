@@ -116,6 +116,19 @@ Content-Type: application/json
 DELETE /members?id=member-id
 ```
 
+#### Reorder members
+```
+PATCH /members
+Content-Type: application/json
+
+{
+  "action": "reorder",
+  "memberIds": ["member-1", "member-2", "member-3"]
+}
+```
+
+Updates the display order of members. Members will be ordered in the sequence provided in the `memberIds` array.
+
 ### Events
 
 #### List all events
