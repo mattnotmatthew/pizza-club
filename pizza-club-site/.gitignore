@@ -12,6 +12,7 @@ server/api/config/db.config.php
 server/.htaccess
 server/uploads/
 server/logs/
+.claude-code
 
 # Dependencies
 node_modules

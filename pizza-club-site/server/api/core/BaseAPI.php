@@ -116,7 +116,7 @@ abstract class BaseAPI {
         
         // Use the same token as upload API for consistency
         // On shared hosting, environment variables don't work, so hardcode it
-        $validToken = 'your-actual-upload-token-here'; // Replace with your actual VITE_UPLOAD_API_TOKEN value
+        $validToken = 'ca5eeb6889def145f7561b0612e89258ed64c70e2577c3c225a90d0cd074740a'; // Your actual VITE_UPLOAD_API_TOKEN value
         
         return $token === $validToken;
     }
@@ -184,7 +184,9 @@ abstract class BaseAPI {
             return array_map([$this, 'sanitize'], $value);
         }
         
-        return htmlspecialchars(strip_tags($value), ENT_QUOTES, 'UTF-8');
+        // Remove HTML and PHP tags but preserve regular text including apostrophes
+        // This prevents XSS while keeping punctuation intact
+        return strip_tags($value);
     }
     
     /**

@@ -115,6 +115,21 @@ const MemberDetail: React.FC = () => {
       })
     : 'Recently';
 
+  // Smart focal point defaults for portrait photos
+  const getImagePositioning = () => {
+    if (member.focalPoint) {
+      // Use custom focal point if available
+      return {
+        objectPosition: `${member.focalPoint.x}% ${member.focalPoint.y}%`
+      };
+    } else {
+      // Smart defaults - better for portrait photos where faces are typically in upper third
+      return {
+        objectPosition: '50% 25%' // Center horizontally, 25% from top (good for faces)
+      };
+    }
+  };
+
   return (
     <div className="min-h-screen py-12 md:py-16 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,7 +151,8 @@ const MemberDetail: React.FC = () => {
             <img
               src={member.photoUrl || '/api/placeholder/800/400'}
               alt={member.name}
-              className="w-full h-full object-cover object-[center_15%]"
+              className="w-full h-full object-cover"
+              style={getImagePositioning()}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">

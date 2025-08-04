@@ -22,23 +22,24 @@ const DraggableMemberCard: React.FC<DraggableMemberCardProps> = ({
 }) => {
   return (
     <SortableItem id={member.id} handle={true}>
-      <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-        <div className="flex items-start gap-4">
+      <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow h-60 flex flex-col">
+        <div className="flex items-start gap-4 flex-1">
           {member.photo && (
             <img
               src={member.photo}
               alt={member.name}
-              className="w-24 h-24 rounded-full object-cover"
+              className="w-24 h-24 rounded-full object-cover flex-shrink-0"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
           )}
-          <div className="flex-1">
-            <h3 className="text-xl font-semibold mb-2">{member.name}</h3>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-semibold mb-2 truncate">{member.name}</h3>
             {member.favoritePizzaStyle && (
               <p className="text-sm text-gray-600 mb-1">
-                <span className="font-medium">Style:</span> {member.favoritePizzaStyle}
+                <span className="font-medium">Style:</span> 
+                <span className="ml-1 break-words">{member.favoritePizzaStyle}</span>
               </p>
             )}
             {member.memberSince && (
@@ -54,7 +55,7 @@ const DraggableMemberCard: React.FC<DraggableMemberCardProps> = ({
           </div>
         </div>
         
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex gap-2 flex-shrink-0">
           <Link
             to={`/admin/members/edit/${member.id}`}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"

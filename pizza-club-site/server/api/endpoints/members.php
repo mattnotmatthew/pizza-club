@@ -99,6 +99,16 @@ class MemberAPI extends BaseAPI {
             unset($member['display_order']);
         }
         
+        // Handle focal point data
+        if (isset($member['focal_point_x']) && isset($member['focal_point_y']) && 
+            $member['focal_point_x'] !== null && $member['focal_point_y'] !== null) {
+            $member['focalPoint'] = [
+                'x' => (float)$member['focal_point_x'],
+                'y' => (float)$member['focal_point_y']
+            ];
+        }
+        unset($member['focal_point_x'], $member['focal_point_y']);
+        
         return $member;
     }
     
@@ -221,6 +231,21 @@ class MemberAPI extends BaseAPI {
             if (isset($data[$jsonField])) {
                 $updates[] = "$dbField = :$dbField";
                 $params[":$dbField"] = $this->sanitize($data[$jsonField]);
+            }
+        }
+        
+        // Handle focal point updates
+        if (isset($data['focalPoint'])) {
+            if ($data['focalPoint'] === null || empty($data['focalPoint'])) {
+                // Clear focal point
+                $updates[] = "focal_point_x = NULL";
+                $updates[] = "focal_point_y = NULL";
+            } else if (isset($data['focalPoint']['x']) && isset($data['focalPoint']['y'])) {
+                // Set focal point
+                $updates[] = "focal_point_x = :focal_point_x";
+                $updates[] = "focal_point_y = :focal_point_y";
+                $params[":focal_point_x"] = max(0, min(100, (float)$data['focalPoint']['x']));
+                $params[":focal_point_y"] = max(0, min(100, (float)$data['focalPoint']['y']));
             }
         }
         

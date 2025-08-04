@@ -265,6 +265,46 @@ Not currently implemented but recommended for production
 2. **Image Optimization**: `loading="lazy"` on images
 3. **Memoization**: Not currently used but recommended for expensive computations
 
+## Admin Components
+
+### FocalPointEditor (`components/admin/FocalPointEditor.tsx`)
+- Visual editor for setting image focal points
+- Features:
+  - Click-to-set focal point positioning
+  - Live preview with object-position styling
+  - Rule of thirds grid overlay during editing
+  - Quick presets (Face, Reset)
+  - Current position display with coordinates
+  - Smart default status indication
+- Props:
+  ```typescript
+  interface FocalPointEditorProps {
+    imageUrl: string;
+    focalPoint?: { x: number; y: number };
+    onFocalPointChange: (focalPoint: { x: number; y: number } | undefined) => void;
+  }
+  ```
+- Usage: Integrated into MemberPhotoUploader for hero image positioning
+
+### MemberPhotoUploader (`components/admin/MemberPhotoUploader.tsx`)
+- Enhanced photo uploader with focal point editing
+- Features:
+  - All PhotoUploader features (drag-and-drop, validation, optimization)
+  - Integrated FocalPointEditor component
+  - Server upload with progress tracking
+  - Base64 fallback support
+  - Photo preview with error handling
+- Props:
+  ```typescript
+  interface MemberPhotoUploaderProps {
+    memberId: string;
+    currentPhotoUrl?: string;
+    currentFocalPoint?: { x: number; y: number };
+    onPhotoChange: (url: string | undefined) => void;
+    onFocalPointChange: (focalPoint: { x: number; y: number } | undefined) => void;
+  }
+  ```
+
 ## Drag and Drop Components
 
 ### SortableContainer (`components/common/SortableContainer.tsx`)

@@ -99,6 +99,81 @@ const PhotoDisplay = ({ photo, containerWidth, containerHeight }) => {
 };
 ```
 
+## Member Hero Image Positioning
+
+### Implementation for Member Detail Pages
+
+Member hero images use a hybrid focal point system that provides smart defaults with optional custom positioning:
+
+```typescript
+// Member type includes optional focal point
+interface Member {
+  // ... other fields
+  focalPoint?: { x: number; y: number }; // 0-100 percentages
+}
+
+// Smart positioning with fallback defaults
+const getImagePositioning = (member: Member) => {
+  if (member.focalPoint) {
+    // Use custom focal point if available
+    return {
+      objectPosition: `${member.focalPoint.x}% ${member.focalPoint.y}%`
+    };
+  } else {
+    // Smart defaults - optimized for portrait photos
+    return {
+      objectPosition: '50% 25%' // Center horizontally, 25% from top (good for faces)
+    };
+  }
+};
+
+// Applied to hero image
+<img
+  src={member.photoUrl}
+  alt={member.name}
+  className="w-full h-full object-cover"
+  style={getImagePositioning(member)}
+/>
+```
+
+### Database Schema
+
+Focal points are stored in the members table:
+
+```sql
+ALTER TABLE members 
+ADD COLUMN focal_point_x DECIMAL(5,2) NULL COMMENT 'Focal point X percentage (0-100)',
+ADD COLUMN focal_point_y DECIMAL(5,2) NULL COMMENT 'Focal point Y percentage (0-100)';
+```
+
+### Admin Interface Integration
+
+The focal point editor is integrated into the member photo uploader:
+
+```typescript
+// In MemberPhotoUploader component
+<FocalPointEditor
+  imageUrl={currentPhotoUrl}
+  focalPoint={currentFocalPoint}
+  onFocalPointChange={onFocalPointChange}
+/>
+```
+
+### Smart Defaults
+
+When no custom focal point is set, the system uses intelligent defaults:
+
+- **Portrait photos**: `50% 25%` (horizontal center, upper third - good for faces)
+- **Previously used**: `50% 15%` (too high, often cut off foreheads)
+
+### Benefits
+
+1. **Immediate improvement**: Better defaults for all existing members
+2. **Customizable**: Perfect positioning for problematic photos
+3. **User-friendly**: Visual click-to-set interface
+4. **Backward compatible**: Works with existing data
+5. **Responsive**: Consistent across desktop and mobile
+
 ## Related Files
 
 - [Image Optimization](./image-optimization.md) - Compression and validation patterns

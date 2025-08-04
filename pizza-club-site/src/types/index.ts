@@ -10,6 +10,7 @@ export interface Member {
   favoriteStyle?: string; // Deprecated: use favoritePizzaStyle
   restaurantsVisited?: number;
   displayOrder?: number;
+  focalPoint?: { x: number; y: number }; // Focal point percentages (0-100) for hero image positioning
 }
 
 // New rating structure types

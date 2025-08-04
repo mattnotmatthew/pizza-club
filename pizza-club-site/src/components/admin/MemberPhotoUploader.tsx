@@ -1,18 +1,23 @@
 import React, { useRef, useState } from 'react';
 import { optimizeImage, validateImageFile } from '@/utils/imageOptimization';
 import { uploadPhotoToServer, shouldUseRemoteStorage } from '@/utils/photoRemoteStorage';
+import FocalPointEditor from './FocalPointEditor';
 import type { UploadProgress } from '@/utils/photoRemoteStorage';
 
 interface MemberPhotoUploaderProps {
   memberId: string;
   currentPhotoUrl?: string;
+  currentFocalPoint?: { x: number; y: number };
   onPhotoChange: (url: string | undefined) => void;
+  onFocalPointChange: (focalPoint: { x: number; y: number } | undefined) => void;
 }
 
 const MemberPhotoUploader: React.FC<MemberPhotoUploaderProps> = ({
   memberId,
   currentPhotoUrl,
-  onPhotoChange
+  currentFocalPoint,
+  onPhotoChange,
+  onFocalPointChange
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -222,6 +227,17 @@ const MemberPhotoUploader: React.FC<MemberPhotoUploaderProps> = ({
       {/* Error Message */}
       {error && (
         <p className="text-sm text-red-600 mt-2">{error}</p>
+      )}
+
+      {/* Focal Point Editor */}
+      {currentPhotoUrl && !isProcessing && (
+        <div className="pt-6 border-t border-gray-200">
+          <FocalPointEditor
+            imageUrl={currentPhotoUrl}
+            focalPoint={currentFocalPoint}
+            onFocalPointChange={onFocalPointChange}
+          />
+        </div>
       )}
     </div>
   );

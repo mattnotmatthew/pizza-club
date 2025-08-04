@@ -107,9 +107,21 @@ Content-Type: application/json
   "id": "member-id",
   "name": "Member Name",
   "bio": "Member bio",
-  "joinedDate": "2024-01-01"
+  "photo": "https://example.com/photo.jpg",
+  "memberSince": "2024",
+  "favoritePizzaStyle": "Neapolitan",
+  "focalPoint": {
+    "x": 50,
+    "y": 25
+  }
 }
 ```
+
+**Focal Point Field:**
+- `focalPoint` (optional): Object with x and y coordinates (0-100 percentages)
+- Used for hero image positioning in member detail pages
+- If not provided, system uses smart default (50% horizontal, 25% vertical)
+- Can be set to `null` to clear custom positioning
 
 #### Delete member
 ```

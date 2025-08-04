@@ -17,6 +17,7 @@ const MembersEditor: React.FC = () => {
     memberSince: '',
     favoritePizzaStyle: ''
   });
+  const [focalPoint, setFocalPoint] = useState<{ x: number; y: number } | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -38,6 +39,7 @@ const MembersEditor: React.FC = () => {
           memberSince: member.memberSince || '',
           favoritePizzaStyle: member.favoritePizzaStyle || ''
         });
+        setFocalPoint(member.focalPoint || undefined);
       } else {
         alert('Member not found');
         navigate('/admin/members');
@@ -67,7 +69,8 @@ const MembersEditor: React.FC = () => {
         bio: formData.bio,
         photo: formData.photo || undefined,
         memberSince: formData.memberSince || undefined,
-        favoritePizzaStyle: formData.favoritePizzaStyle || undefined
+        favoritePizzaStyle: formData.favoritePizzaStyle || undefined,
+        focalPoint: focalPoint
       };
 
       await dataService.saveMember(memberData);
@@ -143,7 +146,9 @@ const MembersEditor: React.FC = () => {
             <MemberPhotoUploader
               memberId={isEditing ? id : `new-${Date.now()}`}
               currentPhotoUrl={formData.photo}
+              currentFocalPoint={focalPoint}
               onPhotoChange={(url) => setFormData({ ...formData, photo: url || '' })}
+              onFocalPointChange={setFocalPoint}
             />
 
             {/* Member Since */}
