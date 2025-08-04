@@ -166,6 +166,28 @@ export const dataService = {
     return apiService.updateMemberOrder(memberIds);
   },
 
+  // Visit management methods
+  async getVisits(restaurantId?: string): Promise<any[]> {
+    return apiService.getVisits(restaurantId);
+  },
+
+  async getVisitById(id: string): Promise<any> {
+    return apiService.getVisitById(id);
+  },
+
+  async saveVisit(visit: any): Promise<any> {
+    return apiService.saveVisit(visit);
+  },
+
+  async deleteVisit(id: string): Promise<void> {
+    return apiService.deleteVisit(id);
+  },
+
+  // Rating categories methods
+  async getRatingCategories(): Promise<any> {
+    return apiService.getRatingCategories();
+  },
+
   // Check API availability
   async isApiAvailable(): Promise<boolean> {
     return apiService.isApiAvailable();

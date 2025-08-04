@@ -62,6 +62,7 @@ export function isPizzaRatingArray(value: unknown): value is PizzaRating[] {
 }
 
 export interface RestaurantVisit {
+  id?: string;
   date: string;
   ratings: RatingStructure;
   attendees: string[]; // member ids

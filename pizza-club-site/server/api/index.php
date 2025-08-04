@@ -66,6 +66,14 @@ try {
             require_once __DIR__ . '/endpoints/ratings.php';
             break;
             
+        case 'rating-categories':
+            require_once __DIR__ . '/endpoints/rating-categories.php';
+            break;
+            
+        case 'visits':
+            require_once __DIR__ . '/endpoints/visits.php';
+            break;
+            
         case 'quotes':
             require_once __DIR__ . '/endpoints/quotes.php';
             break;
@@ -87,7 +95,7 @@ try {
                 'timestamp' => date('c'),
                 'available_endpoints' => [
                     'restaurants', 'members', 'events', 'quotes', 
-                    'infographics', 'ratings', 'migrate'
+                    'infographics', 'ratings', 'rating-categories', 'visits', 'migrate'
                 ]
             ]);
             break;
@@ -104,7 +112,10 @@ try {
                     'GET /events' => 'List all events',
                     'GET /quotes' => 'List all quotes',
                     'GET /infographics' => 'List all infographics',
-                    'GET /ratings?visit_id=X' => 'Get ratings for a visit'
+                    'GET /ratings?visit_id=X' => 'Get ratings for a visit',
+                    'GET /rating-categories' => 'Get all rating categories',
+                    'GET /visits' => 'List all visits',
+                    'POST /visits' => 'Create new visit'
                 ]
             ]);
             break;

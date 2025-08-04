@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Button from '@/components/common/Button';
+import RatingForm from '@/components/admin/RatingForm';
 import { dataService } from '@/services/dataWithApi';
-import type { Restaurant, RestaurantVisit, Member } from '@/types';
+import type { Restaurant, RestaurantVisit, Member, NestedRatings } from '@/types';
 
 const RestaurantVisits: React.FC = () => {
   const { id } = useParams();
@@ -16,7 +17,8 @@ const RestaurantVisits: React.FC = () => {
   const [formData, setFormData] = useState({
     date: '',
     attendees: [] as string[],
-    notes: ''
+    notes: '',
+    ratings: {} as NestedRatings
   });
 
   useEffect(() => {
@@ -50,7 +52,8 @@ const RestaurantVisits: React.FC = () => {
     setFormData({
       date: new Date().toISOString().split('T')[0],
       attendees: [],
-      notes: ''
+      notes: '',
+      ratings: {}
     });
   };
 
@@ -60,17 +63,24 @@ const RestaurantVisits: React.FC = () => {
     setFormData({
       date: visit.date,
       attendees: visit.attendees,
-      notes: visit.notes || ''
+      notes: visit.notes || '',
+      ratings: (visit.ratings as NestedRatings) || {}
     });
   };
 
-  const handleDeleteVisit = async () => {
+  const handleDeleteVisit = async (visitId: string) => {
     if (!confirm('Are you sure you want to delete this visit?')) {
       return;
     }
 
-    // TODO: Implement delete visit endpoint
-    alert('Visit deletion not yet implemented in API');
+    try {
+      await dataService.deleteVisit(visitId);
+      alert('Visit deleted successfully');
+      await loadData();
+    } catch (error) {
+      console.error('Failed to delete visit:', error);
+      alert('Failed to delete visit');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,14 +93,26 @@ const RestaurantVisits: React.FC = () => {
 
     setSaving(true);
     try {
-      // TODO: Implement add/update visit endpoint
-      alert('Visit management not yet implemented in API');
-      
-      // Would need to:
-      // 1. Create/update the visit
-      // 2. Update the restaurant with the new visit
-      // await apiService.saveRestaurantVisit(id, formData);
-      
+      const visitData = {
+        restaurant_id: id,
+        visit_date: formData.date,
+        attendees: formData.attendees,
+        notes: formData.notes,
+        ratings: formData.ratings
+      };
+
+      if (editingVisit) {
+        // Update existing visit
+        await dataService.saveVisit({
+          id: editingVisit.id,
+          ...visitData
+        });
+      } else {
+        // Create new visit
+        await dataService.saveVisit(visitData);
+      }
+
+      alert(`Visit ${editingVisit ? 'updated' : 'created'} successfully`);
       setShowAddForm(false);
       await loadData();
     } catch (error) {
@@ -206,6 +228,16 @@ const RestaurantVisits: React.FC = () => {
                     placeholder="Any memorable moments from this visit..."
                   />
                 </div>
+
+                {/* Ratings */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Ratings</h3>
+                  <RatingForm
+                    initialRatings={formData.ratings}
+                    onRatingsChange={(ratings) => setFormData({ ...formData, ratings })}
+                    disabled={saving}
+                  />
+                </div>
               </div>
 
               <div className="mt-6 flex gap-4">
@@ -239,8 +271,8 @@ const RestaurantVisits: React.FC = () => {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {restaurant.visits.map((visit) => (
-                <div key={visit.date} className="p-6">
+              {restaurant.visits.map((visit, index) => (
+                <div key={visit.id || visit.date || index} className="p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h3 className="text-lg font-medium text-gray-900">
@@ -293,7 +325,7 @@ const RestaurantVisits: React.FC = () => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteVisit()}
+                        onClick={() => handleDeleteVisit(visit.id || visit.date)}
                         className="text-red-600 hover:text-red-900 text-sm font-medium"
                       >
                         Delete

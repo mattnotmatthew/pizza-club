@@ -270,5 +270,49 @@ export const apiService = {
     await apiRequest('migrate', {
       method: 'POST'
     });
+  },
+
+  /**
+   * Get rating categories
+   */
+  async getRatingCategories(): Promise<any> {
+    return await apiRequest('rating-categories');
+  },
+
+  /**
+   * Get visits
+   */
+  async getVisits(restaurantId?: string): Promise<any[]> {
+    const endpoint = restaurantId ? `visits?restaurant_id=${restaurantId}` : 'visits';
+    return await apiRequest(endpoint);
+  },
+
+  /**
+   * Get visit by ID
+   */
+  async getVisitById(id: string): Promise<any> {
+    return await apiRequest(`visits?id=${id}`);
+  },
+
+  /**
+   * Save visit
+   */
+  async saveVisit(visit: any): Promise<any> {
+    const isUpdate = !!visit.id;
+    const method = isUpdate ? 'PUT' : 'POST';
+    
+    return await apiRequest('visits', {
+      method,
+      body: JSON.stringify(visit)
+    });
+  },
+
+  /**
+   * Delete visit
+   */
+  async deleteVisit(id: string): Promise<void> {
+    await apiRequest(`visits?id=${id}`, {
+      method: 'DELETE'
+    });
   }
 };
