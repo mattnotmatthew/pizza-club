@@ -1,7 +1,7 @@
 /**
  * URL Utility Functions
  * 
- * Handles slug generation for member URLs
+ * Handles slug generation for member and restaurant URLs
  */
 
 /**
@@ -80,4 +80,34 @@ export function slugToName(slug: string): string {
     // Remove numeric suffix if present (e.g., "-2" at the end)
     .replace(/\s+\d+$/, '')
     .trim();
+}
+
+/**
+ * Convert a restaurant name to a URL-friendly slug
+ * Uses the same logic as nameToSlug for consistency
+ * 
+ * @param name - The restaurant's name
+ * @returns URL-safe slug
+ * 
+ * @example
+ * restaurantNameToSlug("Giordano's") // "giordanos"
+ * restaurantNameToSlug("Lou Malnati's Pizzeria") // "lou-malnatis-pizzeria"
+ * restaurantNameToSlug("Café Luigi") // "cafe-luigi"
+ */
+export function restaurantNameToSlug(name: string): string {
+  return nameToSlug(name);
+}
+
+/**
+ * Generate a unique restaurant slug, adding numeric suffix if needed
+ * 
+ * @param name - The restaurant's name
+ * @param existingSlugs - Array of existing slugs to check against
+ * @returns Unique URL-safe slug
+ * 
+ * @example
+ * generateUniqueRestaurantSlug("Giordano's", ["giordanos"]) // "giordanos-2"
+ */
+export function generateUniqueRestaurantSlug(name: string, existingSlugs: string[]): string {
+  return generateUniqueSlug(name, existingSlugs);
 }

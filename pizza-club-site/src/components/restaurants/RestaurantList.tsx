@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
 import { dataService } from '@/services/dataWithApi';
+import { restaurantNameToSlug } from '@/utils/urlUtils';
 import type { Restaurant, SortOption } from '@/types';
 import type { Infographic } from '@/types/infographics';
 
@@ -37,6 +38,11 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
   const getInfographicsForRestaurant = (restaurantId: string) => {
     return infographics.filter(ig => ig.restaurantId === restaurantId);
   };
+
+  const getRestaurantSlug = (restaurant: Restaurant): string => {
+    return restaurant.slug || restaurantNameToSlug(restaurant.name);
+  };
+
   return (
     <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${className}`}>
       <div className="space-y-4 p-4">
@@ -50,9 +56,13 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
             `}
           >
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-semibold text-lg text-gray-900 flex-1">
+              <Link
+                to={`/restaurants/${getRestaurantSlug(restaurant)}`}
+                className="font-semibold text-lg text-gray-900 hover:text-red-600 flex-1 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {restaurant.name}
-              </h3>
+              </Link>
             </div>
             
             <div className="flex items-center gap-2 mb-2">

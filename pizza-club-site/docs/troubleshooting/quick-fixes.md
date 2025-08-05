@@ -20,6 +20,7 @@ This document provides a quick reference for common issues and their immediate s
 | 404 on endpoint | Check directory name (underscore vs hyphen) |
 | Empty $_FILES | Don't set Content-Type header manually |
 | No progress | Use XMLHttpRequest, not fetch |
+| Invalid Date on visits | Map `visit_date` to `date` in API endpoints |
 
 ## Emergency Fixes
 
@@ -69,6 +70,16 @@ const compressionOptions = {
   maxWidthOrHeight: 2000, // Max 2000px
   useWebWorker: true      // Prevent UI blocking
 };
+```
+
+### Visit Date Shows "Invalid Date"
+```php
+// In PHP endpoints, map database field to frontend field
+foreach ($visits as &$visit) {
+    // Map visit_date to date for frontend compatibility
+    $visit['date'] = $visit['visit_date'];
+    unset($visit['visit_date']);
+}
 ```
 
 ## Prevention Checklist

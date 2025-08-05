@@ -33,6 +33,23 @@ export const dataService = {
     return await apiService.getRestaurantById(id);
   },
 
+  async getRestaurantBySlug(slug: string): Promise<Restaurant | undefined> {
+    // First try to get all restaurants and find by slug
+    const restaurants = await this.getRestaurants();
+    
+    // Try exact slug match first
+    let restaurant = restaurants.find(r => r.slug === slug);
+    
+    // If no slug field exists or no match, generate slugs on the fly
+    // This provides backward compatibility
+    if (!restaurant) {
+      const { restaurantNameToSlug } = await import('@/utils/urlUtils');
+      restaurant = restaurants.find(r => restaurantNameToSlug(r.name) === slug);
+    }
+    
+    return restaurant;
+  },
+
   async getMembers(): Promise<Member[]> {
     return await apiService.getMembers();
   },

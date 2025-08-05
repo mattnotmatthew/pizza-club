@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';
 import { dataService } from '@/services/dataWithApi';
+import { restaurantNameToSlug } from '@/utils/urlUtils';
 import type { Restaurant } from '@/types';
 
 const RestaurantsList: React.FC = () => {
@@ -49,6 +50,10 @@ const RestaurantsList: React.FC = () => {
     restaurant.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     restaurant.style?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getRestaurantSlug = (restaurant: Restaurant): string => {
+    return restaurant.slug || restaurantNameToSlug(restaurant.name);
+  };
 
   if (loading) {
     return (
@@ -123,7 +128,14 @@ const RestaurantsList: React.FC = () => {
                   <tr key={restaurant.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {restaurant.name}
+                        <Link
+                          to={`/restaurants/${getRestaurantSlug(restaurant)}`}
+                          className="text-blue-600 hover:text-blue-900"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {restaurant.name}
+                        </Link>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

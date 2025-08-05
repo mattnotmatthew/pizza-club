@@ -74,6 +74,7 @@ export interface RestaurantVisit {
 export interface Restaurant {
   id: string;
   name: string;
+  slug?: string; // URL-friendly version of the restaurant's name
   location?: string;
   address: string;
   coordinates: {

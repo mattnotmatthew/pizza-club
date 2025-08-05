@@ -10,6 +10,7 @@ const About = lazy(() => import('@/pages/About'));
 const Members = lazy(() => import('@/pages/Members'));
 const MemberDetail = lazy(() => import('@/pages/MemberDetail'));
 const Restaurants = lazy(() => import('@/pages/Restaurants'));
+const RestaurantDetail = lazy(() => import('@/pages/RestaurantDetail'));
 const RestaurantsCompare = lazy(() => import('@/pages/RestaurantsCompare'));
 const Events = lazy(() => import('@/pages/Events'));
 const Test = lazy(() => import('@/pages/Test'));
@@ -51,6 +52,7 @@ function App() {
               <Route path="members/:id" element={<MemberDetail />} />
               <Route path="restaurants" element={<Restaurants />} />
               <Route path="restaurants/compare" element={<RestaurantsCompare />} />
+              <Route path="restaurants/:slug" element={<RestaurantDetail />} />
               <Route path="events" element={<Events />} />
               <Route path="infographics" element={<Infographics />} />
               <Route path="infographics/:id" element={<InfographicView />} />
