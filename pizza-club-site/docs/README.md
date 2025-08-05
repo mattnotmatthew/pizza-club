@@ -15,6 +15,7 @@ Welcome to the Pizza Club Site documentation. This documentation provides a comp
 ### Features
 - **[Restaurant Comparison](./restaurant-comparison.md)** - Side-by-side restaurant comparison feature
 - **[Dynamic Rating Categories](./dynamic-rating-categories.md)** - Flexible rating system that adapts to data
+- **[Member URL Slugs](./features/member-url-slugs.md)** - SEO-friendly member profile URLs
 - **[Drag and Drop Ordering](./features/drag-and-drop-ordering.md)** - Reusable drag-and-drop components for custom ordering
 - **[Infographics Generator](./features/infographics/overview.md)** - Admin tool for creating visit infographics
   - [Authentication Setup](./features/infographics/authentication.md)

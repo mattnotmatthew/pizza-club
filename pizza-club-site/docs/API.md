@@ -106,6 +106,7 @@ Content-Type: application/json
 {
   "id": "member-id",
   "name": "Member Name",
+  "slug": "member-name",
   "bio": "Member bio",
   "photo": "https://example.com/photo.jpg",
   "memberSince": "2024",
@@ -117,11 +118,15 @@ Content-Type: application/json
 }
 ```
 
-**Focal Point Field:**
+**Special Fields:**
+- `slug` (optional): URL-friendly version of the member's name
+  - Auto-generated from name if not provided
+  - Used for SEO-friendly URLs (e.g., `/members/john-doe`)
+  - Should remain unchanged even if name is updated
 - `focalPoint` (optional): Object with x and y coordinates (0-100 percentages)
-- Used for hero image positioning in member detail pages
-- If not provided, system uses smart default (50% horizontal, 25% vertical)
-- Can be set to `null` to clear custom positioning
+  - Used for hero image positioning in member detail pages
+  - If not provided, system uses smart default (50% horizontal, 25% vertical)
+  - Can be set to `null` to clear custom positioning
 
 #### Delete member
 ```

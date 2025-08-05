@@ -22,6 +22,17 @@ const updateFilter = (newFilter: string) => {
 };
 ```
 
+### SEO-Friendly URL Parameters
+```typescript
+// Member profiles now use slugs instead of IDs
+const { id } = useParams(); // Receives "john-doe" instead of "member_123"
+
+// Navigation with slugs
+import { nameToSlug } from '@/utils/urlUtils';
+const memberSlug = member.slug || nameToSlug(member.name);
+navigate(`/members/${memberSlug}`);
+```
+
 ### Comparison Feature Pattern
 ```typescript
 // URL-based state persistence for shareable comparisons

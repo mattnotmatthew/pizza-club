@@ -47,8 +47,8 @@ const MemberDetail: React.FC = () => {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Fetch member from data service
-        const foundMember = await dataService.getMemberById(id || '');
+        // Fetch member from data service using slug
+        const foundMember = await dataService.getMemberBySlug(id || '');
         if (foundMember) {
           // Handle photo URL with base path
           let photoUrl = foundMember.photoUrl || foundMember.photo;

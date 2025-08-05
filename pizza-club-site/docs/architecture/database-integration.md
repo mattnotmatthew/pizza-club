@@ -117,7 +117,12 @@ POST   /migrate          - Run data migration
 ### Core Tables
 - `restaurants` - Restaurant information
 - `restaurant_visits` - Visit records with dates
-- `members` - Club member profiles with custom ordering via `display_order`
+- `members` - Club member profiles 
+  - `id` - Unique identifier
+  - `name` - Display name
+  - `slug` - URL-friendly slug for SEO (e.g., "john-doe")
+  - `display_order` - Custom ordering
+  - `focal_point` - Hero image positioning
 - `ratings` - All rating data
 - `rating_categories` - Dynamic rating structure
 - `events` - Club events calendar

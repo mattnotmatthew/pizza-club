@@ -36,7 +36,39 @@ const isMobile = useMediaQuery('(max-width: 768px)');
 
 ## Current Utilities
 
-Currently, the project doesn't have a dedicated utils folder, but common utilities are embedded in components and services.
+### URL Utilities (`utils/urlUtils.ts`)
+
+Handles URL slug generation for SEO-friendly member URLs.
+
+#### nameToSlug
+Converts member names to URL-safe slugs:
+```typescript
+nameToSlug(name: string): string
+
+// Examples:
+nameToSlug("John Doe") // "john-doe"
+nameToSlug("José García") // "jose-garcia"
+nameToSlug("Mary O'Brien") // "mary-obrien"
+```
+
+#### generateUniqueSlug
+Generates unique slugs with duplicate handling:
+```typescript
+generateUniqueSlug(name: string, existingSlugs: string[]): string
+
+// Example:
+const slugs = ["john-doe", "john-doe-2"];
+generateUniqueSlug("John Doe", slugs) // "john-doe-3"
+```
+
+#### slugToName
+Converts slugs back to searchable names (best-effort):
+```typescript
+slugToName(slug: string): string
+
+// Example:
+slugToName("john-doe-2") // "john doe"
+```
 
 ### Data Service Utilities (`services/data.ts`)
 

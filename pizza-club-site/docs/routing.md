@@ -31,7 +31,7 @@ Key features:
 |------|-----------|-------------|
 | `/` | `Home.tsx` | Landing page with hero, upcoming events, recent visits |
 | `/members` | `Members.tsx` | Grid view of all club members |
-| `/members/:id` | `MemberDetail.tsx` | Individual member profile and visited restaurants |
+| `/members/:slug` | `MemberDetail.tsx` | Individual member profile (e.g., `/members/john-doe`) |
 | `/restaurants` | `Restaurants.tsx` | List/map view of all restaurants |
 | `/restaurants/compare` | `RestaurantsCompare.tsx` | Side-by-side restaurant comparison tool |
 | `/events` | `Events.tsx` | Upcoming and past club events |
@@ -77,8 +77,8 @@ useEffect(() => {
 
 **Dynamic routing:**
 ```typescript
-const { id } = useParams();
-const member = await dataService.getMemberById(id);
+const { id } = useParams(); // Now receives slug (e.g., "john-doe")
+const member = await dataService.getMemberBySlug(id);
 ```
 
 ### Restaurants Page (`pages/Restaurants.tsx`)
@@ -154,7 +154,7 @@ Using React Router's `Link`:
 import { useNavigate } from 'react-router-dom';
 
 const navigate = useNavigate();
-navigate('/members/123');
+navigate('/members/john-doe');
 ```
 
 ### SubNavigation Pattern

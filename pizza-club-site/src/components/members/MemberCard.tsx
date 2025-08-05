@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import type { Member } from '@/types';
+import { nameToSlug } from '@/utils/urlUtils';
 
 interface MemberCardProps {
   member: Member;
@@ -9,9 +10,12 @@ interface MemberCardProps {
 const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
   const memberSince = member.joinDate ? new Date(member.joinDate).getFullYear() : new Date().getFullYear();
   
+  // Use slug if available, otherwise generate from name
+  const memberSlug = member.slug || nameToSlug(member.name);
+  
   return (
     <Link 
-      to={`/members/${member.id}`}
+      to={`/members/${memberSlug}`}
       className="group block bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
     >
       {/* Image Container */}

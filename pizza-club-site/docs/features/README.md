@@ -30,6 +30,17 @@ Intuitive drag-and-drop interface for customizing display order of members.
 
 **Status:** ✅ Complete
 
+#### [Member URL Slugs](./member-url-slugs.md)
+SEO-friendly URLs for member profiles using name-based slugs.
+
+**Key Benefits:**
+- Human-readable URLs (e.g., `/members/john-doe`)
+- SEO optimization for better search visibility
+- Automatic slug generation from member names
+- Duplicate handling with numeric suffixes
+
+**Status:** ✅ Complete
+
 ### Advanced Features
 
 #### [Infographics System](./infographics/)

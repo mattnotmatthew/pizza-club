@@ -41,6 +41,24 @@ export const dataService = {
     return await apiService.getMemberById(id);
   },
 
+  async getMemberBySlug(slug: string): Promise<Member | undefined> {
+    // First try to get the member by slug if the API supports it
+    // For now, we'll need to get all members and find by slug
+    const members = await this.getMembers();
+    
+    // Try exact slug match first
+    let member = members.find(m => m.slug === slug);
+    
+    // If no slug field exists or no match, generate slugs on the fly
+    // This provides backward compatibility
+    if (!member) {
+      const { nameToSlug } = await import('@/utils/urlUtils');
+      member = members.find(m => nameToSlug(m.name) === slug);
+    }
+    
+    return member;
+  },
+
   async getInfographics(): Promise<Infographic[]> {
     const infographics = await apiService.getInfographics();
     // Sort by most recently updated first

@@ -1,6 +1,7 @@
 export interface Member {
   id: string;
   name: string;
+  slug?: string; // URL-friendly version of the member's name
   bio: string;
   photo?: string;
   photoUrl?: string; // Deprecated: use photo
