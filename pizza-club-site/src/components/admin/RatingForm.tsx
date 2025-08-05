@@ -127,35 +127,75 @@ const RatingForm: React.FC<RatingFormProps> = ({
     value: number;
     onChange: (value: number) => void;
     disabled?: boolean;
-  }> = ({ label, value, onChange, disabled }) => (
-    <div className="flex items-center justify-between py-2">
-      <label className="text-sm font-medium text-gray-700 capitalize">
-        {label.replace('-', ' ')}
-      </label>
-      <div className="flex items-center space-x-2">
-        <input
-          type="range"
-          min="0"
-          max="5"
-          step="0.1"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          disabled={disabled}
-          className="w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-        />
-        <input
-          type="number"
-          min="0"
-          max="5"
-          step="0.1"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          disabled={disabled}
-          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-red-500 focus:border-red-500"
-        />
+  }> = ({ label, value, onChange, disabled }) => {
+    const [displayValue, setDisplayValue] = React.useState(value.toString());
+    const [isTyping, setIsTyping] = React.useState(false);
+
+    // Update display value when prop value changes (but not when user is actively typing)
+    React.useEffect(() => {
+      if (!isTyping) {
+        setDisplayValue(value.toString());
+      }
+    }, [value, isTyping]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+      setDisplayValue(inputValue);
+      setIsTyping(true);
+
+      // Only call onChange when the user stops typing or on blur
+      // This prevents focus loss during typing
+    };
+
+    const handleBlur = () => {
+      setIsTyping(false);
+      
+      // On blur, parse and validate the input
+      const numValue = parseFloat(displayValue);
+      if (isNaN(numValue) || numValue < 0) {
+        setDisplayValue('0');
+        onChange(0);
+      } else if (numValue > 5) {
+        setDisplayValue('5');
+        onChange(5);
+      } else {
+        // Round to 1 decimal place for clean display
+        const rounded = Math.round(numValue * 10) / 10;
+        setDisplayValue(rounded.toString());
+        onChange(rounded);
+      }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Handle Enter key to commit the value
+      if (e.key === 'Enter') {
+        handleBlur();
+        (e.target as HTMLInputElement).blur();
+      }
+    };
+
+    return (
+      <div className="flex items-center justify-between py-2">
+        <label className="text-sm font-medium text-gray-700 capitalize">
+          {label.replace('-', ' ')}
+        </label>
+        <div className="flex items-center space-x-2">
+          <input
+            type="text"
+            value={displayValue}
+            onChange={handleInputChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setIsTyping(true)}
+            disabled={disabled}
+            placeholder="0.0"
+            className="w-20 px-3 py-2 text-center border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm font-medium"
+          />
+          <span className="text-xs text-gray-500 w-8">/ 5</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
