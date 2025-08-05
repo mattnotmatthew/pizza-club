@@ -109,7 +109,7 @@ export const apiService = {
     const existingRestaurant = await this.getRestaurantById(restaurant.id).catch(() => null);
     const isNew = !existingRestaurant;
     const method = isNew ? 'POST' : 'PUT';
-    const endpoint = isNew ? 'restaurants' : `restaurants?id=${restaurant.id}`;
+    const endpoint = 'restaurants';
     
     return await apiRequest<Restaurant>(endpoint, {
       method,

@@ -148,6 +148,10 @@ class RestaurantAPI extends BaseAPI {
             $visit['attendees'] = $visit['attendee_ids'] ? explode(',', $visit['attendee_ids']) : [];
             unset($visit['attendee_ids']);
             
+            // Map visit_date to date for frontend compatibility
+            $visit['date'] = $visit['visit_date'];
+            unset($visit['visit_date']);
+            
             // Get ratings for this visit
             $visit['ratings'] = $this->getVisitRatings($visit['id']);
         }

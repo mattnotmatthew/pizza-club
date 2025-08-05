@@ -48,6 +48,10 @@ class VisitsAPI extends BaseAPI {
         // Get ratings
         $visit['ratings'] = $this->getVisitRatings($id);
         
+        // Map visit_date to date for frontend compatibility
+        $visit['date'] = $visit['visit_date'];
+        unset($visit['visit_date']);
+        
         $this->sendResponse($visit);
     }
     
@@ -70,6 +74,10 @@ class VisitsAPI extends BaseAPI {
             // Convert attendee IDs to array
             $visit['attendees'] = $visit['attendee_ids'] ? explode(',', $visit['attendee_ids']) : [];
             unset($visit['attendee_ids']);
+            
+            // Map visit_date to date for frontend compatibility
+            $visit['date'] = $visit['visit_date'];
+            unset($visit['visit_date']);
             
             // Get ratings for this visit
             $visit['ratings'] = $this->getVisitRatings($visit['id']);
@@ -107,6 +115,10 @@ class VisitsAPI extends BaseAPI {
         foreach ($visits as &$visit) {
             $visit['attendees'] = $this->getVisitAttendees($visit['id']);
             $visit['ratings'] = $this->getVisitRatings($visit['id']);
+            
+            // Map visit_date to date for frontend compatibility
+            $visit['date'] = $visit['visit_date'];
+            unset($visit['visit_date']);
         }
         
         $response = $this->paginatedResponse(
