@@ -13,7 +13,7 @@ server/.htaccess
 server/uploads/
 server/logs/
 .claude-code
-
+.mcp.json
 # Dependencies
 node_modules
 .pnp

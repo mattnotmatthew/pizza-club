@@ -185,7 +185,7 @@ const MemberDetail: React.FC = () => {
               </div>
               {member.favoriteStyle && (
                 <div>
-                  <p className="text-sm text-gray-500">Favorite Pizza Style</p>
+                  <p className="text-sm text-gray-500">Role</p>
                   <p className="text-lg font-semibold">{member.favoriteStyle}</p>
                 </div>
               )}
