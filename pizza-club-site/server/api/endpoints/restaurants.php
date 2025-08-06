@@ -87,6 +87,21 @@ class RestaurantAPI extends BaseAPI {
                 'lng' => (float)$restaurant['longitude']
             ];
             unset($restaurant['latitude'], $restaurant['longitude']);
+            
+            // Format hero focal point for frontend
+            if ($restaurant['hero_focal_point_x'] !== null && $restaurant['hero_focal_point_y'] !== null) {
+                $restaurant['heroFocalPoint'] = [
+                    'x' => (float)$restaurant['hero_focal_point_x'],
+                    'y' => (float)$restaurant['hero_focal_point_y']
+                ];
+            }
+            unset($restaurant['hero_focal_point_x'], $restaurant['hero_focal_point_y']);
+            
+            // Rename hero_image to heroImage for frontend compatibility
+            if (isset($restaurant['hero_image'])) {
+                $restaurant['heroImage'] = $restaurant['hero_image'];
+                unset($restaurant['hero_image']);
+            }
         }
         
         $response = $this->paginatedResponse(
@@ -121,6 +136,21 @@ class RestaurantAPI extends BaseAPI {
             'lng' => (float)$restaurant['longitude']
         ];
         unset($restaurant['latitude'], $restaurant['longitude']);
+        
+        // Format hero focal point for frontend
+        if ($restaurant['hero_focal_point_x'] !== null && $restaurant['hero_focal_point_y'] !== null) {
+            $restaurant['heroFocalPoint'] = [
+                'x' => (float)$restaurant['hero_focal_point_x'],
+                'y' => (float)$restaurant['hero_focal_point_y']
+            ];
+        }
+        unset($restaurant['hero_focal_point_x'], $restaurant['hero_focal_point_y']);
+        
+        // Rename hero_image to heroImage for frontend compatibility
+        if (isset($restaurant['hero_image'])) {
+            $restaurant['heroImage'] = $restaurant['hero_image'];
+            unset($restaurant['hero_image']);
+        }
         
         // Get visits
         $restaurant['visits'] = $this->getRestaurantVisits($id);
@@ -228,13 +258,16 @@ class RestaurantAPI extends BaseAPI {
             ':price_range' => $data['price_range'] ?? null,
             ':website' => $this->sanitize($data['website'] ?? ''),
             ':phone' => $this->sanitize($data['phone'] ?? ''),
-            ':must_try' => $this->sanitize($data['must_try'] ?? '')
+            ':must_try' => $this->sanitize($data['must_try'] ?? ''),
+            ':hero_image' => $this->sanitize($data['heroImage'] ?? ''),
+            ':hero_focal_point_x' => isset($data['heroFocalPoint']['x']) ? (float)$data['heroFocalPoint']['x'] : null,
+            ':hero_focal_point_y' => isset($data['heroFocalPoint']['y']) ? (float)$data['heroFocalPoint']['y'] : null
         ];
         
         $sql = "INSERT INTO restaurants 
-                (id, name, location, address, latitude, longitude, style, price_range, website, phone, must_try)
+                (id, name, location, address, latitude, longitude, style, price_range, website, phone, must_try, hero_image, hero_focal_point_x, hero_focal_point_y)
                 VALUES 
-                (:id, :name, :location, :address, :latitude, :longitude, :style, :price_range, :website, :phone, :must_try)";
+                (:id, :name, :location, :address, :latitude, :longitude, :style, :price_range, :website, :phone, :must_try, :hero_image, :hero_focal_point_x, :hero_focal_point_y)";
         
         try {
             $this->db->execute($sql, $params);
@@ -422,6 +455,24 @@ class RestaurantAPI extends BaseAPI {
             if (isset($data['coordinates']['lng'])) {
                 $updates[] = "longitude = :longitude";
                 $params[':longitude'] = (float)$data['coordinates']['lng'];
+            }
+        }
+        
+        // Handle hero image
+        if (isset($data['heroImage'])) {
+            $updates[] = "hero_image = :hero_image";
+            $params[':hero_image'] = $this->sanitize($data['heroImage']);
+        }
+        
+        // Handle hero focal point
+        if (isset($data['heroFocalPoint'])) {
+            if (isset($data['heroFocalPoint']['x'])) {
+                $updates[] = "hero_focal_point_x = :hero_focal_point_x";
+                $params[':hero_focal_point_x'] = (float)$data['heroFocalPoint']['x'];
+            }
+            if (isset($data['heroFocalPoint']['y'])) {
+                $updates[] = "hero_focal_point_y = :hero_focal_point_y";
+                $params[':hero_focal_point_y'] = (float)$data['heroFocalPoint']['y'];
             }
         }
         
