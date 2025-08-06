@@ -89,6 +89,8 @@ export interface Restaurant {
   website?: string;
   phone?: string;
   mustTry?: string;
+  heroImage?: string; // URL to the restaurant's hero image
+  heroFocalPoint?: { x: number; y: number }; // Focal point for responsive image positioning (0-100)
 }
 
 export interface Visit {

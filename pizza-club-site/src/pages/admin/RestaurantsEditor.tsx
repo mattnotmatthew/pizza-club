@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
+import RestaurantImageUploader from '@/components/admin/RestaurantImageUploader';
 import { dataService } from '@/services/dataWithApi';
+import { restaurantNameToSlug } from '@/utils/urlUtils';
 import type { Restaurant } from '@/types';
 
 const RestaurantsEditor: React.FC = () => {
@@ -21,6 +23,8 @@ const RestaurantsEditor: React.FC = () => {
     phone: '',
     mustTry: ''
   });
+  const [heroImage, setHeroImage] = useState<string | undefined>();
+  const [heroFocalPoint, setHeroFocalPoint] = useState<{ x: number; y: number } | undefined>();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -47,6 +51,8 @@ const RestaurantsEditor: React.FC = () => {
           phone: restaurant.phone || '',
           mustTry: restaurant.mustTry || ''
         });
+        setHeroImage(restaurant.heroImage);
+        setHeroFocalPoint(restaurant.heroFocalPoint);
       } else {
         alert('Restaurant not found');
         navigate('/admin/restaurants');
@@ -84,6 +90,8 @@ const RestaurantsEditor: React.FC = () => {
         website: formData.website || undefined,
         phone: formData.phone || undefined,
         mustTry: formData.mustTry || undefined,
+        heroImage: heroImage || undefined,
+        heroFocalPoint: heroFocalPoint || undefined,
         averageRating: 0,
         visits: isEditing ? undefined : []
       };
@@ -290,6 +298,17 @@ const RestaurantsEditor: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, mustTry: e.target.value })}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
                 placeholder="Margherita Pizza"
+              />
+            </div>
+
+            {/* Hero Image */}
+            <div className="pt-6 border-t border-gray-200">
+              <RestaurantImageUploader
+                restaurantSlug={formData.name ? restaurantNameToSlug(formData.name) : 'new-restaurant'}
+                currentImageUrl={heroImage}
+                currentFocalPoint={heroFocalPoint}
+                onImageChange={setHeroImage}
+                onFocalPointChange={setHeroFocalPoint}
               />
             </div>
           </div>
