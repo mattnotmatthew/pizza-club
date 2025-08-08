@@ -64,10 +64,29 @@ Content-Type: application/json
   "coordinates": {"lat": 41.8781, "lng": -87.6298},
   "phone": "(312) 555-0123",
   "website": "https://example.com",
+  "heroImage": "https://example.com/hero.jpg",
+  "heroFocalPoint": {"x": 50, "y": 40},
+  "heroZoom": 1.2,
+  "heroPanX": -10,
+  "heroPanY": 5,
   "hours": {...},
   "features": {...}
 }
 ```
+
+**Hero Image Fields:**
+- `heroImage` (optional): URL to the restaurant's hero image
+- `heroFocalPoint` (optional): Object with x and y coordinates (0-100 percentages)
+  - Used for responsive image positioning
+  - If not provided, system uses smart default (50% horizontal, 40% vertical)
+  - Can be set to `null` to clear custom positioning
+- `heroZoom` (optional): Zoom level for hero image (1.0-3.0)
+  - 1.0 = no zoom, 3.0 = maximum zoom
+  - Used for magnifying specific areas of the image
+- `heroPanX` (optional): Horizontal pan offset (-50 to 50 percentage)
+  - Negative values pan left, positive values pan right
+- `heroPanY` (optional): Vertical pan offset (-50 to 50 percentage)
+  - Negative values pan up, positive values pan down
 
 #### Update restaurant
 ```
@@ -76,9 +95,17 @@ Content-Type: application/json
 
 {
   "id": "existing-id",
-  // ... fields to update
+  "name": "Updated Restaurant Name",
+  "heroImage": "https://example.com/new-hero.jpg",
+  "heroFocalPoint": {"x": 60, "y": 30},
+  "heroZoom": 1.5,
+  "heroPanX": 0,
+  "heroPanY": -5
+  // ... other fields to update
 }
 ```
+
+**Note:** Hero image fields can be set to `null` to clear existing values and return to defaults.
 
 #### Delete restaurant
 ```

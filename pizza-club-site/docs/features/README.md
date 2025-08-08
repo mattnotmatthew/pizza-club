@@ -19,6 +19,18 @@ Smart focal point control for member profile photos with visual editing interfac
 
 **Status:** ✅ Complete
 
+#### [Restaurant Hero Image Positioning](./restaurant-hero-image-positioning.md)
+Comprehensive image control system for restaurant hero images with zoom, pan, and focal point capabilities.
+
+**Key Benefits:**
+- **Zoom Control**: 1x-3x magnification for detailed positioning
+- **Pan Controls**: X/Y positioning for optimal framing
+- **Focal Point**: Smart responsive positioning
+- **Live Preview**: Real-time visual feedback
+- **Cache Busting**: Prevents browser caching issues
+
+**Status:** ✅ Complete
+
 #### [Drag and Drop Ordering](./drag-and-drop-ordering.md)
 Intuitive drag-and-drop interface for customizing display order of members.
 
@@ -61,6 +73,7 @@ Comprehensive infographic creation and management system.
 
 ### Image Handling
 - **Member Hero Positioning** - Focal point control for member photos
+- **Restaurant Hero Positioning** - Zoom, pan, and focal point control for restaurant images
 - **Infographic Photos** - Advanced photo positioning and layering
 - **Photo Upload** - Drag-and-drop upload with optimization
 

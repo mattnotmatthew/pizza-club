@@ -81,12 +81,15 @@ export default ComponentName;
 ## Restaurant Components
 
 ### RestaurantList (`components/restaurants/RestaurantList.tsx`)
-- Grid/list view of all restaurants
+- Grid/list view of all restaurants with enhanced hero image display
 - Features:
   - Filtering and sorting
   - Average ratings display
   - Visit count
   - Price range indicators
+  - **Hero image transforms**: Applies zoom, pan, and focal point positioning
+  - **Enhanced gradient overlay**: Improved readability with multi-stop gradient
+  - **Responsive image loading**: Handles load states and errors gracefully
 
 ### RestaurantSelector (`components/restaurants/RestaurantSelector.tsx`)
 - Restaurant selection interface for comparison feature
@@ -268,12 +271,15 @@ Not currently implemented but recommended for production
 ## Admin Components
 
 ### FocalPointEditor (`components/admin/FocalPointEditor.tsx`)
-- Visual editor for setting image focal points
+- Enhanced visual editor for setting image focal points with zoom and pan controls
 - Features:
-  - Click-to-set focal point positioning
-  - Live preview with object-position styling
+  - Click-to-set focal point positioning with zoom/pan compensation
+  - Live preview with object-position and transform styling
   - Rule of thirds grid overlay during editing
   - Quick presets (Face, Reset)
+  - **Zoom Control**: 1x-3x magnification with visual progress indicator
+  - **Pan X/Y Controls**: -50% to 50% positioning with visual progress indicators
+  - **Reset All**: Quick reset for zoom, pan, and focal point values
   - Current position display with coordinates
   - Smart default status indication
 - Props:
@@ -281,10 +287,44 @@ Not currently implemented but recommended for production
   interface FocalPointEditorProps {
     imageUrl: string;
     focalPoint?: { x: number; y: number };
+    zoom?: number;
+    panX?: number;
+    panY?: number;
     onFocalPointChange: (focalPoint: { x: number; y: number } | undefined) => void;
+    onZoomChange?: (zoom: number | undefined) => void;
+    onPanXChange?: (panX: number | undefined) => void;
+    onPanYChange?: (panY: number | undefined) => void;
   }
   ```
-- Usage: Integrated into MemberPhotoUploader for hero image positioning
+- Usage: Integrated into both MemberPhotoUploader and RestaurantImageUploader for comprehensive image positioning
+
+### RestaurantImageUploader (`components/admin/RestaurantImageUploader.tsx`)
+- Enhanced photo uploader specifically for restaurant hero images
+- Features:
+  - All PhotoUploader features (drag-and-drop, validation, optimization)
+  - **Integrated zoom and pan controls** via FocalPointEditor
+  - **Live preview** showing exact final positioning
+  - **Cache-busting timestamps** to prevent browser caching issues
+  - Server upload with progress tracking
+  - Base64 fallback support
+  - Photo preview with error handling
+  - **Remove image functionality** that clears all positioning values
+- Props:
+  ```typescript
+  interface RestaurantImageUploaderProps {
+    restaurantSlug: string;
+    currentImageUrl?: string;
+    currentFocalPoint?: { x: number; y: number };
+    currentZoom?: number;
+    currentPanX?: number;
+    currentPanY?: number;
+    onImageChange: (url: string | undefined) => void;
+    onFocalPointChange: (focalPoint: { x: number; y: number } | undefined) => void;
+    onZoomChange: (zoom: number | undefined) => void;
+    onPanXChange: (panX: number | undefined) => void;
+    onPanYChange: (panY: number | undefined) => void;
+  }
+  ```
 
 ### MemberPhotoUploader (`components/admin/MemberPhotoUploader.tsx`)
 - Enhanced photo uploader with focal point editing
