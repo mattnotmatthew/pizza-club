@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { optimizeImage, validateImageFile } from '@/utils/imageOptimization';
 import { uploadPhotoToServer, shouldUseRemoteStorage } from '@/utils/photoRemoteStorage';
 import FocalPointEditor from './FocalPointEditor';
@@ -8,16 +8,28 @@ interface RestaurantImageUploaderProps {
   restaurantSlug: string;
   currentImageUrl?: string;
   currentFocalPoint?: { x: number; y: number };
+  currentZoom?: number;
+  currentPanX?: number;
+  currentPanY?: number;
   onImageChange: (url: string | undefined) => void;
   onFocalPointChange: (focalPoint: { x: number; y: number } | undefined) => void;
+  onZoomChange: (zoom: number | undefined) => void;
+  onPanXChange: (panX: number | undefined) => void;
+  onPanYChange: (panY: number | undefined) => void;
 }
 
 const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
   restaurantSlug,
   currentImageUrl,
   currentFocalPoint,
+  currentZoom,
+  currentPanX,
+  currentPanY,
   onImageChange,
-  onFocalPointChange
+  onFocalPointChange,
+  onZoomChange,
+  onPanXChange,
+  onPanYChange
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -25,6 +37,14 @@ const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const useRemoteStorage = shouldUseRemoteStorage();
+
+  // Simply use the currentImageUrl prop - let the parent manage the state
+  const displayUrl = currentImageUrl;
+
+  // Clear error when restaurant changes
+  useEffect(() => {
+    setError(null);
+  }, [restaurantSlug]);
 
   const processFile = async (file: File) => {
     try {
@@ -52,7 +72,9 @@ const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
         );
 
         if (uploadResult.success && uploadResult.url) {
-          onImageChange(uploadResult.url);
+          // Add cache-busting timestamp to prevent browser caching issues
+          const urlWithCacheBuster = `${uploadResult.url}?t=${Date.now()}`;
+          onImageChange(urlWithCacheBuster);
         } else {
           throw new Error(uploadResult.error || 'Upload failed');
         }
@@ -61,7 +83,10 @@ const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
         const reader = new FileReader();
         reader.onload = (e) => {
           if (e.target?.result) {
-            onImageChange(e.target.result as string);
+            const url = e.target.result as string;
+            // Base64 URLs don't need cache-busting but add timestamp for consistency
+            const urlWithCacheBuster = `${url}#t=${Date.now()}`;
+            onImageChange(urlWithCacheBuster);
           }
         };
         reader.onerror = () => {
@@ -121,6 +146,9 @@ const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
   const handleRemoveImage = () => {
     onImageChange(undefined);
     onFocalPointChange(undefined);
+    onZoomChange(undefined);
+    onPanXChange(undefined);
+    onPanYChange(undefined);
     setError(null);
   };
 
@@ -130,7 +158,7 @@ const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
         <label className="block text-sm font-medium text-gray-700">
           Restaurant Hero Image
         </label>
-        {currentImageUrl && (
+        {displayUrl && (
           <button
             type="button"
             onClick={handleRemoveImage}
@@ -142,24 +170,33 @@ const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
       </div>
 
       {/* Current Image Preview */}
-      {currentImageUrl && !isProcessing && (
+      {displayUrl && !isProcessing && (
         <div className="mb-4">
           <div className="relative w-full h-48 rounded-lg overflow-hidden shadow-sm">
-            <img
-              src={currentImageUrl}
-              alt="Current restaurant hero image"
-              className="w-full h-full object-cover"
+            <div
+              className="w-full h-full"
               style={{
-                objectPosition: currentFocalPoint 
-                  ? `${currentFocalPoint.x}% ${currentFocalPoint.y}%` 
-                  : '50% 40%'
+                transform: `scale(${currentZoom || 1}) translate(${currentPanX || 0}%, ${currentPanY || 0}%)`,
+                transformOrigin: 'center',
+                transition: 'transform 0.2s ease-out'
               }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '';
-                (e.target as HTMLImageElement).style.display = 'none';
-                setError('Failed to load current image');
-              }}
-            />
+            >
+              <img
+                src={displayUrl}
+                alt="Current restaurant hero image"
+                className="w-full h-full object-cover"
+                style={{
+                  objectPosition: currentFocalPoint 
+                    ? `${currentFocalPoint.x}% ${currentFocalPoint.y}%` 
+                    : '50% 40%'
+                }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '';
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  setError('Failed to load current image');
+                }}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -224,7 +261,7 @@ const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
             />
           </svg>
           <p className="mt-2 text-sm text-gray-600">
-            {currentImageUrl ? 'Drop a new image here or click to replace' : 'Drop an image here or click to select'}
+            {displayUrl ? 'Drop a new image here or click to replace' : 'Drop an image here or click to select'}
           </p>
           <p className="text-xs text-gray-500 mt-1">
             JPG, PNG, WebP up to 10MB (will be optimized to WebP)
@@ -241,12 +278,18 @@ const RestaurantImageUploader: React.FC<RestaurantImageUploaderProps> = ({
       )}
 
       {/* Focal Point Editor */}
-      {currentImageUrl && !isProcessing && (
+      {displayUrl && !isProcessing && (
         <div className="pt-6 border-t border-gray-200">
           <FocalPointEditor
-            imageUrl={currentImageUrl}
+            imageUrl={displayUrl}
             focalPoint={currentFocalPoint}
+            zoom={currentZoom}
+            panX={currentPanX}
+            panY={currentPanY}
             onFocalPointChange={onFocalPointChange}
+            onZoomChange={onZoomChange}
+            onPanXChange={onPanXChange}
+            onPanYChange={onPanYChange}
           />
         </div>
       )}

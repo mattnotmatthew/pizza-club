@@ -106,7 +106,13 @@ export const apiService = {
    * Create or update restaurant
    */
   async saveRestaurant(restaurant: Partial<Restaurant> & { id: string }): Promise<Restaurant> {
-    const existingRestaurant = await this.getRestaurantById(restaurant.id).catch(() => null);
+    let existingRestaurant = null;
+    try {
+      existingRestaurant = await this.getRestaurantById(restaurant.id);
+    } catch (error) {
+      // Restaurant doesn't exist, will create new
+    }
+    
     const isNew = !existingRestaurant;
     const method = isNew ? 'POST' : 'PUT';
     const endpoint = 'restaurants';

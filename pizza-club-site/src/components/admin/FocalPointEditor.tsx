@@ -3,22 +3,54 @@ import React, { useState } from 'react';
 interface FocalPointEditorProps {
   imageUrl: string;
   focalPoint?: { x: number; y: number };
+  zoom?: number;
+  panX?: number;
+  panY?: number;
   onFocalPointChange: (focalPoint: { x: number; y: number } | undefined) => void;
+  onZoomChange?: (zoom: number | undefined) => void;
+  onPanXChange?: (panX: number | undefined) => void;
+  onPanYChange?: (panY: number | undefined) => void;
 }
 
 const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
   imageUrl,
   focalPoint,
-  onFocalPointChange
+  zoom: propZoom,
+  panX: propPanX,
+  panY: propPanY,
+  onFocalPointChange,
+  onZoomChange,
+  onPanXChange,
+  onPanYChange
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Use props if available, fallback to defaults
+  const zoom = propZoom ?? 1;
+  const panX = propPanX ?? 0;
+  const panY = propPanY ?? 0;
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isEditing) return;
     
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    // Account for zoom and pan when calculating click position
+    const containerWidth = rect.width;
+    const containerHeight = rect.height;
+    const scaledWidth = containerWidth * zoom;
+    const scaledHeight = containerHeight * zoom;
+    
+    // Calculate offset from zoom scaling
+    const scaleOffsetX = (scaledWidth - containerWidth) / 2;
+    const scaleOffsetY = (scaledHeight - containerHeight) / 2;
+    
+    // Calculate pan offset (convert percentage to pixels)
+    const panOffsetX = (panX / 100) * scaledWidth;
+    const panOffsetY = (panY / 100) * scaledHeight;
+    
+    const x = ((e.clientX - rect.left + scaleOffsetX - panOffsetX) / scaledWidth) * 100;
+    const y = ((e.clientY - rect.top + scaleOffsetY - panOffsetY) / scaledHeight) * 100;
     
     onFocalPointChange({
       x: Math.max(0, Math.min(100, x)),
@@ -32,6 +64,12 @@ const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
 
   const useFaceDefault = () => {
     onFocalPointChange({ x: 50, y: 25 });
+  };
+
+  const resetZoomAndPan = () => {
+    onZoomChange?.(undefined);
+    onPanXChange?.(undefined);
+    onPanYChange?.(undefined);
   };
 
   if (!imageUrl) {
@@ -59,20 +97,110 @@ const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
         </div>
       </div>
 
+      {/* Zoom and Pan Controls */}
+      {isEditing && (
+        <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-gray-700">Image Controls</h4>
+            <button
+              type="button"
+              onClick={resetZoomAndPan}
+              className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+            >
+              Reset All
+            </button>
+          </div>
+          
+          {/* Zoom Control */}
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-700 min-w-0 w-12">
+              Zoom:
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="3"
+              step="0.1"
+              value={zoom}
+              onChange={(e) => onZoomChange?.(parseFloat(e.target.value))}
+              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((zoom - 1) / 2) * 100}%, #e5e7eb ${((zoom - 1) / 2) * 100}%, #e5e7eb 100%)`
+              }}
+            />
+            <span className="text-sm text-gray-600 min-w-0 font-mono w-12 text-right">
+              {zoom.toFixed(1)}x
+            </span>
+          </div>
+
+          {/* Pan X Control */}
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-700 min-w-0 w-12">
+              Pan X:
+            </label>
+            <input
+              type="range"
+              min="-50"
+              max="50"
+              step="1"
+              value={panX}
+              onChange={(e) => onPanXChange?.(parseFloat(e.target.value))}
+              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb 50%, #10b981 50%, #10b981 ${50 + (panX / 100) * 50}%, #e5e7eb ${50 + (panX / 100) * 50}%, #e5e7eb 100%)`
+              }}
+            />
+            <span className="text-sm text-gray-600 min-w-0 font-mono w-12 text-right">
+              {panX}%
+            </span>
+          </div>
+
+          {/* Pan Y Control */}
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-700 min-w-0 w-12">
+              Pan Y:
+            </label>
+            <input
+              type="range"
+              min="-50"
+              max="50"
+              step="1"
+              value={panY}
+              onChange={(e) => onPanYChange?.(parseFloat(e.target.value))}
+              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              style={{
+                background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb 50%, #10b981 50%, #10b981 ${50 + (panY / 100) * 50}%, #e5e7eb ${50 + (panY / 100) * 50}%, #e5e7eb 100%)`
+              }}
+            />
+            <span className="text-sm text-gray-600 min-w-0 font-mono w-12 text-right">
+              {panY}%
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Image Preview with Focal Point */}
       <div 
-        className={`relative bg-gray-100 rounded-lg overflow-hidden ${
-          isEditing ? 'cursor-crosshair' : ''
+        className={`relative bg-gray-100 rounded-lg ${
+          isEditing ? 'cursor-crosshair overflow-auto' : 'overflow-hidden'
         }`}
         onClick={handleImageClick}
       >
-        <div className="aspect-[5/3] relative">
-          <img
-            src={imageUrl}
-            alt="Focal point preview"
-            className="w-full h-full object-cover"
-            style={focalPoint ? { objectPosition: `${focalPoint.x}% ${focalPoint.y}%` } : {}}
-          />
+        <div className="aspect-[5/3] relative" style={{ minHeight: '200px' }}>
+          <div 
+            className={`w-full h-full ${isEditing ? 'origin-center' : ''}`}
+            style={isEditing ? { 
+              transform: `scale(${zoom}) translate(${panX}%, ${panY}%)`,
+              transition: 'transform 0.2s ease-out'
+            } : {}}
+          >
+            <img
+              src={imageUrl}
+              alt="Focal point preview"
+              className="w-full h-full object-cover"
+              style={focalPoint ? { objectPosition: `${focalPoint.x}% ${focalPoint.y}%` } : {}}
+            />
+          </div>
           
           {/* Focal Point Indicator */}
           {focalPoint && (
@@ -141,6 +269,7 @@ const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
       <p className="text-xs text-gray-500">
         The focal point determines which part of the image stays visible when cropped for the hero display.
         {!focalPoint && ' Currently using smart defaults optimized for portrait photos.'}
+        {isEditing && ' Use zoom to see details and pan sliders to move around when setting the focal point.'}
       </p>
     </div>
   );

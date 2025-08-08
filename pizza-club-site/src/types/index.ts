@@ -91,6 +91,9 @@ export interface Restaurant {
   mustTry?: string;
   heroImage?: string; // URL to the restaurant's hero image
   heroFocalPoint?: { x: number; y: number }; // Focal point for responsive image positioning (0-100)
+  heroZoom?: number; // Zoom level for hero image (1-3)
+  heroPanX?: number; // Pan X offset for hero image (-50 to 50)
+  heroPanY?: number; // Pan Y offset for hero image (-50 to 50)
 }
 
 export interface Visit {

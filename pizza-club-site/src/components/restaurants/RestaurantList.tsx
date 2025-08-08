@@ -49,6 +49,13 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
     return `${focalPoint.x}% ${focalPoint.y}%`;
   };
 
+  const getImageTransform = (restaurant: Restaurant): string => {
+    const zoom = restaurant.heroZoom || 1;
+    const panX = restaurant.heroPanX || 0;
+    const panY = restaurant.heroPanY || 0;
+    return `scale(${zoom}) translate(${panX}%, ${panY}%)`;
+  };
+
   const handleImageLoad = (restaurantId: string) => {
     setImageLoadStates(prev => ({
       ...prev,
@@ -97,7 +104,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                     onError={() => handleImageError(restaurant.id)}
                   />
                   
-                  {/* Background image with focal point */}
+                  {/* Background image with focal point and zoom/pan */}
                   <div
                     className={`
                       absolute inset-0 bg-cover bg-no-repeat
@@ -106,12 +113,14 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                     `}
                     style={{
                       backgroundImage: `url(${restaurant.heroImage})`,
-                      backgroundPosition: getFocalPointStyle(restaurant)
+                      backgroundPosition: getFocalPointStyle(restaurant),
+                      transform: getImageTransform(restaurant),
+                      transformOrigin: 'center'
                     }}
                   />
                   
                   {/* Gradient overlay for text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/100 via-black/90 via-black/80 to-black/0" />
                 </>
               )}
 

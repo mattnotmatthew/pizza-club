@@ -25,6 +25,9 @@ const RestaurantsEditor: React.FC = () => {
   });
   const [heroImage, setHeroImage] = useState<string | undefined>();
   const [heroFocalPoint, setHeroFocalPoint] = useState<{ x: number; y: number } | undefined>();
+  const [heroZoom, setHeroZoom] = useState<number | undefined>();
+  const [heroPanX, setHeroPanX] = useState<number | undefined>();
+  const [heroPanY, setHeroPanY] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -53,6 +56,9 @@ const RestaurantsEditor: React.FC = () => {
         });
         setHeroImage(restaurant.heroImage);
         setHeroFocalPoint(restaurant.heroFocalPoint);
+        setHeroZoom(restaurant.heroZoom);
+        setHeroPanX(restaurant.heroPanX);
+        setHeroPanY(restaurant.heroPanY);
       } else {
         alert('Restaurant not found');
         navigate('/admin/restaurants');
@@ -76,7 +82,7 @@ const RestaurantsEditor: React.FC = () => {
 
     setSaving(true);
     try {
-      const restaurantData: Partial<Restaurant> & { id: string } = {
+      const restaurantData: any = {
         id: isEditing ? id : `restaurant_${Date.now()}`,
         name: formData.name,
         location: formData.location || undefined,
@@ -90,8 +96,12 @@ const RestaurantsEditor: React.FC = () => {
         website: formData.website || undefined,
         phone: formData.phone || undefined,
         mustTry: formData.mustTry || undefined,
-        heroImage: heroImage || undefined,
-        heroFocalPoint: heroFocalPoint || undefined,
+        // Explicitly send null when removing image to clear it in database
+        heroImage: heroImage === undefined ? null : heroImage,
+        heroFocalPoint: heroFocalPoint === undefined ? null : heroFocalPoint,
+        heroZoom: heroZoom === undefined ? null : heroZoom,
+        heroPanX: heroPanX === undefined ? null : heroPanX,
+        heroPanY: heroPanY === undefined ? null : heroPanY,
         averageRating: 0,
         visits: isEditing ? undefined : []
       };
@@ -307,8 +317,14 @@ const RestaurantsEditor: React.FC = () => {
                 restaurantSlug={formData.name ? restaurantNameToSlug(formData.name) : 'new-restaurant'}
                 currentImageUrl={heroImage}
                 currentFocalPoint={heroFocalPoint}
+                currentZoom={heroZoom}
+                currentPanX={heroPanX}
+                currentPanY={heroPanY}
                 onImageChange={setHeroImage}
                 onFocalPointChange={setHeroFocalPoint}
+                onZoomChange={setHeroZoom}
+                onPanXChange={setHeroPanX}
+                onPanYChange={setHeroPanY}
               />
             </div>
           </div>

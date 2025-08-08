@@ -97,6 +97,20 @@ class RestaurantAPI extends BaseAPI {
             }
             unset($restaurant['hero_focal_point_x'], $restaurant['hero_focal_point_y']);
             
+            // Format hero zoom and pan for frontend
+            if (isset($restaurant['hero_zoom'])) {
+                $restaurant['heroZoom'] = (float)$restaurant['hero_zoom'];
+                unset($restaurant['hero_zoom']);
+            }
+            if (isset($restaurant['hero_pan_x'])) {
+                $restaurant['heroPanX'] = (float)$restaurant['hero_pan_x'];
+                unset($restaurant['hero_pan_x']);
+            }
+            if (isset($restaurant['hero_pan_y'])) {
+                $restaurant['heroPanY'] = (float)$restaurant['hero_pan_y'];
+                unset($restaurant['hero_pan_y']);
+            }
+            
             // Rename hero_image to heroImage for frontend compatibility
             if (isset($restaurant['hero_image'])) {
                 $restaurant['heroImage'] = $restaurant['hero_image'];
@@ -145,6 +159,20 @@ class RestaurantAPI extends BaseAPI {
             ];
         }
         unset($restaurant['hero_focal_point_x'], $restaurant['hero_focal_point_y']);
+        
+        // Format hero zoom and pan for frontend
+        if (isset($restaurant['hero_zoom'])) {
+            $restaurant['heroZoom'] = (float)$restaurant['hero_zoom'];
+            unset($restaurant['hero_zoom']);
+        }
+        if (isset($restaurant['hero_pan_x'])) {
+            $restaurant['heroPanX'] = (float)$restaurant['hero_pan_x'];
+            unset($restaurant['hero_pan_x']);
+        }
+        if (isset($restaurant['hero_pan_y'])) {
+            $restaurant['heroPanY'] = (float)$restaurant['hero_pan_y'];
+            unset($restaurant['hero_pan_y']);
+        }
         
         // Rename hero_image to heroImage for frontend compatibility
         if (isset($restaurant['hero_image'])) {
@@ -259,15 +287,18 @@ class RestaurantAPI extends BaseAPI {
             ':website' => $this->sanitize($data['website'] ?? ''),
             ':phone' => $this->sanitize($data['phone'] ?? ''),
             ':must_try' => $this->sanitize($data['must_try'] ?? ''),
-            ':hero_image' => $this->sanitize($data['heroImage'] ?? ''),
+            ':hero_image' => isset($data['heroImage']) && $data['heroImage'] !== null ? $this->sanitize($data['heroImage']) : null,
             ':hero_focal_point_x' => isset($data['heroFocalPoint']['x']) ? (float)$data['heroFocalPoint']['x'] : null,
-            ':hero_focal_point_y' => isset($data['heroFocalPoint']['y']) ? (float)$data['heroFocalPoint']['y'] : null
+            ':hero_focal_point_y' => isset($data['heroFocalPoint']['y']) ? (float)$data['heroFocalPoint']['y'] : null,
+            ':hero_zoom' => isset($data['heroZoom']) ? (float)$data['heroZoom'] : null,
+            ':hero_pan_x' => isset($data['heroPanX']) ? (float)$data['heroPanX'] : null,
+            ':hero_pan_y' => isset($data['heroPanY']) ? (float)$data['heroPanY'] : null
         ];
         
         $sql = "INSERT INTO restaurants 
-                (id, name, location, address, latitude, longitude, style, price_range, website, phone, must_try, hero_image, hero_focal_point_x, hero_focal_point_y)
+                (id, name, location, address, latitude, longitude, style, price_range, website, phone, must_try, hero_image, hero_focal_point_x, hero_focal_point_y, hero_zoom, hero_pan_x, hero_pan_y)
                 VALUES 
-                (:id, :name, :location, :address, :latitude, :longitude, :style, :price_range, :website, :phone, :must_try, :hero_image, :hero_focal_point_x, :hero_focal_point_y)";
+                (:id, :name, :location, :address, :latitude, :longitude, :style, :price_range, :website, :phone, :must_try, :hero_image, :hero_focal_point_x, :hero_focal_point_y, :hero_zoom, :hero_pan_x, :hero_pan_y)";
         
         try {
             $this->db->execute($sql, $params);
@@ -458,22 +489,49 @@ class RestaurantAPI extends BaseAPI {
             }
         }
         
-        // Handle hero image
-        if (isset($data['heroImage'])) {
+        // Handle hero image (allow null to clear the image)
+        if (array_key_exists('heroImage', $data)) {
             $updates[] = "hero_image = :hero_image";
-            $params[':hero_image'] = $this->sanitize($data['heroImage']);
+            $params[':hero_image'] = $data['heroImage'] === null ? null : $this->sanitize($data['heroImage']);
         }
         
-        // Handle hero focal point
-        if (isset($data['heroFocalPoint'])) {
-            if (isset($data['heroFocalPoint']['x'])) {
+        // Handle hero focal point (allow null to clear the focal point)
+        if (array_key_exists('heroFocalPoint', $data)) {
+            if ($data['heroFocalPoint'] === null) {
+                // Clear both focal point values
                 $updates[] = "hero_focal_point_x = :hero_focal_point_x";
-                $params[':hero_focal_point_x'] = (float)$data['heroFocalPoint']['x'];
-            }
-            if (isset($data['heroFocalPoint']['y'])) {
                 $updates[] = "hero_focal_point_y = :hero_focal_point_y";
-                $params[':hero_focal_point_y'] = (float)$data['heroFocalPoint']['y'];
+                $params[':hero_focal_point_x'] = null;
+                $params[':hero_focal_point_y'] = null;
+            } else {
+                // Update focal point values if provided
+                if (isset($data['heroFocalPoint']['x'])) {
+                    $updates[] = "hero_focal_point_x = :hero_focal_point_x";
+                    $params[':hero_focal_point_x'] = (float)$data['heroFocalPoint']['x'];
+                }
+                if (isset($data['heroFocalPoint']['y'])) {
+                    $updates[] = "hero_focal_point_y = :hero_focal_point_y";
+                    $params[':hero_focal_point_y'] = (float)$data['heroFocalPoint']['y'];
+                }
             }
+        }
+        
+        // Handle hero zoom (allow null to clear)
+        if (array_key_exists('heroZoom', $data)) {
+            $updates[] = "hero_zoom = :hero_zoom";
+            $params[':hero_zoom'] = $data['heroZoom'] === null ? null : (float)$data['heroZoom'];
+        }
+        
+        // Handle hero pan X (allow null to clear)
+        if (array_key_exists('heroPanX', $data)) {
+            $updates[] = "hero_pan_x = :hero_pan_x";
+            $params[':hero_pan_x'] = $data['heroPanX'] === null ? null : (float)$data['heroPanX'];
+        }
+        
+        // Handle hero pan Y (allow null to clear)
+        if (array_key_exists('heroPanY', $data)) {
+            $updates[] = "hero_pan_y = :hero_pan_y";
+            $params[':hero_pan_y'] = $data['heroPanY'] === null ? null : (float)$data['heroPanY'];
         }
         
         if (empty($updates)) {
