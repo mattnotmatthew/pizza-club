@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import TranslatedText from './TranslatedText';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,14 +29,16 @@ const Header: React.FC = () => {
               alt="Greater Chicagoland Pizza Club Logo" 
               className="h-12 w-12 md:h-10 md:w-10 rounded-full shadow-md object-cover"
             />
-            <span className="text-white font-bold text-xl md:text-2xl">GCPC</span>
+            <TranslatedText>
+              <span className="text-white font-bold text-xl md:text-2xl">GCPC</span>
+            </TranslatedText>
           </Link>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6">
             {navItems.map((item) => (
               <NavLink key={item.path} to={item.path} className={navLinkClass}>
-                {item.label}
+                <TranslatedText>{item.label}</TranslatedText>
               </NavLink>
             ))}
           </nav>
@@ -66,7 +69,7 @@ const Header: React.FC = () => {
                 className={navLinkClass}
                 onClick={() => setIsMenuOpen(false)}
               >
-                {item.label}
+                <TranslatedText>{item.label}</TranslatedText>
               </NavLink>
             ))}
           </nav>

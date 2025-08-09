@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from '@/components/common/Layout';
 import AdminRoute from '@/components/admin/AdminRoute';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { ChicagoianProvider } from '@/contexts/ChicagoianContext';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('@/pages/Home'));
@@ -42,8 +43,9 @@ const Loading: React.FC = () => (
 function App() {
   return (
     <ErrorBoundary>
-      <Router basename="/pizza">
-        <Suspense fallback={<Loading />}>
+      <ChicagoianProvider>
+        <Router basename="/pizza">
+          <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
@@ -78,6 +80,7 @@ function App() {
           </Routes>
         </Suspense>
       </Router>
+      </ChicagoianProvider>
     </ErrorBoundary>
   );
 }

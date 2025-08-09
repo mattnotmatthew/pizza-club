@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Member, Restaurant } from '@/types';
 
@@ -146,22 +147,28 @@ const MemberDetail: React.FC = () => {
           <div className="p-6 md:p-8">
             {/* Bio */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">About</h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {member.bio}
-              </p>
+              <TranslatedText>
+                <h2 className="text-2xl font-bold mb-4">About</h2>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {member.bio}
+                </p>
+              </TranslatedText>
             </div>
 
             {/* Member Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6 border-t border-gray-200">
               <div>
-                <p className="text-sm text-gray-500">Member Since</p>
-                <p className="text-lg font-semibold">{memberSince}</p>
+                <TranslatedText>
+                  <p className="text-sm text-gray-500">Member Since</p>
+                  <p className="text-lg font-semibold">{memberSince}</p>
+                </TranslatedText>
               </div>
               {member.favoriteStyle && (
                 <div>
-                  <p className="text-sm text-gray-500">Role</p>
-                  <p className="text-lg font-semibold">{member.favoriteStyle}</p>
+                  <TranslatedText>
+                    <p className="text-sm text-gray-500">Role</p>
+                    <p className="text-lg font-semibold">{member.favoriteStyle}</p>
+                  </TranslatedText>
                 </div>
               )}
             </div>
@@ -170,7 +177,9 @@ const MemberDetail: React.FC = () => {
 
         {/* Visited Restaurants */}
         <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-          <h2 className="text-2xl font-bold mb-6">Restaurants Visited with the Club</h2>
+          <TranslatedText>
+            <h2 className="text-2xl font-bold mb-6">Restaurants Visited with the Club</h2>
+          </TranslatedText>
           
           {visitedRestaurants.length > 0 ? (
             <div className="space-y-4">
@@ -182,15 +191,19 @@ const MemberDetail: React.FC = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-lg text-gray-900">
-                        {restaurant.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">{restaurant.address}</p>
+                      <TranslatedText>
+                        <h3 className="font-semibold text-lg text-gray-900">
+                          {restaurant.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">{restaurant.address}</p>
+                      </TranslatedText>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-500">
-                        {restaurant.totalVisits || 0} visit{(restaurant.totalVisits || 0) > 1 ? 's' : ''}
-                      </p>
+                      <TranslatedText>
+                        <p className="text-sm text-gray-500">
+                          {restaurant.totalVisits || 0} visit{(restaurant.totalVisits || 0) > 1 ? 's' : ''}
+                        </p>
+                      </TranslatedText>
                     </div>
                   </div>
                 </Link>
@@ -198,30 +211,36 @@ const MemberDetail: React.FC = () => {
               
               {!showAllVisits && visitedRestaurants.length > 3 && (
                 <div className="text-center pt-4">
-                  <button
-                    onClick={() => setShowAllVisits(true)}
-                    className="text-red-700 hover:text-red-800 font-medium transition-colors"
-                  >
-                    Show More ({visitedRestaurants.length - 3} more restaurants)
-                  </button>
+                  <TranslatedText>
+                    <button
+                      onClick={() => setShowAllVisits(true)}
+                      className="text-red-700 hover:text-red-800 font-medium transition-colors"
+                    >
+                      Show More ({visitedRestaurants.length - 3} more restaurants)
+                    </button>
+                  </TranslatedText>
                 </div>
               )}
               
               {showAllVisits && visitedRestaurants.length > 3 && (
                 <div className="text-center pt-4">
-                  <button
-                    onClick={() => setShowAllVisits(false)}
-                    className="text-red-700 hover:text-red-800 font-medium transition-colors"
-                  >
-                    Show Less
-                  </button>
+                  <TranslatedText>
+                    <button
+                      onClick={() => setShowAllVisits(false)}
+                      className="text-red-700 hover:text-red-800 font-medium transition-colors"
+                    >
+                      Show Less
+                    </button>
+                  </TranslatedText>
                 </div>
               )}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">
-              No restaurant visits recorded yet
-            </p>
+            <TranslatedText>
+              <p className="text-gray-500 text-center py-8">
+                No restaurant visits recorded yet
+              </p>
+            </TranslatedText>
           )}
         </div>
       </div>

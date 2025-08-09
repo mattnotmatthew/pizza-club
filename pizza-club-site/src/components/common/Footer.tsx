@@ -1,4 +1,5 @@
 import React from 'react';
+import TranslatedText from './TranslatedText';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -13,11 +14,15 @@ const Footer: React.FC = () => {
               alt="Greater Chicagoland Pizza Club Logo" 
               className="h-8 w-8 object-contain"
             />
-            <p className="text-lg font-semibold">Greater Chicagoland Pizza Club</p>
+            <TranslatedText>
+              <p className="text-lg font-semibold">Greater Chicagoland Pizza Club</p>
+            </TranslatedText>
           </div>
-          <p className="text-gray-400 text-sm">
-            © {currentYear} GCPC. All rights reserved. | Dedicated to the pursuit of perfect pizza.
-          </p>
+          <TranslatedText>
+            <p className="text-gray-400 text-sm">
+              © {currentYear} GCPC. All rights reserved. | Dedicated to the pursuit of perfect pizza.
+            </p>
+          </TranslatedText>
         </div>
       </div>
     </footer>

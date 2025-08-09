@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MemberCard from '@/components/members/MemberCard';
 import { MemberCardSkeleton } from '@/components/common/Skeleton';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Member } from '@/types';
 
@@ -47,12 +48,14 @@ const Members: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Club Members
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Meet the passionate pizza lovers who make up the Greater Chicagoland Pizza Club
-          </p>
+          <TranslatedText>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Club Members
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Meet the passionate pizza lovers who make up the Greater Chicagoland Pizza Club
+            </p>
+          </TranslatedText>
         </div>
 
         {/* Members Grid */}
