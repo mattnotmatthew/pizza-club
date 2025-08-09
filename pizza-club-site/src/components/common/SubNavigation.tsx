@@ -1,4 +1,5 @@
 import React from 'react';
+import TranslatedText from '@/components/common/TranslatedText';
 
 export interface NavigationItem {
   id: string;
@@ -32,7 +33,7 @@ const SubNavigation: React.FC<SubNavigationProps> = ({
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            {item.label}
+            <TranslatedText>{item.label}</TranslatedText>
           </button>
         ))}
       </div>

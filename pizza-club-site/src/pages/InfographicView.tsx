@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import InfographicCanvas from '@/components/infographics/InfographicCanvas';
 import Skeleton from '@/components/common/Skeleton';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { InfographicWithData } from '@/types/infographics';
 
@@ -67,10 +68,10 @@ const InfographicView: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {error || 'Infographic not found'}
+            <TranslatedText>{error || 'Infographic not found'}</TranslatedText>
           </h2>
           <Link to="/infographics" className="text-red-600 hover:text-red-700">
-            Back to Infographics
+            <TranslatedText>Back to Infographics</TranslatedText>
           </Link>
         </div>
       </div>
@@ -83,7 +84,7 @@ const InfographicView: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 mb-8 print:hidden">
         <div className="flex items-center justify-between">
           <Link to="/infographics" className="text-blue-600 hover:text-blue-700">
-            ← Back to Infographics
+            <TranslatedText>← Back to Infographics</TranslatedText>
           </Link>
           <div className="flex gap-4">
             <button
@@ -103,7 +104,7 @@ const InfographicView: React.FC = () => {
                   d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 6.316a3 3 0 11-5.368-2.684m5.368 2.684a3 3 0 00-5.368-2.684m0 0a3 3 0 00-5.368 2.684"
                 />
               </svg>
-              Share
+<TranslatedText>Share</TranslatedText>
             </button>
             <button
               onClick={handlePrint}
@@ -122,7 +123,7 @@ const InfographicView: React.FC = () => {
                   d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
                 />
               </svg>
-              Print
+<TranslatedText>Print</TranslatedText>
             </button>
           </div>
         </div>
@@ -137,7 +138,7 @@ const InfographicView: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 mt-8 print:hidden">
         <div className="text-center text-sm text-gray-600">
           <p>
-            Published on {new Date(infographic.publishedAt || infographic.createdAt).toLocaleDateString()}
+            <TranslatedText>Published on</TranslatedText> {new Date(infographic.publishedAt || infographic.createdAt).toLocaleDateString()}
           </p>
         </div>
       </div>

@@ -3,6 +3,7 @@ import MapContainer from '@/components/map/MapContainer';
 import RestaurantList from '@/components/restaurants/RestaurantList';
 import Skeleton from '@/components/common/Skeleton';
 import SubNavigation from '@/components/common/SubNavigation';
+import TranslatedText from '@/components/common/TranslatedText';
 import { useSort } from '@/hooks/useSort';
 import { useSubNavigation } from '@/hooks/useSubNavigation';
 import { dataService } from '@/services/dataWithApi';
@@ -82,10 +83,10 @@ const Restaurants: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Pizza Restaurants
+<TranslatedText>Pizza Restaurants</TranslatedText>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explore all the amazing pizza places we've visited across Chicagoland
+<TranslatedText>Explore all the amazing pizza places we've visited across Chicagoland</TranslatedText>
           </p>
         </div>
         
@@ -111,7 +112,7 @@ const Restaurants: React.FC = () => {
               <svg className="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
               </svg>
-              Map
+<TranslatedText>Map</TranslatedText>
             </button>
             <button
               onClick={() => setViewMode('list')}
@@ -124,7 +125,7 @@ const Restaurants: React.FC = () => {
               <svg className="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
-              List
+<TranslatedText>List</TranslatedText>
             </button>
           </div>
         </div>
@@ -133,18 +134,18 @@ const Restaurants: React.FC = () => {
         {(viewMode === 'list' || isDesktop) && !loading && (
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm text-gray-600">
-              {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} found
+{restaurants.length} <TranslatedText>restaurant{restaurants.length !== 1 ? 's' : ''} found</TranslatedText>
             </p>
             <div className="flex gap-2 items-center">
-              <span className="text-sm text-gray-600">Sort by:</span>
+              <span className="text-sm text-gray-600"><TranslatedText>Sort by:</TranslatedText></span>
               <select
                 value={sortField}
                 onChange={(e) => handleSortChange(e.target.value as keyof Restaurant)}
                 className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-red-500"
               >
-                <option value="averageRating">Rating</option>
-                <option value="name">Name</option>
-                <option value="totalVisits">Visits</option>
+                <option value="averageRating"><TranslatedText>Rating</TranslatedText></option>
+                <option value="name"><TranslatedText>Name</TranslatedText></option>
+                <option value="totalVisits"><TranslatedText>Visits</TranslatedText></option>
               </select>
             </div>
           </div>

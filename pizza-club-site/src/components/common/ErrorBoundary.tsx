@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import type { ReactNode } from 'react';
+import TranslatedText from '@/components/common/TranslatedText';
 
 interface Props {
   children: ReactNode;
@@ -40,35 +41,35 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
               
               <h1 className="text-xl font-semibold text-gray-900 mb-2">
-                {isApiError ? 'Configuration Error' : 'Something went wrong'}
+                {isApiError ? <TranslatedText>Configuration Error</TranslatedText> : <TranslatedText>Something went wrong</TranslatedText>}
               </h1>
               
               {isApiError ? (
                 <div className="text-left">
                   <p className="text-gray-600 mb-4">
-                    The site is not properly configured. The API URL is missing from the build.
+                    <TranslatedText>The site is not properly configured. The API URL is missing from the build.</TranslatedText>
                   </p>
                   <div className="bg-gray-100 rounded p-4 mb-4">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">To fix this:</p>
+                    <p className="text-sm font-semibold text-gray-700 mb-2"><TranslatedText>To fix this:</TranslatedText></p>
                     <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1">
-                      <li>Set the VITE_API_URL environment variable</li>
-                      <li>Rebuild the application with npm run build</li>
-                      <li>Redeploy the dist folder to your server</li>
+                      <li><TranslatedText>Set the VITE_API_URL environment variable</TranslatedText></li>
+                      <li><TranslatedText>Rebuild the application with npm run build</TranslatedText></li>
+                      <li><TranslatedText>Redeploy the dist folder to your server</TranslatedText></li>
                     </ol>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Expected API URL: https://greaterchicagolandpizza.club/pizza_api
+                    <TranslatedText>Expected API URL:</TranslatedText> https://greaterchicagolandpizza.club/pizza_api
                   </p>
                 </div>
               ) : (
                 <div>
                   <p className="text-gray-600 mb-4">
-                    An unexpected error occurred. Please try refreshing the page.
+                    <TranslatedText>An unexpected error occurred. Please try refreshing the page.</TranslatedText>
                   </p>
                   {error && (
                     <details className="text-left">
                       <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
-                        Error details
+                        <TranslatedText>Error details</TranslatedText>
                       </summary>
                       <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
                         {error.message}
@@ -82,7 +83,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 onClick={() => window.location.reload()}
                 className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
-                Reload Page
+                <TranslatedText>Reload Page</TranslatedText>
               </button>
             </div>
           </div>

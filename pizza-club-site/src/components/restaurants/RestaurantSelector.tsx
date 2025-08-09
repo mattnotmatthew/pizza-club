@@ -1,4 +1,5 @@
 import React from 'react';
+import TranslatedText from '@/components/common/TranslatedText';
 import type { Restaurant } from '@/types';
 
 interface RestaurantSelectorProps {
@@ -25,10 +26,10 @@ const RestaurantSelector: React.FC<RestaurantSelectorProps> = ({
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-xl font-semibold text-gray-900">
-            Select Restaurants to Compare
+            <TranslatedText>Select Restaurants to Compare</TranslatedText>
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            {selectedIds.length} of {maxSelections} selected
+            {selectedIds.length} <TranslatedText>of</TranslatedText> {maxSelections} <TranslatedText>selected</TranslatedText>
           </p>
         </div>
         {selectedIds.length > 0 && (
@@ -36,7 +37,7 @@ const RestaurantSelector: React.FC<RestaurantSelectorProps> = ({
             onClick={onClearAll}
             className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
           >
-            Clear All
+            <TranslatedText>Clear All</TranslatedText>
           </button>
         )}
       </div>
@@ -81,7 +82,7 @@ const RestaurantSelector: React.FC<RestaurantSelectorProps> = ({
                     {restaurant.averageRating.toFixed(1)} ★
                   </span>
                   <span className="text-xs text-gray-500">
-                    • {restaurant.totalVisits} visit{restaurant.totalVisits !== 1 ? 's' : ''}
+                    • {restaurant.totalVisits} <TranslatedText>visit{restaurant.totalVisits !== 1 ? 's' : ''}</TranslatedText>
                   </span>
                 </div>
               </div>
@@ -92,7 +93,7 @@ const RestaurantSelector: React.FC<RestaurantSelectorProps> = ({
 
       {!canSelectMore && selectedIds.length === maxSelections && (
         <p className="text-sm text-amber-600 mt-4 text-center">
-          Maximum {maxSelections} restaurants can be compared at once
+          <TranslatedText>Maximum {maxSelections} restaurants can be compared at once</TranslatedText>
         </p>
       )}
     </div>

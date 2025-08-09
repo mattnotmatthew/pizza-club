@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import TranslatedText from '@/components/common/TranslatedText';
 import type { Member } from '@/types';
 import { nameToSlug } from '@/utils/urlUtils';
 
@@ -37,7 +38,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
         {/* Favorite Style Badge */}
         {member.favoriteStyle && (
           <span className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-xs mb-3">
-            {member.favoriteStyle}
+            <TranslatedText>{member.favoriteStyle}</TranslatedText>
           </span>
         )}
         
@@ -48,7 +49,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
         
         {/* Meta Info */}
         <div className="text-xs text-gray-500">
-          <span>Member since {memberSince}</span>
+          <span><TranslatedText>Member since</TranslatedText> {memberSince}</span>
         </div>
       </div>
     </Link>

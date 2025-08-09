@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 import { PARENT_CATEGORIES } from '@/types';
@@ -54,7 +55,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
   if (restaurants.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-        <p className="text-gray-500">Select restaurants above to start comparing</p>
+        <p className="text-gray-500"><TranslatedText>Select restaurants above to start comparing</TranslatedText></p>
       </div>
     );
   }
@@ -67,7 +68,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
           <thead className="bg-gray-50">
             <tr>
               <th className="sticky left-0 z-10 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
+                <TranslatedText>Category</TranslatedText>
               </th>
               {restaurants.map((restaurant) => (
                 <th key={restaurant.id} className="px-6 py-3 text-center min-w-[200px]">
@@ -87,7 +88,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
                 return (
                   <tr key="overall">
                     <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      Overall Rating
+                      <TranslatedText>Overall Rating</TranslatedText>
                     </td>
                     {restaurants.map((restaurant) => (
                       <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
@@ -110,7 +111,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
                     {/* Parent header row */}
                     <tr className="bg-gray-50">
                       <td className="sticky left-0 z-10 bg-gray-50 px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
-                        Pizzas
+                        <TranslatedText>Pizzas</TranslatedText>
                       </td>
                       {restaurants.map((restaurant) => (
                         <td key={restaurant.id} className="px-6 py-3"></td>
@@ -119,14 +120,14 @@ const CompareTable: React.FC<CompareTableProps> = ({
                     {/* Pizza average row */}
                     <tr>
                       <td className="sticky left-0 z-10 bg-white px-6 py-4 pl-10 whitespace-nowrap text-sm font-medium text-gray-700">
-                        Average
+                        <TranslatedText>Average</TranslatedText>
                       </td>
                       {restaurants.map((restaurant) => {
                         const rating = getAverageRating(restaurant, PARENT_CATEGORIES.PIZZAS);
                         return (
                           <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
                             <span className="text-sm text-gray-600">
-                              {rating > 0 ? rating.toFixed(1) : 'N/A'}
+                              {rating > 0 ? rating.toFixed(1) : <TranslatedText>N/A</TranslatedText>}
                             </span>
                           </td>
                         );
@@ -168,7 +169,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
                             return (
                               <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
                                 <span className="text-sm text-gray-600">
-                                  {rating > 0 ? rating.toFixed(1) : 'N/A'}
+                                  {rating > 0 ? rating.toFixed(1) : <TranslatedText>N/A</TranslatedText>}
                                 </span>
                               </td>
                             );
@@ -184,18 +185,18 @@ const CompareTable: React.FC<CompareTableProps> = ({
             {/* Additional Details */}
             <tr>
               <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                Price Range
+                <TranslatedText>Price Range</TranslatedText>
               </td>
               {restaurants.map((restaurant) => (
                 <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
-                  {restaurant.priceRange || 'N/A'}
+                  {restaurant.priceRange || <TranslatedText>N/A</TranslatedText>}
                 </td>
               ))}
             </tr>
 
             <tr>
               <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                Total Visits
+                <TranslatedText>Total Visits</TranslatedText>
               </td>
               {restaurants.map((restaurant) => (
                 <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
@@ -206,12 +207,12 @@ const CompareTable: React.FC<CompareTableProps> = ({
 
             <tr>
               <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                Must Try
+                <TranslatedText>Must Try</TranslatedText>
               </td>
               {restaurants.map((restaurant) => (
                 <td key={restaurant.id} className="px-6 py-4 text-center text-sm text-gray-600">
                   <div className="max-w-[200px] mx-auto">
-                    {restaurant.mustTry || 'N/A'}
+                    {restaurant.mustTry || <TranslatedText>N/A</TranslatedText>}
                   </div>
                 </td>
               ))}
@@ -219,7 +220,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 
             <tr>
               <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                Links
+                <TranslatedText>Links</TranslatedText>
               </td>
               {restaurants.map((restaurant) => (
                 <td key={restaurant.id} className="px-6 py-4 text-center text-sm">
@@ -231,7 +232,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-700"
                       >
-                        Website
+                        <TranslatedText>Website</TranslatedText>
                       </a>
                     )}
                     <a
@@ -240,7 +241,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-700"
                     >
-                      Directions
+                      <TranslatedText>Directions</TranslatedText>
                     </a>
                   </div>
                 </td>

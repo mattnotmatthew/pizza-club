@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Infographic } from '@/types/infographics';
 import type { Restaurant } from '@/types';
@@ -53,10 +54,10 @@ const Infographics: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Pizza Club Visit Infographics
+<TranslatedText>Pizza Club Visit Infographics</TranslatedText>
           </h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Visual summaries of our pizza adventures, featuring ratings, quotes, and memories from each visit.
+<TranslatedText>Visual summaries of our pizza adventures, featuring ratings, quotes, and memories from each visit.</TranslatedText>
           </p>
         </div>
 
@@ -75,7 +76,7 @@ const Infographics: React.FC = () => {
                 d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
               />
             </svg>
-            <p className="mt-4 text-gray-600">No infographics have been published yet.</p>
+            <p className="mt-4 text-gray-600"><TranslatedText>No infographics have been published yet.</TranslatedText></p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -122,7 +123,7 @@ const Infographics: React.FC = () => {
 
                       {/* View Link */}
                       <div className="flex items-center text-red-600 group-hover:text-red-700">
-                        <span className="text-sm font-medium">View Infographic</span>
+                        <span className="text-sm font-medium"><TranslatedText>View Infographic</TranslatedText></span>
                         <svg
                           className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1"
                           fill="none"

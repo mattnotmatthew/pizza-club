@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import RestaurantImageUploader from '@/components/admin/RestaurantImageUploader';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import { restaurantNameToSlug } from '@/utils/urlUtils';
 import type { Restaurant } from '@/types';
@@ -122,7 +123,7 @@ const RestaurantsEditor: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading restaurant...</p>
+          <p className="mt-4 text-gray-600"><TranslatedText>Loading restaurant...</TranslatedText></p>
         </div>
       </div>
     );
@@ -133,10 +134,10 @@ const RestaurantsEditor: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
           <Link to="/admin/restaurants" className="text-blue-600 hover:text-blue-700 text-sm">
-            ← Back to Restaurants
+            <TranslatedText>← Back to Restaurants</TranslatedText>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mt-2">
-            {isEditing ? 'Edit' : 'Add'} Restaurant
+            <TranslatedText>{isEditing ? 'Edit' : 'Add'} Restaurant</TranslatedText>
           </h1>
         </div>
 
@@ -145,7 +146,7 @@ const RestaurantsEditor: React.FC = () => {
             {/* Name */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Name <span className="text-red-500">*</span>
+                <TranslatedText>Name</TranslatedText> <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -160,7 +161,7 @@ const RestaurantsEditor: React.FC = () => {
             {/* Location */}
             <div>
               <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                Location/Neighborhood
+                <TranslatedText>Location/Neighborhood</TranslatedText>
               </label>
               <input
                 type="text"
@@ -175,7 +176,7 @@ const RestaurantsEditor: React.FC = () => {
             {/* Address */}
             <div>
               <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Address <span className="text-red-500">*</span>
+                <TranslatedText>Address</TranslatedText> <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -187,7 +188,7 @@ const RestaurantsEditor: React.FC = () => {
                 required
               />
               <p className="mt-1 text-sm text-gray-500">
-                You can use Google Maps to find exact coordinates
+                <TranslatedText>You can use Google Maps to find exact coordinates</TranslatedText>
               </p>
             </div>
 
@@ -195,7 +196,7 @@ const RestaurantsEditor: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="latitude" className="block text-sm font-medium text-gray-700">
-                  Latitude <span className="text-red-500">*</span>
+                  <TranslatedText>Latitude</TranslatedText> <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -210,7 +211,7 @@ const RestaurantsEditor: React.FC = () => {
               </div>
               <div>
                 <label htmlFor="longitude" className="block text-sm font-medium text-gray-700">
-                  Longitude <span className="text-red-500">*</span>
+                  <TranslatedText>Longitude</TranslatedText> <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -228,7 +229,7 @@ const RestaurantsEditor: React.FC = () => {
             {/* Style */}
             <div>
               <label htmlFor="style" className="block text-sm font-medium text-gray-700">
-                Pizza Style
+                <TranslatedText>Pizza Style</TranslatedText>
               </label>
               <select
                 id="style"
@@ -236,7 +237,7 @@ const RestaurantsEditor: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, style: e.target.value })}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
               >
-                <option value="">Select a style</option>
+                <option value=""><TranslatedText>Select a style</TranslatedText></option>
                 <option value="Neapolitan">Neapolitan</option>
                 <option value="New York">New York</option>
                 <option value="Sicilian">Sicilian</option>
@@ -250,7 +251,7 @@ const RestaurantsEditor: React.FC = () => {
             {/* Price Range */}
             <div>
               <label htmlFor="priceRange" className="block text-sm font-medium text-gray-700">
-                Price Range
+                <TranslatedText>Price Range</TranslatedText>
               </label>
               <select
                 id="priceRange"
@@ -258,18 +259,18 @@ const RestaurantsEditor: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, priceRange: e.target.value })}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
               >
-                <option value="">Select price range</option>
-                <option value="$">$ - Budget friendly</option>
-                <option value="$$">$$ - Moderate</option>
-                <option value="$$$">$$$ - Upscale</option>
-                <option value="$$$$">$$$$ - Fine dining</option>
+                <option value=""><TranslatedText>Select price range</TranslatedText></option>
+                <option value="$"><TranslatedText>$ - Budget friendly</TranslatedText></option>
+                <option value="$$"><TranslatedText>$$ - Moderate</TranslatedText></option>
+                <option value="$$$"><TranslatedText>$$$ - Upscale</TranslatedText></option>
+                <option value="$$$$"><TranslatedText>$$$$ - Fine dining</TranslatedText></option>
               </select>
             </div>
 
             {/* Website */}
             <div>
               <label htmlFor="website" className="block text-sm font-medium text-gray-700">
-                Website
+                <TranslatedText>Website</TranslatedText>
               </label>
               <input
                 type="url"
@@ -284,7 +285,7 @@ const RestaurantsEditor: React.FC = () => {
             {/* Phone */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone
+                <TranslatedText>Phone</TranslatedText>
               </label>
               <input
                 type="tel"
@@ -299,7 +300,7 @@ const RestaurantsEditor: React.FC = () => {
             {/* Must Try */}
             <div>
               <label htmlFor="mustTry" className="block text-sm font-medium text-gray-700">
-                Must Try
+                <TranslatedText>Must Try</TranslatedText>
               </label>
               <input
                 type="text"
@@ -336,11 +337,11 @@ const RestaurantsEditor: React.FC = () => {
               disabled={saving}
               className="flex-1"
             >
-              {saving ? 'Saving...' : (isEditing ? 'Update Restaurant' : 'Add Restaurant')}
+              {saving ? <TranslatedText>Saving...</TranslatedText> : (isEditing ? <TranslatedText>Update Restaurant</TranslatedText> : <TranslatedText>Add Restaurant</TranslatedText>)}
             </Button>
             <Link to="/admin/restaurants" className="flex-1">
               <Button variant="secondary" className="w-full">
-                Cancel
+                <TranslatedText>Cancel</TranslatedText>
               </Button>
             </Link>
           </div>

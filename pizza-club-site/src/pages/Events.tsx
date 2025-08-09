@@ -3,6 +3,7 @@ import { dataService } from '@/services/dataWithApi';
 import Card from '@/components/common/Card';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';
+import TranslatedText from '@/components/common/TranslatedText';
 import type { Event } from '@/types';
 
 const Events: React.FC = () => {
@@ -71,7 +72,7 @@ const Events: React.FC = () => {
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                Max {event.maxAttendees} attendees
+<TranslatedText>Max</TranslatedText> {event.maxAttendees} <TranslatedText>attendees</TranslatedText>
               </p>
             )}
           </div>
@@ -83,7 +84,7 @@ const Events: React.FC = () => {
               onClick={() => window.open(event.rsvpLink!, '_blank')}
               className="w-full"
             >
-              RSVP Now
+<TranslatedText>RSVP Now</TranslatedText>
             </Button>
           )}
         </div>
@@ -96,10 +97,10 @@ const Events: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Club Events
+<TranslatedText>Club Events</TranslatedText>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Join us for our monthly pizza adventures around Chicagoland
+<TranslatedText>Join us for our monthly pizza adventures around Chicagoland</TranslatedText>
           </p>
         </div>
 
@@ -114,7 +115,7 @@ const Events: React.FC = () => {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Upcoming Events
+<TranslatedText>Upcoming Events</TranslatedText>
             </button>
             <button
               onClick={() => setActiveTab('past')}
@@ -124,7 +125,7 @@ const Events: React.FC = () => {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Past Events
+<TranslatedText>Past Events</TranslatedText>
             </button>
           </div>
         </div>
@@ -141,8 +142,8 @@ const Events: React.FC = () => {
               upcomingEvents.map(renderEventCard)
             ) : (
               <div className="col-span-full text-center py-12">
-                <p className="text-gray-500 text-lg">No upcoming events scheduled</p>
-                <p className="text-gray-400 mt-2">Check back soon!</p>
+                <p className="text-gray-500 text-lg"><TranslatedText>No upcoming events scheduled</TranslatedText></p>
+                <p className="text-gray-400 mt-2"><TranslatedText>Check back soon!</TranslatedText></p>
               </div>
             )
           ) : (
@@ -150,7 +151,7 @@ const Events: React.FC = () => {
               pastEvents.map(renderEventCard)
             ) : (
               <div className="col-span-full text-center py-12">
-                <p className="text-gray-500 text-lg">No past events to show</p>
+                <p className="text-gray-500 text-lg"><TranslatedText>No past events to show</TranslatedText></p>
               </div>
             )
           )}

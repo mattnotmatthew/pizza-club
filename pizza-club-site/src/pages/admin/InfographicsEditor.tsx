@@ -6,6 +6,7 @@ import PhotoUploader from '@/components/infographics/PhotoUploader';
 import PhotoPositioner from '@/components/infographics/PhotoPositioner';
 import InfographicPreview from '@/components/infographics/InfographicPreview';
 import Button from '@/components/common/Button';
+import TranslatedText from '@/components/common/TranslatedText';
 import { useInfographics } from '@/hooks/useInfographics';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import { dataService } from '@/services/dataWithApi';
@@ -274,7 +275,7 @@ const InfographicsEditor: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading infographic...</p>
+          <p className="mt-4 text-gray-600"><TranslatedText>Loading infographic...</TranslatedText></p>
         </div>
       </div>
     );
@@ -285,10 +286,10 @@ const InfographicsEditor: React.FC = () => {
       <div className="mx-auto px-4 py-6">
         <div className="mb-6">
           <Link to="/admin/infographics" className="text-blue-600 hover:text-blue-700 text-sm">
-            ← Back to Infographics
+            <TranslatedText>← Back to Infographics</TranslatedText>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mt-2">
-            {isEditing ? 'Edit' : 'Create'} Infographic
+            <TranslatedText>{isEditing ? 'Edit' : 'Create'} Infographic</TranslatedText>
           </h1>
         </div>
         
@@ -297,7 +298,7 @@ const InfographicsEditor: React.FC = () => {
           <div className="space-y-6">
             {/* Visit Selection */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold mb-4">Select Restaurant Visit</h2>
+              <h2 className="text-lg font-semibold mb-4"><TranslatedText>Select Restaurant Visit</TranslatedText></h2>
               <VisitSelector
                 onVisitSelect={handleVisitSelect}
                 selectedRestaurantId={selectedRestaurantId}
@@ -308,7 +309,7 @@ const InfographicsEditor: React.FC = () => {
             {/* Quote Selection */}
             {selectedVisit && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold mb-4">Quotes & Testimonials</h2>
+                <h2 className="text-lg font-semibold mb-4"><TranslatedText>Quotes & Testimonials</TranslatedText></h2>
                 <QuoteSelector
                   visitNotes={selectedVisit.notes || ''}
                   selectedQuotes={content.selectedQuotes}
@@ -347,9 +348,11 @@ const InfographicsEditor: React.FC = () => {
                 {photos.length > 0 && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-600 mb-2">
-                      {selectedPhotoId 
-                        ? "Select a different photo or click the same photo to deselect:"
-                        : "Select a photo to adjust its position and settings:"}
+                      <TranslatedText>
+                        {selectedPhotoId 
+                          ? "Select a different photo or click the same photo to deselect:"
+                          : "Select a photo to adjust its position and settings:"}
+                      </TranslatedText>
                     </p>
                     <div className="grid grid-cols-3 gap-2">
                       {photos.map((photo) => (
@@ -404,7 +407,7 @@ const InfographicsEditor: React.FC = () => {
             {/* Rating Toggles */}
             {selectedVisit && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold mb-4">Rating Display Options</h2>
+                <h2 className="text-lg font-semibold mb-4"><TranslatedText>Rating Display Options</TranslatedText></h2>
                 <div className="grid grid-cols-2 gap-3">
                   {availableCategories.map((category) => (
                     <label key={category} className="flex items-center cursor-pointer">
@@ -415,7 +418,7 @@ const InfographicsEditor: React.FC = () => {
                         className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
                       />
                       <span className="text-sm text-gray-700 capitalize">
-                        {category === 'overall' ? 'Overall Rating' : category}
+                        <TranslatedText>{category === 'overall' ? 'Overall Rating' : category}</TranslatedText>
                       </span>
                     </label>
                   ))}
@@ -430,21 +433,21 @@ const InfographicsEditor: React.FC = () => {
                 disabled={!selectedRestaurantId || !selectedVisitDate || saving}
                 className="flex-1"
               >
-                {saving && !isEditing ? 'Saving...' : 'Save Draft'}
+                {saving && !isEditing ? <TranslatedText>Saving...</TranslatedText> : <TranslatedText>Save Draft</TranslatedText>}
               </Button>
               <Button 
                 onClick={handlePublish}
                 disabled={!selectedRestaurantId || !selectedVisitDate || saving}
                 className="flex-1 bg-red-600 text-white hover:bg-red-700"
               >
-                {saving ? 'Publishing...' : 'Publish'}
+                {saving ? <TranslatedText>Publishing...</TranslatedText> : <TranslatedText>Publish</TranslatedText>}
               </Button>
             </div>
           </div>
 
           {/* Preview Panel */}
           <div className="bg-gray-100 rounded-lg p-4 h-auto xl:h-[calc(100vh-200px)] xl:sticky xl:top-6 overflow-auto">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">Preview</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-700"><TranslatedText>Preview</TranslatedText></h3>
             <InfographicPreview
               infographic={{
                 restaurantId: selectedRestaurantId,

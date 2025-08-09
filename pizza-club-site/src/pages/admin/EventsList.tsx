@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Event } from '@/types';
 
@@ -62,15 +63,15 @@ const EventsList: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+          <h1 className="text-3xl font-bold text-gray-900"><TranslatedText>Events</TranslatedText></h1>
           <Link to="/admin/events/new">
-            <Button>Create New Event</Button>
+            <Button><TranslatedText>Create New Event</TranslatedText></Button>
           </Link>
         </div>
 
         {events.length === 0 ? (
           <div className="bg-white shadow rounded-lg p-6">
-            <p className="text-gray-600">No events yet. Create your first one!</p>
+            <p className="text-gray-600"><TranslatedText>No events yet. Create your first one!</TranslatedText></p>
           </div>
         ) : (
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -78,19 +79,19 @@ const EventsList: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Title
+                    <TranslatedText>Title</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date/Time
+                    <TranslatedText>Date/Time</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
+                    <TranslatedText>Location</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Max Attendees
+                    <TranslatedText>Max Attendees</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    <TranslatedText>Actions</TranslatedText>
                   </th>
                 </tr>
               </thead>
@@ -111,7 +112,7 @@ const EventsList: React.FC = () => {
                           {eventDate.toLocaleDateString()} at {eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                         {isPast && (
-                          <span className="text-xs text-gray-500">Past event</span>
+                          <span className="text-xs text-gray-500"><TranslatedText>Past event</TranslatedText></span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -121,7 +122,7 @@ const EventsList: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {event.maxAttendees || 'Unlimited'}
+                          {event.maxAttendees || <TranslatedText>Unlimited</TranslatedText>}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -129,14 +130,14 @@ const EventsList: React.FC = () => {
                           to={`/admin/events/edit/${event.id}`}
                           className="text-indigo-600 hover:text-indigo-900 mr-4"
                         >
-                          Edit
+                          <TranslatedText>Edit</TranslatedText>
                         </Link>
                         <button
                           onClick={() => handleDelete(event.id)}
                           disabled={deleting === event.id}
                           className="text-red-600 hover:text-red-900 disabled:opacity-50"
                         >
-                          {deleting === event.id ? 'Deleting...' : 'Delete'}
+                          {deleting === event.id ? <TranslatedText>Deleting...</TranslatedText> : <TranslatedText>Delete</TranslatedText>}
                         </button>
                       </td>
                     </tr>

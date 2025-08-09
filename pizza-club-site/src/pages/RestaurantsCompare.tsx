@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
 import RestaurantSelector from '@/components/restaurants/RestaurantSelector';
 import CompareTable from '@/components/restaurants/CompareTable';
+import TranslatedText from '@/components/common/TranslatedText';
 import { useCompareSelection } from '@/hooks/useCompareSelection';
 import { useCompareUrl } from '@/hooks/useCompareUrl';
 import { dataService } from '@/services/dataWithApi';
@@ -114,14 +115,14 @@ const RestaurantsCompare: React.FC = () => {
             <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Restaurants
+<TranslatedText>Back to Restaurants</TranslatedText>
           </Link>
           
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Compare Restaurants
+<TranslatedText>Compare Restaurants</TranslatedText>
           </h1>
           <p className="text-lg text-gray-600 max-w-3xl">
-            Select up to 4 restaurants to compare their ratings, prices, and details side-by-side.
+<TranslatedText>Select up to 4 restaurants to compare their ratings, prices, and details side-by-side.</TranslatedText>
           </p>
         </div>
 
@@ -146,7 +147,7 @@ const RestaurantsCompare: React.FC = () => {
             {/* Rating Toggle Controls */}
             {selection.selectedIds.length > 0 && (
               <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Show/Hide Rating Categories</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3"><TranslatedText>Show/Hide Rating Categories</TranslatedText></h3>
                 <div className="flex flex-wrap gap-3">
                   {toggleableCategories.map((category) => {
                     let label = category;
@@ -172,7 +173,7 @@ const RestaurantsCompare: React.FC = () => {
                           className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
                         />
                         <span className="text-sm text-gray-700">
-                          {label}
+                          <TranslatedText>{label}</TranslatedText>
                         </span>
                       </label>
                     );

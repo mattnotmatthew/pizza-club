@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import { restaurantNameToSlug } from '@/utils/urlUtils';
 import type { Restaurant } from '@/types';
@@ -70,9 +71,9 @@ const RestaurantsList: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Restaurants</h1>
+          <h1 className="text-3xl font-bold text-gray-900"><TranslatedText>Restaurants</TranslatedText></h1>
           <Link to="/admin/restaurants/new">
-            <Button>Add New Restaurant</Button>
+            <Button><TranslatedText>Add New Restaurant</TranslatedText></Button>
           </Link>
         </div>
 
@@ -89,11 +90,11 @@ const RestaurantsList: React.FC = () => {
 
         {restaurants.length === 0 ? (
           <div className="bg-white shadow rounded-lg p-6">
-            <p className="text-gray-600">No restaurants yet. Add your first one!</p>
+            <p className="text-gray-600"><TranslatedText>No restaurants yet. Add your first one!</TranslatedText></p>
           </div>
         ) : filteredRestaurants.length === 0 ? (
           <div className="bg-white shadow rounded-lg p-6">
-            <p className="text-gray-600">No restaurants found matching your search.</p>
+            <p className="text-gray-600"><TranslatedText>No restaurants found matching your search.</TranslatedText></p>
           </div>
         ) : (
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -101,25 +102,25 @@ const RestaurantsList: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
+                    <TranslatedText>Name</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
+                    <TranslatedText>Location</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Style
+                    <TranslatedText>Style</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
+                    <TranslatedText>Price</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rating
+                    <TranslatedText>Rating</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Visits
+                    <TranslatedText>Visits</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    <TranslatedText>Actions</TranslatedText>
                   </th>
                 </tr>
               </thead>
@@ -168,20 +169,20 @@ const RestaurantsList: React.FC = () => {
                         to={`/admin/restaurants/edit/${restaurant.id}`}
                         className="text-indigo-600 hover:text-indigo-900 mr-3"
                       >
-                        Edit
+                        <TranslatedText>Edit</TranslatedText>
                       </Link>
                       <Link
                         to={`/admin/restaurants/${restaurant.id}/visits`}
                         className="text-green-600 hover:text-green-900 mr-3"
                       >
-                        Visits
+                        <TranslatedText>Visits</TranslatedText>
                       </Link>
                       <button
                         onClick={() => handleDelete(restaurant.id)}
                         disabled={deleting === restaurant.id}
                         className="text-red-600 hover:text-red-900 disabled:opacity-50"
                       >
-                        {deleting === restaurant.id ? 'Deleting...' : 'Delete'}
+                        {deleting === restaurant.id ? <TranslatedText>Deleting...</TranslatedText> : <TranslatedText>Delete</TranslatedText>}
                       </button>
                     </td>
                   </tr>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Restaurant, Member } from '@/types';
 import type { Infographic } from '@/types/infographics';
@@ -101,27 +102,37 @@ const RestaurantDetail: React.FC = () => {
           <div className="p-6 md:p-8">
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Details</h2>
+                <TranslatedText>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-3">Details</h2>
+                </TranslatedText>
                 <dl className="space-y-2">
                   <div>
-                    <dt className="text-sm font-medium text-gray-500">Address</dt>
+                    <TranslatedText>
+                      <dt className="text-sm font-medium text-gray-500">Address</dt>
+                    </TranslatedText>
                     <dd className="text-sm text-gray-900">{restaurant.address}</dd>
                   </div>
                   {restaurant.style && (
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Style</dt>
+                      <TranslatedText>
+                        <dt className="text-sm font-medium text-gray-500">Style</dt>
+                      </TranslatedText>
                       <dd className="text-sm text-gray-900">{restaurant.style}</dd>
                     </div>
                   )}
                   {restaurant.priceRange && (
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Price Range</dt>
+                      <TranslatedText>
+                        <dt className="text-sm font-medium text-gray-500">Price Range</dt>
+                      </TranslatedText>
                       <dd className="text-sm text-gray-900">{restaurant.priceRange}</dd>
                     </div>
                   )}
                   {restaurant.mustTry && (
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Must Try</dt>
+                      <TranslatedText>
+                        <dt className="text-sm font-medium text-gray-500">Must Try</dt>
+                      </TranslatedText>
                       <dd className="text-sm text-gray-900">{restaurant.mustTry}</dd>
                     </div>
                   )}
@@ -129,7 +140,9 @@ const RestaurantDetail: React.FC = () => {
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Contact</h2>
+                <TranslatedText>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-3">Contact</h2>
+                </TranslatedText>
                 <div className="space-y-3">
                   {restaurant.phone && (
                     <a
@@ -152,7 +165,7 @@ const RestaurantDetail: React.FC = () => {
                       <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                       </svg>
-                      Visit Website
+                      <TranslatedText>Visit Website</TranslatedText>
                     </a>
                   )}
                   <a
@@ -165,7 +178,7 @@ const RestaurantDetail: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Get Directions
+                    <TranslatedText>Get Directions</TranslatedText>
                   </a>
                 </div>
               </div>
@@ -174,9 +187,11 @@ const RestaurantDetail: React.FC = () => {
             {/* Visit History */}
             {restaurant.visits && restaurant.visits.length > 0 && (
               <div className="border-t pt-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Visit History ({restaurant.visits.length})
-                </h2>
+                <TranslatedText>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    Visit History ({restaurant.visits.length})
+                  </h2>
+                </TranslatedText>
                 <div className="space-y-4">
                   {restaurant.visits.slice(0, 5).map((visit, index) => (
                     <div key={visit.id || index} className="border-l-4 border-red-600 pl-4">
@@ -190,9 +205,11 @@ const RestaurantDetail: React.FC = () => {
                               day: 'numeric'
                             })}
                           </p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            Attendees: {visit.attendees.map(id => getMemberName(id)).join(', ')}
-                          </p>
+                          <TranslatedText>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Attendees: {visit.attendees.map(id => getMemberName(id)).join(', ')}
+                            </p>
+                          </TranslatedText>
                           {visit.notes && (
                             <p className="text-sm text-gray-700 mt-2 italic">"{visit.notes}"</p>
                           )}
@@ -211,9 +228,11 @@ const RestaurantDetail: React.FC = () => {
                     </div>
                   ))}
                   {restaurant.visits.length > 5 && (
-                    <p className="text-sm text-gray-500 italic">
-                      And {restaurant.visits.length - 5} more visits...
-                    </p>
+                    <TranslatedText>
+                      <p className="text-sm text-gray-500 italic">
+                        And {restaurant.visits.length - 5} more visits...
+                      </p>
+                    </TranslatedText>
                   )}
                 </div>
               </div>
@@ -222,9 +241,11 @@ const RestaurantDetail: React.FC = () => {
             {/* Infographics */}
             {infographics.length > 0 && (
               <div className="border-t pt-6 mt-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Visit Infographics
-                </h2>
+                <TranslatedText>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    Visit Infographics
+                  </h2>
+                </TranslatedText>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {infographics.map(ig => (
                     <Link
@@ -232,9 +253,11 @@ const RestaurantDetail: React.FC = () => {
                       to={`/infographics/${ig.id}`}
                       className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                     >
-                      <h3 className="font-medium text-gray-900">
-                        {ig.content.title || 'Visit Summary'}
-                      </h3>
+                      <TranslatedText>
+                        <h3 className="font-medium text-gray-900">
+                          {ig.content.title || 'Visit Summary'}
+                        </h3>
+                      </TranslatedText>
                       <p className="text-sm text-gray-600 mt-1">
                         {new Date(ig.visitDate).toLocaleDateString()}
                       </p>
@@ -250,13 +273,13 @@ const RestaurantDetail: React.FC = () => {
                 to="/restaurants"
                 className="text-gray-600 hover:text-gray-900"
               >
-                ← Back to Restaurants
+                <TranslatedText>← Back to Restaurants</TranslatedText>
               </Link>
               <Link
                 to="/restaurants/compare"
                 className="ml-auto text-blue-600 hover:text-blue-700"
               >
-                Compare Restaurants →
+                <TranslatedText>Compare Restaurants →</TranslatedText>
               </Link>
             </div>
           </div>

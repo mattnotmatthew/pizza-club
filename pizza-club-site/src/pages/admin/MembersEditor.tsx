@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import MemberPhotoUploader from '@/components/admin/MemberPhotoUploader';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Member } from '@/types';
 
@@ -89,7 +90,7 @@ const MembersEditor: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading member...</p>
+          <p className="mt-4 text-gray-600"><TranslatedText>Loading member...</TranslatedText></p>
         </div>
       </div>
     );
@@ -100,10 +101,10 @@ const MembersEditor: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
           <Link to="/admin/members" className="text-blue-600 hover:text-blue-700 text-sm">
-            ← Back to Members
+            <TranslatedText>← Back to Members</TranslatedText>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mt-2">
-            {isEditing ? 'Edit' : 'Add'} Member
+            <TranslatedText>{isEditing ? 'Edit' : 'Add'} Member</TranslatedText>
           </h1>
         </div>
 
@@ -112,7 +113,7 @@ const MembersEditor: React.FC = () => {
             {/* Name */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Name <span className="text-red-500">*</span>
+                <TranslatedText>Name</TranslatedText> <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -127,7 +128,7 @@ const MembersEditor: React.FC = () => {
             {/* Bio */}
             <div>
               <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-                Bio
+                <TranslatedText>Bio</TranslatedText>
               </label>
               <textarea
                 id="bio"
@@ -138,7 +139,7 @@ const MembersEditor: React.FC = () => {
                 placeholder="Tell us about this member's pizza journey..."
               />
               <p className="mt-1 text-sm text-gray-500">
-                This should be a rich text field, not a single line.
+                <TranslatedText>This should be a rich text field, not a single line.</TranslatedText>
               </p>
             </div>
 
@@ -154,7 +155,7 @@ const MembersEditor: React.FC = () => {
             {/* Member Since */}
             <div>
               <label htmlFor="memberSince" className="block text-sm font-medium text-gray-700">
-                Member Since
+                <TranslatedText>Member Since</TranslatedText>
               </label>
               <input
                 type="text"
@@ -169,7 +170,7 @@ const MembersEditor: React.FC = () => {
             {/* Favorite Pizza Style */}
             <div>
               <label htmlFor="favoritePizzaStyle" className="block text-sm font-medium text-gray-700">
-                Favorite Pizza Style
+                <TranslatedText>Favorite Pizza Style</TranslatedText>
               </label>
               <input
                 type="text"
@@ -189,11 +190,11 @@ const MembersEditor: React.FC = () => {
               disabled={saving}
               className="flex-1"
             >
-              {saving ? 'Saving...' : (isEditing ? 'Update Member' : 'Add Member')}
+              {saving ? <TranslatedText>Saving...</TranslatedText> : (isEditing ? <TranslatedText>Update Member</TranslatedText> : <TranslatedText>Add Member</TranslatedText>)}
             </Button>
             <Link to="/admin/members" className="flex-1">
               <Button variant="secondary" className="w-full">
-                Cancel
+                <TranslatedText>Cancel</TranslatedText>
               </Button>
             </Link>
           </div>

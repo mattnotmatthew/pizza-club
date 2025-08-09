@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Event } from '@/types';
 
@@ -98,7 +99,7 @@ const EventsEditor: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading event...</p>
+          <p className="mt-4 text-gray-600"><TranslatedText>Loading event...</TranslatedText></p>
         </div>
       </div>
     );
@@ -109,10 +110,10 @@ const EventsEditor: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
           <Link to="/admin/events" className="text-blue-600 hover:text-blue-700 text-sm">
-            ← Back to Events
+            <TranslatedText>← Back to Events</TranslatedText>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mt-2">
-            {isEditing ? 'Edit' : 'Create'} Event
+            <TranslatedText>{isEditing ? 'Edit' : 'Create'} Event</TranslatedText>
           </h1>
         </div>
 
@@ -121,7 +122,7 @@ const EventsEditor: React.FC = () => {
             {/* Title */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                Title <span className="text-red-500">*</span>
+                <TranslatedText>Title</TranslatedText> <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -137,7 +138,7 @@ const EventsEditor: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-                  Date <span className="text-red-500">*</span>
+                  <TranslatedText>Date</TranslatedText> <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -150,7 +151,7 @@ const EventsEditor: React.FC = () => {
               </div>
               <div>
                 <label htmlFor="time" className="block text-sm font-medium text-gray-700">
-                  Time <span className="text-red-500">*</span>
+                  <TranslatedText>Time</TranslatedText> <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="time"
@@ -167,7 +168,7 @@ const EventsEditor: React.FC = () => {
             {/* Location */}
             <div>
               <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                Location <span className="text-red-500">*</span>
+                <TranslatedText>Location</TranslatedText> <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -183,7 +184,7 @@ const EventsEditor: React.FC = () => {
             {/* Address */}
             <div>
               <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Address <span className="text-red-500">*</span>
+                <TranslatedText>Address</TranslatedText> <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -199,7 +200,7 @@ const EventsEditor: React.FC = () => {
             {/* Description */}
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                Description
+                <TranslatedText>Description</TranslatedText>
               </label>
               <textarea
                 id="description"
@@ -214,7 +215,7 @@ const EventsEditor: React.FC = () => {
             {/* Max Attendees */}
             <div>
               <label htmlFor="maxAttendees" className="block text-sm font-medium text-gray-700">
-                Max Attendees
+                <TranslatedText>Max Attendees</TranslatedText>
               </label>
               <input
                 type="number"
@@ -230,7 +231,7 @@ const EventsEditor: React.FC = () => {
             {/* RSVP Link */}
             <div>
               <label htmlFor="rsvpLink" className="block text-sm font-medium text-gray-700">
-                RSVP Link
+                <TranslatedText>RSVP Link</TranslatedText>
               </label>
               <input
                 type="url"
@@ -250,11 +251,11 @@ const EventsEditor: React.FC = () => {
               disabled={saving}
               className="flex-1"
             >
-              {saving ? 'Saving...' : (isEditing ? 'Update Event' : 'Create Event')}
+              {saving ? <TranslatedText>Saving...</TranslatedText> : (isEditing ? <TranslatedText>Update Event</TranslatedText> : <TranslatedText>Create Event</TranslatedText>)}
             </Button>
             <Link to="/admin/events" className="flex-1">
               <Button variant="secondary" className="w-full">
-                Cancel
+                <TranslatedText>Cancel</TranslatedText>
               </Button>
             </Link>
           </div>

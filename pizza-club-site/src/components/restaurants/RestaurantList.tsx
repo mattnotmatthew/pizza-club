@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import { restaurantNameToSlug } from '@/utils/urlUtils';
 import type { Restaurant, SortOption } from '@/types';
@@ -150,7 +151,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                       ({restaurant.averageRating.toFixed(1)})
                     </span>
                     <span className={`text-sm ${hasImage ? 'text-white/80' : 'text-gray-500'}`}>
-                      • {restaurant.totalVisits} visit{restaurant.totalVisits !== 1 ? 's' : ''}
+                      • {restaurant.totalVisits} <TranslatedText>visit{restaurant.totalVisits !== 1 ? 's' : ''}</TranslatedText>
                     </span>
                   </div>
                   
@@ -175,7 +176,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                       `}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Website
+                      <TranslatedText>Website</TranslatedText>
                     </a>
                   )}
                   <a
@@ -191,7 +192,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                     `}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    Directions
+                    <TranslatedText>Directions</TranslatedText>
                   </a>
                   {getInfographicsForRestaurant(restaurant.id).length > 0 && (
                     <Link
@@ -208,7 +209,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
-                      Infographic
+                      <TranslatedText>Infographic</TranslatedText>
                     </Link>
                   )}
                 </div>
@@ -225,7 +226,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
 
       {restaurants.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No restaurants found</p>
+          <p className="text-gray-500"><TranslatedText>No restaurants found</TranslatedText></p>
         </div>
       )}
     </div>

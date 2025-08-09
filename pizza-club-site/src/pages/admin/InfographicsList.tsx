@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import Skeleton from '@/components/common/Skeleton';
+import TranslatedText from '@/components/common/TranslatedText';
 import { useInfographics } from '@/hooks/useInfographics';
 import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
@@ -72,36 +73,36 @@ const InfographicsList: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Infographics</h1>
+          <h1 className="text-3xl font-bold text-gray-900"><TranslatedText>Infographics</TranslatedText></h1>
           <div className="flex gap-4">
             {infographics.length > 0 && (
               <Button onClick={handleExport} variant="secondary">
-                Export JSON
+                <TranslatedText>Export JSON</TranslatedText>
               </Button>
             )}
             <Link to="/admin/infographics/new">
-              <Button>Create New Infographic</Button>
+              <Button><TranslatedText>Create New Infographic</TranslatedText></Button>
             </Link>
           </div>
         </div>
         
         {/* Help Text */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h3 className="text-sm font-semibold text-blue-900 mb-2">Publishing Infographics</h3>
+          <h3 className="text-sm font-semibold text-blue-900 mb-2"><TranslatedText>Publishing Infographics</TranslatedText></h3>
           <p className="text-sm text-blue-800">
-            Since this is a static site, infographics are stored locally in your browser. To make them visible to visitors:
+            <TranslatedText>Since this is a static site, infographics are stored locally in your browser. To make them visible to visitors:</TranslatedText>
           </p>
           <ol className="list-decimal list-inside text-sm text-blue-800 mt-2 space-y-1">
-            <li>Create and publish your infographics</li>
-            <li>Click "Export JSON" to download infographics.json</li>
-            <li>Replace /public/data/infographics.json with the downloaded file</li>
-            <li>Commit and push the changes to your repository</li>
+            <li><TranslatedText>Create and publish your infographics</TranslatedText></li>
+            <li><TranslatedText>Click "Export JSON" to download infographics.json</TranslatedText></li>
+            <li><TranslatedText>Replace /public/data/infographics.json with the downloaded file</TranslatedText></li>
+            <li><TranslatedText>Commit and push the changes to your repository</TranslatedText></li>
           </ol>
         </div>
 
         {infographics.length === 0 ? (
           <div className="bg-white shadow rounded-lg p-6">
-            <p className="text-gray-600">No infographics yet. Create your first one!</p>
+            <p className="text-gray-600"><TranslatedText>No infographics yet. Create your first one!</TranslatedText></p>
           </div>
         ) : (
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -109,19 +110,19 @@ const InfographicsList: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Restaurant
+                    <TranslatedText>Restaurant</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Visit Date
+                    <TranslatedText>Visit Date</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    <TranslatedText>Status</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Updated
+                    <TranslatedText>Updated</TranslatedText>
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    <TranslatedText>Actions</TranslatedText>
                   </th>
                 </tr>
               </thead>
@@ -155,14 +156,14 @@ const InfographicsList: React.FC = () => {
                         to={`/admin/infographics/edit/${infographic.id}`}
                         className="text-indigo-600 hover:text-indigo-900 mr-4"
                       >
-                        Edit
+                        <TranslatedText>Edit</TranslatedText>
                       </Link>
                       {infographic.status === 'published' && (
                         <Link
                           to={`/infographics/${infographic.id}`}
                           className="text-green-600 hover:text-green-900 mr-4"
                         >
-                          View
+                          <TranslatedText>View</TranslatedText>
                         </Link>
                       )}
                       <button
@@ -170,7 +171,7 @@ const InfographicsList: React.FC = () => {
                         disabled={deleting === infographic.id}
                         className="text-red-600 hover:text-red-900 disabled:opacity-50"
                       >
-                        {deleting === infographic.id ? 'Deleting...' : 'Delete'}
+                        {deleting === infographic.id ? <TranslatedText>Deleting...</TranslatedText> : <TranslatedText>Delete</TranslatedText>}
                       </button>
                     </td>
                   </tr>

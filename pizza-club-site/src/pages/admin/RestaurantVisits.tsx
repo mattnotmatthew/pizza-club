@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import RatingForm from '@/components/admin/RatingForm';
+import TranslatedText from '@/components/common/TranslatedText';
 import { dataService } from '@/services/dataWithApi';
 import type { Restaurant, RestaurantVisit, Member, NestedRatings } from '@/types';
 
@@ -137,7 +138,7 @@ const RestaurantVisits: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading restaurant visits...</p>
+          <p className="mt-4 text-gray-600"><TranslatedText>Loading restaurant visits...</TranslatedText></p>
         </div>
       </div>
     );
@@ -147,9 +148,9 @@ const RestaurantVisits: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">Restaurant not found</p>
+          <p className="text-gray-600"><TranslatedText>Restaurant not found</TranslatedText></p>
           <Link to="/admin/restaurants" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
-            Back to Restaurants
+            <TranslatedText>Back to Restaurants</TranslatedText>
           </Link>
         </div>
       </div>
@@ -161,10 +162,10 @@ const RestaurantVisits: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-6">
           <Link to="/admin/restaurants" className="text-blue-600 hover:text-blue-700 text-sm">
-            ← Back to Restaurants
+            <TranslatedText>← Back to Restaurants</TranslatedText>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mt-2">
-            {restaurant.name} - Visits
+            <TranslatedText>{restaurant.name} - Visits</TranslatedText>
           </h1>
         </div>
 
@@ -172,14 +173,14 @@ const RestaurantVisits: React.FC = () => {
         {showAddForm && (
           <div className="bg-white shadow rounded-lg p-6 mb-6">
             <h2 className="text-lg font-semibold mb-4">
-              {editingVisit ? 'Edit Visit' : 'Add New Visit'}
+              <TranslatedText>{editingVisit ? 'Edit Visit' : 'Add New Visit'}</TranslatedText>
             </h2>
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 {/* Date */}
                 <div>
                   <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-                    Visit Date <span className="text-red-500">*</span>
+                    <TranslatedText>Visit Date</TranslatedText> <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -194,7 +195,7 @@ const RestaurantVisits: React.FC = () => {
                 {/* Attendees */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Attendees <span className="text-red-500">*</span>
+                    <TranslatedText>Attendees</TranslatedText> <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {members.map((member) => (
@@ -217,7 +218,7 @@ const RestaurantVisits: React.FC = () => {
                 {/* Notes */}
                 <div>
                   <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-                    Notes
+                    <TranslatedText>Notes</TranslatedText>
                   </label>
                   <textarea
                     id="notes"
@@ -231,7 +232,7 @@ const RestaurantVisits: React.FC = () => {
 
                 {/* Ratings */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Ratings</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4"><TranslatedText>Ratings</TranslatedText></h3>
                   <RatingForm
                     initialRatings={formData.ratings}
                     onRatingsChange={(ratings) => setFormData({ ...formData, ratings })}
@@ -242,14 +243,14 @@ const RestaurantVisits: React.FC = () => {
 
               <div className="mt-6 flex gap-4">
                 <Button type="submit" disabled={saving}>
-                  {saving ? 'Saving...' : (editingVisit ? 'Update Visit' : 'Add Visit')}
+                  {saving ? <TranslatedText>Saving...</TranslatedText> : (editingVisit ? <TranslatedText>Update Visit</TranslatedText> : <TranslatedText>Add Visit</TranslatedText>)}
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={() => setShowAddForm(false)}
                 >
-                  Cancel
+                  <TranslatedText>Cancel</TranslatedText>
                 </Button>
               </div>
             </form>
@@ -259,15 +260,15 @@ const RestaurantVisits: React.FC = () => {
         {/* Visits List */}
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Visit History</h2>
+            <h2 className="text-lg font-semibold"><TranslatedText>Visit History</TranslatedText></h2>
             {!showAddForm && (
-              <Button onClick={handleAddVisit}>Add Visit</Button>
+              <Button onClick={handleAddVisit}><TranslatedText>Add Visit</TranslatedText></Button>
             )}
           </div>
           
           {!restaurant.visits || restaurant.visits.length === 0 ? (
             <div className="p-6">
-              <p className="text-gray-600">No visits recorded yet.</p>
+              <p className="text-gray-600"><TranslatedText>No visits recorded yet.</TranslatedText></p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
@@ -286,7 +287,7 @@ const RestaurantVisits: React.FC = () => {
                       
                       <div className="mt-2">
                         <p className="text-sm text-gray-600">
-                          <strong>Attendees:</strong>{' '}
+                          <strong><TranslatedText>Attendees:</TranslatedText></strong>{' '}
                           {visit.attendees
                             .map(attendeeId => members.find(m => m.id === attendeeId)?.name || attendeeId)
                             .join(', ')}
@@ -296,7 +297,7 @@ const RestaurantVisits: React.FC = () => {
                       {visit.notes && (
                         <div className="mt-2">
                           <p className="text-sm text-gray-600">
-                            <strong>Notes:</strong> {visit.notes}
+                            <strong><TranslatedText>Notes:</TranslatedText></strong> {visit.notes}
                           </p>
                         </div>
                       )}
@@ -304,7 +305,7 @@ const RestaurantVisits: React.FC = () => {
                       {/* Ratings Summary */}
                       {visit.ratings && Object.keys(visit.ratings).length > 0 && (
                         <div className="mt-3">
-                          <p className="text-sm font-medium text-gray-700 mb-1">Ratings:</p>
+                          <p className="text-sm font-medium text-gray-700 mb-1"><TranslatedText>Ratings:</TranslatedText></p>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {Object.entries(visit.ratings).map(([category, rating]) => (
                               <div key={category} className="text-sm">
@@ -322,13 +323,13 @@ const RestaurantVisits: React.FC = () => {
                         onClick={() => handleEditVisit(visit)}
                         className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
                       >
-                        Edit
+                        <TranslatedText>Edit</TranslatedText>
                       </button>
                       <button
                         onClick={() => handleDeleteVisit(visit.id || visit.date)}
                         className="text-red-600 hover:text-red-900 text-sm font-medium"
                       >
-                        Delete
+                        <TranslatedText>Delete</TranslatedText>
                       </button>
                     </div>
                   </div>

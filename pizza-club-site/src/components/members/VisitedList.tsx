@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import TranslatedText from '@/components/common/TranslatedText';
 import type { Restaurant } from '@/types';
 
 interface VisitedListProps {
@@ -11,7 +12,7 @@ const VisitedList: React.FC<VisitedListProps> = ({ restaurants, showRatings = fa
   if (restaurants.length === 0) {
     return (
       <p className="text-gray-500 text-center py-8">
-        No restaurant visits recorded yet
+        <TranslatedText>No restaurant visits recorded yet</TranslatedText>
       </p>
     );
   }
@@ -39,7 +40,7 @@ const VisitedList: React.FC<VisitedListProps> = ({ restaurants, showRatings = fa
                 </div>
               )}
               <p className="text-sm text-gray-500">
-                {restaurant.totalVisits || 0} visit{(restaurant.totalVisits || 0) > 1 ? 's' : ''}
+                {restaurant.totalVisits || 0} <TranslatedText>visit{(restaurant.totalVisits || 0) > 1 ? 's' : ''}</TranslatedText>
               </p>
             </div>
           </div>
