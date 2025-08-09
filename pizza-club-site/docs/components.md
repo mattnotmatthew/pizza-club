@@ -74,9 +74,21 @@ export default ComponentName;
   - Member since date
   - Links to member detail page
 
-### VisitedList (`components/members/VisitedList.tsx`)
-- Shows restaurants visited by a member
-- Displays ratings and visit dates
+### MemberDetail (`pages/MemberDetail.tsx`)
+- Full member profile page with visit history
+- Features:
+  - Member hero image with focal point positioning
+  - Bio and member information
+  - **Real-time visit history** from API
+  - Restaurant visit aggregation by restaurant
+  - "Show more" functionality (displays 3 visits initially, expandable)
+  - Visit counts per restaurant
+  - Links to restaurant pages
+- **Data Integration**:
+  - Fetches member data via `dataService.getMemberBySlug()`
+  - Includes visit history via `dataService.getMemberVisits()`
+  - Transforms backend visit data into restaurant-grouped format
+  - Sorts by most recent visit first
 
 ## Restaurant Components
 

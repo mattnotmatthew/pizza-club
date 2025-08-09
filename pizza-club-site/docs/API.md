@@ -124,6 +124,53 @@ GET /members
 GET /members?id=member-id
 ```
 
+**Response includes visit history:**
+```json
+{
+  "id": "member-id",
+  "name": "Member Name",
+  "slug": "member-name", 
+  "bio": "Member bio",
+  "photo": "https://example.com/photo.jpg",
+  "memberSince": "2024",
+  "favoritePizzaStyle": "Neapolitan",
+  "focalPoint": {
+    "x": 50,
+    "y": 25
+  },
+  "visits": [
+    {
+      "id": "visit-123",
+      "visit_date": "2024-01-15",
+      "restaurant_id": "restaurant-456",
+      "restaurant_name": "Lou Malnati's Pizzeria",
+      "location": "439 N Wells St, Chicago, IL 60654"
+    }
+  ],
+  "statistics": {
+    "total_visits": 5,
+    "unique_restaurants": 3,
+    "average_rating_given": 4.2,
+    "first_visit": "2023-06-01",
+    "last_visit": "2024-01-15"
+  }
+}
+```
+
+**Visit History Fields:**
+- `visits`: Array of restaurant visits (last 20 visits, ordered by date descending)
+  - `id`: Visit ID
+  - `visit_date`: Date of the visit (YYYY-MM-DD)
+  - `restaurant_id`: ID of the restaurant visited
+  - `restaurant_name`: Name of the restaurant
+  - `location`: Restaurant address/location
+- `statistics`: Member visit statistics
+  - `total_visits`: Total number of visits across all restaurants
+  - `unique_restaurants`: Number of different restaurants visited
+  - `average_rating_given`: Average rating this member has given (null if no ratings)
+  - `first_visit`: Date of member's first visit
+  - `last_visit`: Date of member's most recent visit
+
 #### Create/Update member
 ```
 POST /members (create)

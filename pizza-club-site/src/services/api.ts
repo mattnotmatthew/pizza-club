@@ -183,6 +183,7 @@ export const apiService = {
     });
   },
 
+
   /**
    * Get all events
    */

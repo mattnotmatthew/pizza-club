@@ -20,8 +20,8 @@ const MapContainer: React.FC<MapContainerProps> = ({
   const [mapLoaded, setMapLoaded] = useState(false);
   
   // Chicago center coordinates
-  const defaultCenter = { lat: 41.8781, lng: -87.6298 };
-  const defaultZoom = 9;
+  const defaultCenter = { lat: 41.76098913714663, lng: -87.90005319427127 };
+  const defaultZoom = 10;
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_ID || 'DEMO_MAP_ID';

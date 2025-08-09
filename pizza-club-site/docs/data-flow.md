@@ -108,6 +108,19 @@ export const dataService = {
     return limit ? upcoming.slice(0, limit) : upcoming;
   },
 
+  // Member visit aggregation
+  async getMemberVisits(memberId: string): Promise<VisitedRestaurant[]> {
+    // Gets member data which includes visits from backend
+    const member = await apiService.getMemberById(memberId);
+    
+    // Transforms visit data into restaurant-grouped format
+    // - Aggregates multiple visits to same restaurant
+    // - Counts total visits per restaurant
+    // - Tracks most recent visit date
+    // - Sorts by most recent visit first
+    return visitedRestaurants;
+  },
+
   // Relationship queries
   async getInfographicWithData(id: string): Promise<InfographicWithData> {
     const infographic = await this.getInfographicById(id);

@@ -254,7 +254,7 @@ export const dataService = {
   },
 
   getPizzaArrayAverage(pizzas: PizzaRating[]): number {
-    if (!pizzas || pizzas.length === 0) return 0;
+    if (!pizzas || !Array.isArray(pizzas) || pizzas.length === 0) return 0;
     
     const sum = pizzas.reduce((acc, pizza) => acc + pizza.rating, 0);
     return Math.round((sum / pizzas.length) * 10) / 10;

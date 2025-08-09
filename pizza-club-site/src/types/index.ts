@@ -12,6 +12,15 @@ export interface Member {
   restaurantsVisited?: number;
   displayOrder?: number;
   focalPoint?: { x: number; y: number }; // Focal point percentages (0-100) for hero image positioning
+  visits?: MemberVisit[]; // Visit history from backend API
+}
+
+export interface MemberVisit {
+  id: string;
+  visit_date: string;
+  restaurant_id: string;
+  restaurant_name: string;
+  location: string;
 }
 
 // New rating structure types
@@ -94,6 +103,11 @@ export interface Restaurant {
   heroZoom?: number; // Zoom level for hero image (1-3)
   heroPanX?: number; // Pan X offset for hero image (-50 to 50)
   heroPanY?: number; // Pan Y offset for hero image (-50 to 50)
+}
+
+// Extended Restaurant type for member visit history
+export interface VisitedRestaurant extends Restaurant {
+  lastVisitDate: string;
 }
 
 export interface Visit {

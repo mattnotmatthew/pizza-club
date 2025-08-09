@@ -4,7 +4,7 @@
  * This service uses the API exclusively for all data operations
  */
 
-import type { Event, Member, Restaurant } from '@/types';
+import type { Event, Member, Restaurant, VisitedRestaurant, MemberVisit } from '@/types';
 import type { Infographic, InfographicWithData } from '@/types/infographics';
 import { dataService as originalDataService } from './data';
 import { apiService } from './api';
@@ -15,6 +15,7 @@ export const dataService = {
   getParentCategories: originalDataService.getParentCategories,
   getChildCategories: originalDataService.getChildCategories,
   getCategoryAverage: originalDataService.getCategoryAverage,
+  getPizzaArrayAverage: originalDataService.getPizzaArrayAverage.bind(originalDataService),
   mapFlatToNested: originalDataService.mapFlatToNested,
   getAvailableRatingCategories: originalDataService.getAvailableRatingCategories,
   
@@ -74,6 +75,58 @@ export const dataService = {
     }
     
     return member;
+  },
+
+  async getMemberVisits(memberId: string): Promise<VisitedRestaurant[]> {
+    try {
+      // Get member data which includes visits
+      const member = await apiService.getMemberById(memberId);
+      if (!member || !member.visits) {
+        return [];
+      }
+
+      // Transform the visit data into Restaurant objects with visit counts
+      const restaurantVisitsMap = new Map<string, { restaurant: Partial<VisitedRestaurant>; visitCount: number; lastVisitDate: string }>();
+      
+      member.visits.forEach((visit: MemberVisit) => {
+        const restaurantId = visit.restaurant_id;
+        if (restaurantVisitsMap.has(restaurantId)) {
+          const existing = restaurantVisitsMap.get(restaurantId)!;
+          existing.visitCount++;
+          // Keep the most recent visit date
+          if (new Date(visit.visit_date) > new Date(existing.lastVisitDate)) {
+            existing.lastVisitDate = visit.visit_date;
+          }
+        } else {
+          restaurantVisitsMap.set(restaurantId, {
+            restaurant: {
+              id: visit.restaurant_id,
+              name: visit.restaurant_name,
+              address: visit.location,
+              coordinates: { lat: 0, lng: 0 }, // Will need to get from restaurants API if needed
+              averageRating: 0, // Will need to calculate if needed
+            },
+            visitCount: 1,
+            lastVisitDate: visit.visit_date
+          });
+        }
+      });
+      
+      // Convert map to array and add visit count to restaurant objects
+      const visitedRestaurants = Array.from(restaurantVisitsMap.values())
+        .map(item => ({
+          ...item.restaurant,
+          totalVisits: item.visitCount,
+          lastVisitDate: item.lastVisitDate
+        } as VisitedRestaurant))
+        // Sort by most recent visit first
+        .sort((a, b) => new Date(b.lastVisitDate).getTime() - new Date(a.lastVisitDate).getTime());
+      
+      return visitedRestaurants;
+    } catch (error) {
+      console.error('Failed to fetch member visits:', error);
+      return [];
+    }
   },
 
   async getInfographics(): Promise<Infographic[]> {

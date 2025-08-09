@@ -53,6 +53,18 @@ SEO-friendly URLs for member profiles using name-based slugs.
 
 **Status:** ✅ Complete
 
+#### [Member Visits History](./member-visits-history.md)
+Real-time visit history display on member detail pages showing restaurant visits with aggregation.
+
+**Key Benefits:**
+- Live data from backend API via visit_attendees table
+- Restaurant visit aggregation and counting
+- Progressive disclosure (show 3, expand to all)
+- Chronological sorting by most recent visits
+- Direct links to restaurant pages
+
+**Status:** ✅ Complete
+
 ### Advanced Features
 
 #### [Infographics System](./infographics/)
@@ -83,6 +95,7 @@ Comprehensive infographic creation and management system.
 - **Admin Interface** - Comprehensive content management
 
 ### Data Management
+- **Member Visits History** - Real-time visit tracking and aggregation
 - **Dynamic Ratings** - Flexible rating category system
 - **Database Integration** - Full MySQL backend with migrations
 - **API Architecture** - RESTful endpoints with authentication

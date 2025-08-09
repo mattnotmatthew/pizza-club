@@ -5,33 +5,6 @@ import { dataService } from '@/services/dataWithApi';
 import type { Member, Restaurant } from '@/types';
 
 
-// Mock visited restaurants data
-const mockVisitedRestaurants: Restaurant[] = [
-  {
-    id: '1',
-    name: 'Lou Malnati\'s Pizzeria',
-    address: '439 N Wells St, Chicago, IL 60654',
-    coordinates: { lat: 41.890251, lng: -87.633991 },
-    averageRating: 4.5,
-    totalVisits: 3,
-  },
-  {
-    id: '2',
-    name: 'Pequod\'s Pizza',
-    address: '2207 N Clybourn Ave, Chicago, IL 60614',
-    coordinates: { lat: 41.922577, lng: -87.664421 },
-    averageRating: 4.8,
-    totalVisits: 2,
-  },
-  {
-    id: '3',
-    name: 'Art of Pizza',
-    address: '3033 N Ashland Ave, Chicago, IL 60657',
-    coordinates: { lat: 41.937594, lng: -87.668365 },
-    averageRating: 4.3,
-    totalVisits: 4,
-  },
-];
 
 const MemberDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,6 +12,7 @@ const MemberDetail: React.FC = () => {
   const [member, setMember] = useState<Member | null>(null);
   const [visitedRestaurants, setVisitedRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAllVisits, setShowAllVisits] = useState(false);
 
   useEffect(() => {
     const fetchMemberData = async () => {
@@ -64,8 +38,9 @@ const MemberDetail: React.FC = () => {
           };
           
           setMember(mappedMember);
-          // TODO: Fetch actual visited restaurants for this member
-          setVisitedRestaurants(mockVisitedRestaurants);
+          // Fetch actual visited restaurants for this member
+          const memberVisits = await dataService.getMemberVisits(mappedMember.id);
+          setVisitedRestaurants(memberVisits);
         } else {
           // Member not found
           navigate('/members');
@@ -199,7 +174,7 @@ const MemberDetail: React.FC = () => {
           
           {visitedRestaurants.length > 0 ? (
             <div className="space-y-4">
-              {visitedRestaurants.map((restaurant) => (
+              {(showAllVisits ? visitedRestaurants : visitedRestaurants.slice(0, 3)).map((restaurant) => (
                 <Link
                   key={restaurant.id}
                   to={`/restaurants#${restaurant.id}`}
@@ -220,6 +195,28 @@ const MemberDetail: React.FC = () => {
                   </div>
                 </Link>
               ))}
+              
+              {!showAllVisits && visitedRestaurants.length > 3 && (
+                <div className="text-center pt-4">
+                  <button
+                    onClick={() => setShowAllVisits(true)}
+                    className="text-red-700 hover:text-red-800 font-medium transition-colors"
+                  >
+                    Show More ({visitedRestaurants.length - 3} more restaurants)
+                  </button>
+                </div>
+              )}
+              
+              {showAllVisits && visitedRestaurants.length > 3 && (
+                <div className="text-center pt-4">
+                  <button
+                    onClick={() => setShowAllVisits(false)}
+                    className="text-red-700 hover:text-red-800 font-medium transition-colors"
+                  >
+                    Show Less
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-gray-500 text-center py-8">
