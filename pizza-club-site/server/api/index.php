@@ -82,6 +82,10 @@ try {
             require_once __DIR__ . '/endpoints/infographics.php';
             break;
             
+        case 'links':
+            require_once __DIR__ . '/endpoints/links.php';
+            break;
+            
         case 'migrate':
             // Special endpoint for data migration
             require_once __DIR__ . '/endpoints/migrate.php';
@@ -95,7 +99,7 @@ try {
                 'timestamp' => date('c'),
                 'available_endpoints' => [
                     'restaurants', 'members', 'events', 'quotes', 
-                    'infographics', 'ratings', 'rating-categories', 'visits', 'migrate'
+                    'infographics', 'links', 'ratings', 'rating-categories', 'visits', 'migrate'
                 ]
             ]);
             break;
@@ -112,6 +116,8 @@ try {
                     'GET /events' => 'List all events',
                     'GET /quotes' => 'List all quotes',
                     'GET /infographics' => 'List all infographics',
+                    'GET /links' => 'List all social links',
+                    'POST /links' => 'Create new link (admin)',
                     'GET /ratings?visit_id=X' => 'Get ratings for a visit',
                     'GET /rating-categories' => 'Get all rating categories',
                     'GET /visits' => 'List all visits',

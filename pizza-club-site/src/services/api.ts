@@ -9,6 +9,7 @@ import type {
   Event, 
   Member, 
   Restaurant, 
+  SocialLink,
   PaginatedResponse 
 } from '@/types';
 import type { 
@@ -320,6 +321,63 @@ export const apiService = {
   async deleteVisit(id: string): Promise<void> {
     await apiRequest(`visits?id=${id}`, {
       method: 'DELETE'
+    });
+  },
+
+  /**
+   * Get all social links
+   */
+  async getLinks(): Promise<SocialLink[]> {
+    const links = await apiRequest<SocialLink[]>('links');
+    return links.sort((a, b) => a.sortOrder - b.sortOrder);
+  },
+
+  /**
+   * Get link by ID
+   */
+  async getLinkById(id: string): Promise<SocialLink | undefined> {
+    return await apiRequest<SocialLink>(`links?id=${id}`);
+  },
+
+  /**
+   * Create or update link
+   */
+  async saveLink(link: Partial<SocialLink>): Promise<SocialLink> {
+    const isUpdate = !!link.id;
+    const method = isUpdate ? 'PUT' : 'POST';
+    const endpoint = isUpdate ? `links?id=${link.id}` : 'links';
+    
+    return await apiRequest<SocialLink>(endpoint, {
+      method,
+      body: JSON.stringify(link)
+    });
+  },
+
+  /**
+   * Delete link
+   */
+  async deleteLink(id: string): Promise<void> {
+    await apiRequest(`links?id=${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  /**
+   * Reorder links
+   */
+  async reorderLinks(linkIds: string[]): Promise<void> {
+    await apiRequest('links/reorder', {
+      method: 'PATCH',
+      body: JSON.stringify({ linkIds })
+    });
+  },
+
+  /**
+   * Track link click
+   */
+  async trackLinkClick(id: string): Promise<void> {
+    await apiRequest(`links/${id}/click`, {
+      method: 'POST'
     });
   }
 };

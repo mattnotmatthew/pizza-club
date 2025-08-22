@@ -181,6 +181,25 @@ CREATE TABLE IF NOT EXISTS events (
   INDEX idx_event_date (event_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Social links table (for LinkTree functionality)
+CREATE TABLE IF NOT EXISTS social_links (
+  id VARCHAR(36) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  url TEXT NOT NULL,
+  description TEXT NULL,
+  icon_type ENUM('default', 'custom', 'emoji') DEFAULT 'default',
+  icon_value VARCHAR(255) NULL,
+  custom_image_url TEXT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  click_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_active_sort (is_active, sort_order),
+  INDEX idx_created_at (created_at),
+  INDEX idx_sort_order (sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- API keys table for authentication (optional)
 CREATE TABLE IF NOT EXISTS api_keys (
   id INT AUTO_INCREMENT PRIMARY KEY,

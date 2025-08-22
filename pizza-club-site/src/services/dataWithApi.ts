@@ -4,7 +4,7 @@
  * This service uses the API exclusively for all data operations
  */
 
-import type { Event, Member, Restaurant, VisitedRestaurant, MemberVisit } from '@/types';
+import type { Event, Member, Restaurant, VisitedRestaurant, MemberVisit, SocialLink } from '@/types';
 import type { Infographic, InfographicWithData } from '@/types/infographics';
 import { dataService as originalDataService } from './data';
 import { apiService } from './api';
@@ -284,5 +284,30 @@ export const dataService = {
   // Run data migration
   async runMigration(): Promise<void> {
     return apiService.runMigration();
+  },
+
+  // Social Links methods
+  async getLinks(): Promise<SocialLink[]> {
+    return await apiService.getLinks();
+  },
+
+  async getLinkById(id: string): Promise<SocialLink | undefined> {
+    return await apiService.getLinkById(id);
+  },
+
+  async saveLink(link: Partial<SocialLink>): Promise<SocialLink> {
+    return await apiService.saveLink(link);
+  },
+
+  async deleteLink(id: string): Promise<void> {
+    await apiService.deleteLink(id);
+  },
+
+  async reorderLinks(linkIds: string[]): Promise<void> {
+    await apiService.reorderLinks(linkIds);
+  },
+
+  async trackLinkClick(id: string): Promise<void> {
+    await apiService.trackLinkClick(id);
   }
 };

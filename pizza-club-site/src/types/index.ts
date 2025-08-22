@@ -190,3 +190,21 @@ export interface FilterOptions {
   dateTo?: Date;
   priceRange?: Restaurant['priceRange'][];
 }
+
+// Social Links / LinkTree types
+export interface SocialLink {
+  id: string;
+  title: string;
+  url: string;
+  description?: string;
+  iconType: 'default' | 'custom' | 'emoji';
+  iconValue?: string;
+  customImageUrl?: string;
+  isActive: boolean;
+  sortOrder: number;
+  clickCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type LinkFormData = Omit<SocialLink, 'id' | 'clickCount' | 'createdAt' | 'updatedAt'>;

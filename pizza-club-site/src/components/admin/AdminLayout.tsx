@@ -64,6 +64,16 @@ const AdminLayout: React.FC = () => {
                 >
                   Restaurants
                 </Link>
+                <Link
+                  to="/admin/links"
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    isActive('/admin/links')
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  }`}
+                >
+                  Links
+                </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">

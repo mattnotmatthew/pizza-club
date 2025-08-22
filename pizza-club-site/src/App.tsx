@@ -13,6 +13,7 @@ const Restaurants = lazy(() => import('@/pages/Restaurants'));
 const RestaurantDetail = lazy(() => import('@/pages/RestaurantDetail'));
 const RestaurantsCompare = lazy(() => import('@/pages/RestaurantsCompare'));
 const Events = lazy(() => import('@/pages/Events'));
+const Links = lazy(() => import('@/pages/Links'));
 const Test = lazy(() => import('@/pages/Test'));
 const Infographics = lazy(() => import('@/pages/Infographics'));
 const InfographicView = lazy(() => import('@/pages/InfographicView'));
@@ -28,6 +29,8 @@ const MembersEditor = lazy(() => import('@/pages/admin/MembersEditor'));
 const RestaurantsList = lazy(() => import('@/pages/admin/RestaurantsList'));
 const RestaurantsEditor = lazy(() => import('@/pages/admin/RestaurantsEditor'));
 const RestaurantVisits = lazy(() => import('@/pages/admin/RestaurantVisits'));
+const LinksList = lazy(() => import('@/pages/admin/LinksList'));
+const LinksEditor = lazy(() => import('@/pages/admin/LinksEditor'));
 
 // Loading component for Suspense fallback
 const Loading: React.FC = () => (
@@ -54,6 +57,7 @@ function App() {
               <Route path="restaurants/compare" element={<RestaurantsCompare />} />
               <Route path="restaurants/:slug" element={<RestaurantDetail />} />
               <Route path="events" element={<Events />} />
+              <Route path="links" element={<Links />} />
               <Route path="infographics" element={<Infographics />} />
               <Route path="infographics/:id" element={<InfographicView />} />
               <Route path="test" element={<Test />} />
@@ -74,6 +78,9 @@ function App() {
               <Route path="restaurants/new" element={<RestaurantsEditor />} />
               <Route path="restaurants/edit/:id" element={<RestaurantsEditor />} />
               <Route path="restaurants/:id/visits" element={<RestaurantVisits />} />
+              <Route path="links" element={<LinksList />} />
+              <Route path="links/new" element={<LinksEditor />} />
+              <Route path="links/edit/:id" element={<LinksEditor />} />
             </Route>
           </Routes>
         </Suspense>
