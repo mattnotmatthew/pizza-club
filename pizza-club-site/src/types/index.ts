@@ -29,12 +29,23 @@ export interface PizzaRating {
   rating: number;
 }
 
+export interface AppetizerRating {
+  order: string;
+  rating: number;
+}
+
+export interface Quote {
+  text: string;
+  author?: string;
+}
+
 export interface NestedRatings {
   overall?: number;
   pizzas?: PizzaRating[];
+  appetizers?: AppetizerRating[];
   'pizza-components'?: Record<string, number>;
   'the-other-stuff'?: Record<string, number>;
-  [key: string]: number | PizzaRating[] | Record<string, number> | undefined;
+  [key: string]: number | PizzaRating[] | AppetizerRating[] | Record<string, number> | undefined;
 }
 
 // Flat rating structure (legacy)
@@ -72,12 +83,23 @@ export function isPizzaRatingArray(value: unknown): value is PizzaRating[] {
   );
 }
 
+export function isAppetizerRatingArray(value: unknown): value is AppetizerRating[] {
+  return Array.isArray(value) && value.every(item => 
+    typeof item === 'object' && 
+    'order' in item && 
+    'rating' in item &&
+    typeof item.order === 'string' &&
+    typeof item.rating === 'number'
+  );
+}
+
 export interface RestaurantVisit {
   id?: string;
   date: string;
   ratings: RatingStructure;
   attendees: string[]; // member ids
   notes?: string;
+  quotes?: Quote[];
 }
 
 export interface Restaurant {

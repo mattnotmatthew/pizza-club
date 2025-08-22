@@ -53,6 +53,13 @@ const RestaurantsCompare: React.FC = () => {
           ...restaurant,
           totalVisits: restaurant.totalVisits || restaurant.visits?.length || 0
         }));
+        
+        // Debug: Check if restaurants have visits and their structure
+        console.log('Fetched restaurants:', mappedRestaurants[0]?.name, 'has', mappedRestaurants[0]?.visits?.length, 'visits');
+        if (mappedRestaurants[0]?.visits?.[0]) {
+          console.log('First visit ratings structure:', mappedRestaurants[0].visits[0].ratings);
+        }
+        
         setRestaurants(mappedRestaurants);
         
         // Get all toggleable categories (overall + pizzas + child categories)

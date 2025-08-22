@@ -210,6 +210,13 @@ class RestaurantAPI extends BaseAPI {
             $visit['date'] = $visit['visit_date'];
             unset($visit['visit_date']);
             
+            // Parse quotes JSON to array
+            if ($visit['quotes']) {
+                $visit['quotes'] = json_decode($visit['quotes'], true);
+            } else {
+                $visit['quotes'] = [];
+            }
+            
             // Get ratings for this visit
             $visit['ratings'] = $this->getVisitRatings($visit['id']);
         }
@@ -245,6 +252,15 @@ class RestaurantAPI extends BaseAPI {
                     $structured['pizzas'] = [];
                 }
                 $structured['pizzas'][] = [
+                    'order' => $rating['pizza_order'],
+                    'rating' => $value
+                ];
+            } elseif ($rating['parent_category'] === 'appetizers' && $rating['pizza_order']) {
+                // Appetizer with order (reusing pizza_order field)
+                if (!isset($structured['appetizers'])) {
+                    $structured['appetizers'] = [];
+                }
+                $structured['appetizers'][] = [
                     'order' => $rating['pizza_order'],
                     'rating' => $value
                 ];

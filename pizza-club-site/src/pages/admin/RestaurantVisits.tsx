@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import RatingForm from '@/components/admin/RatingForm';
 import { dataService } from '@/services/dataWithApi';
-import type { Restaurant, RestaurantVisit, Member, NestedRatings } from '@/types';
+import type { Restaurant, RestaurantVisit, Member, NestedRatings, Quote } from '@/types';
 
 const RestaurantVisits: React.FC = () => {
   const { id } = useParams();
@@ -18,6 +18,7 @@ const RestaurantVisits: React.FC = () => {
     date: '',
     attendees: [] as string[],
     notes: '',
+    quotes: [] as Quote[],
     ratings: {} as NestedRatings
   });
 
@@ -53,6 +54,7 @@ const RestaurantVisits: React.FC = () => {
       date: new Date().toISOString().split('T')[0],
       attendees: [],
       notes: '',
+      quotes: [],
       ratings: {}
     });
   };
@@ -60,10 +62,20 @@ const RestaurantVisits: React.FC = () => {
   const handleEditVisit = (visit: RestaurantVisit) => {
     setShowAddForm(true);
     setEditingVisit(visit);
+    
+    // Debug: Check what's in the ratings
+    console.log('Edit visit - full visit:', visit);
+    console.log('Edit visit - ratings:', visit.ratings);
+    console.log('Edit visit - pizzas in ratings:', (visit.ratings as NestedRatings)?.pizzas);
+    console.log('Edit visit - appetizers in ratings:', (visit.ratings as NestedRatings)?.appetizers);
+    console.log('Edit visit - ratings type:', typeof visit.ratings);
+    console.log('Edit visit - ratings keys:', Object.keys(visit.ratings || {}));
+    
     setFormData({
       date: visit.date,
       attendees: visit.attendees,
       notes: visit.notes || '',
+      quotes: Array.isArray(visit.quotes) ? visit.quotes : [],
       ratings: (visit.ratings as NestedRatings) || {}
     });
   };
@@ -93,11 +105,17 @@ const RestaurantVisits: React.FC = () => {
 
     setSaving(true);
     try {
+      // Filter out empty quotes before sending to API
+      const validQuotes = formData.quotes.filter(
+        quote => quote.text.trim() !== '' || quote.author?.trim() !== ''
+      );
+      
       const visitData = {
         restaurant_id: id,
         visit_date: formData.date,
         attendees: formData.attendees,
         notes: formData.notes,
+        quotes: validQuotes,
         ratings: formData.ratings
       };
 
@@ -129,6 +147,29 @@ const RestaurantVisits: React.FC = () => {
       attendees: prev.attendees.includes(memberId)
         ? prev.attendees.filter(id => id !== memberId)
         : [...prev.attendees, memberId]
+    }));
+  };
+
+  const addQuote = () => {
+    setFormData(prev => ({
+      ...prev,
+      quotes: [...prev.quotes, { text: '', author: '' }]
+    }));
+  };
+
+  const updateQuote = (index: number, field: keyof Quote, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      quotes: prev.quotes.map((quote, i) => 
+        i === index ? { ...quote, [field]: value } : quote
+      )
+    }));
+  };
+
+  const removeQuote = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      quotes: prev.quotes.filter((_, i) => i !== index)
     }));
   };
 
@@ -229,6 +270,63 @@ const RestaurantVisits: React.FC = () => {
                   />
                 </div>
 
+                {/* Quotes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Memorable Quotes
+                  </label>
+                  <div className="space-y-3">
+                    {formData.quotes.map((quote, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <div className="space-y-2">
+                          <div>
+                            <label htmlFor={`quote-text-${index}`} className="block text-xs font-medium text-gray-600 mb-1">
+                              Quote
+                            </label>
+                            <textarea
+                              id={`quote-text-${index}`}
+                              rows={2}
+                              value={quote.text}
+                              onChange={(e) => updateQuote(index, 'text', e.target.value)}
+                              className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm"
+                              placeholder="Enter the memorable quote..."
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1">
+                              <label htmlFor={`quote-author-${index}`} className="block text-xs font-medium text-gray-600 mb-1">
+                                Author (optional)
+                              </label>
+                              <input
+                                type="text"
+                                id={`quote-author-${index}`}
+                                value={quote.author || ''}
+                                onChange={(e) => updateQuote(index, 'author', e.target.value)}
+                                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm"
+                                placeholder="Who said this?"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeQuote(index)}
+                              className="mt-5 px-3 py-1 text-red-600 hover:text-red-800 text-sm font-medium"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addQuote}
+                      className="w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-red-300 hover:text-red-600 font-medium"
+                    >
+                      + Add Quote
+                    </button>
+                  </div>
+                </div>
+
                 {/* Ratings */}
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Ratings</h3>
@@ -298,6 +396,20 @@ const RestaurantVisits: React.FC = () => {
                           <p className="text-sm text-gray-600">
                             <strong>Notes:</strong> {visit.notes}
                           </p>
+                        </div>
+                      )}
+                      
+                      {visit.quotes && Array.isArray(visit.quotes) && visit.quotes.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium text-gray-700 mb-1">Memorable Quotes:</p>
+                          <div className="space-y-1">
+                            {visit.quotes.map((quote, index) => (
+                              <blockquote key={index} className="text-sm text-gray-600 italic">
+                                "{quote.text}"
+                                {quote.author && <span className="font-medium"> - {quote.author}</span>}
+                              </blockquote>
+                            ))}
+                          </div>
                         </div>
                       )}
                       

@@ -48,7 +48,30 @@ const CompareTable: React.FC<CompareTableProps> = ({
   
   // Calculate average rating for a specific category across all visits
   const getAverageRating = (restaurant: Restaurant, category: string) => {
-    return dataService.getCategoryAverage(restaurant, category);
+    // Debug: Check if restaurant has visits
+    if (!restaurant.visits || restaurant.visits.length === 0) {
+      console.warn(`Restaurant ${restaurant.name} has no visits data for category ${category}`);
+      return 0;
+    }
+    
+    // Debug: Check visits structure for specific categories
+    if (category === 'atmosphere' || category === 'waitstaff') {
+      console.log(`Getting average for ${category} at ${restaurant.name}:`);
+      restaurant.visits.forEach((visit, i) => {
+        console.log(`  Visit ${i + 1}:`, visit.ratings);
+        if (visit.ratings['the-other-stuff']) {
+          console.log(`    the-other-stuff:`, visit.ratings['the-other-stuff']);
+        }
+      });
+    }
+    
+    const result = dataService.getCategoryAverage(restaurant, category);
+    
+    if (category === 'atmosphere' || category === 'waitstaff') {
+      console.log(`  Result for ${category}:`, result);
+    }
+    
+    return result;
   };
 
   if (restaurants.length === 0) {

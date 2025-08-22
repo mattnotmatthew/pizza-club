@@ -48,6 +48,13 @@ class VisitsAPI extends BaseAPI {
         // Get ratings
         $visit['ratings'] = $this->getVisitRatings($id);
         
+        // Parse quotes JSON to array
+        if ($visit['quotes']) {
+            $visit['quotes'] = json_decode($visit['quotes'], true);
+        } else {
+            $visit['quotes'] = [];
+        }
+        
         // Map visit_date to date for frontend compatibility
         $visit['date'] = $visit['visit_date'];
         unset($visit['visit_date']);
@@ -74,6 +81,13 @@ class VisitsAPI extends BaseAPI {
             // Convert attendee IDs to array
             $visit['attendees'] = $visit['attendee_ids'] ? explode(',', $visit['attendee_ids']) : [];
             unset($visit['attendee_ids']);
+            
+            // Parse quotes JSON to array
+            if ($visit['quotes']) {
+                $visit['quotes'] = json_decode($visit['quotes'], true);
+            } else {
+                $visit['quotes'] = [];
+            }
             
             // Map visit_date to date for frontend compatibility
             $visit['date'] = $visit['visit_date'];
@@ -115,6 +129,13 @@ class VisitsAPI extends BaseAPI {
         foreach ($visits as &$visit) {
             $visit['attendees'] = $this->getVisitAttendees($visit['id']);
             $visit['ratings'] = $this->getVisitRatings($visit['id']);
+            
+            // Parse quotes JSON to array
+            if ($visit['quotes']) {
+                $visit['quotes'] = json_decode($visit['quotes'], true);
+            } else {
+                $visit['quotes'] = [];
+            }
             
             // Map visit_date to date for frontend compatibility
             $visit['date'] = $visit['visit_date'];
@@ -176,6 +197,15 @@ class VisitsAPI extends BaseAPI {
                     'order' => $rating['pizza_order'],
                     'rating' => $value
                 ];
+            } elseif ($rating['parent_category'] === 'appetizers' && $rating['pizza_order']) {
+                // Appetizer with order (reusing pizza_order field for consistency)
+                if (!isset($structured['appetizers'])) {
+                    $structured['appetizers'] = [];
+                }
+                $structured['appetizers'][] = [
+                    'order' => $rating['pizza_order'],
+                    'rating' => $value
+                ];
             } else {
                 // Nested rating
                 if (!isset($structured[$rating['parent_category']])) {
@@ -201,17 +231,28 @@ class VisitsAPI extends BaseAPI {
             $this->sendError('At least one attendee is required');
         }
         
+        // Validate quotes if provided
+        if (isset($data['quotes'])) {
+            $this->validateQuotes($data['quotes']);
+        }
+        
         $this->db->beginTransaction();
         
         try {
             // Insert visit
-            $visitSql = "INSERT INTO restaurant_visits (restaurant_id, visit_date, notes) 
-                        VALUES (:restaurant_id, :visit_date, :notes)";
+            $visitSql = "INSERT INTO restaurant_visits (restaurant_id, visit_date, notes, quotes) 
+                        VALUES (:restaurant_id, :visit_date, :notes, :quotes)";
+            
+            $quotesJson = null;
+            if (isset($data['quotes']) && is_array($data['quotes'])) {
+                $quotesJson = json_encode($data['quotes']);
+            }
             
             $this->db->execute($visitSql, [
                 ':restaurant_id' => $data['restaurant_id'],
                 ':visit_date' => $data['visit_date'],
-                ':notes' => $data['notes'] ?? null
+                ':notes' => $data['notes'] ?? null,
+                ':quotes' => $quotesJson
             ]);
             
             $visitId = $this->db->lastInsertId();
@@ -261,6 +302,11 @@ class VisitsAPI extends BaseAPI {
             $this->sendError('Visit not found', 404);
         }
         
+        // Validate quotes if provided
+        if (isset($data['quotes'])) {
+            $this->validateQuotes($data['quotes']);
+        }
+        
         $this->db->beginTransaction();
         
         try {
@@ -276,6 +322,15 @@ class VisitsAPI extends BaseAPI {
             if (isset($data['notes'])) {
                 $updates[] = "notes = :notes";
                 $params[':notes'] = $data['notes'];
+            }
+            
+            if (isset($data['quotes'])) {
+                $updates[] = "quotes = :quotes";
+                if (is_array($data['quotes'])) {
+                    $params[':quotes'] = json_encode($data['quotes']);
+                } else {
+                    $params[':quotes'] = null;
+                }
             }
             
             if (!empty($updates)) {
@@ -387,6 +442,18 @@ class VisitsAPI extends BaseAPI {
                             ':pizza_order' => $pizza['order']
                         ]);
                     }
+                } elseif ($key === 'appetizers') {
+                    // Appetizer ratings with order
+                    foreach ($value as $appetizer) {
+                        $categoryId = $this->getCategoryId('appetizers');
+                        $this->db->execute($ratingSql, [
+                            ':visit_id' => $visitId,
+                            ':member_id' => $memberId,
+                            ':category_id' => $categoryId,
+                            ':rating' => $appetizer['rating'],
+                            ':pizza_order' => $appetizer['order']
+                        ]);
+                    }
                 } else {
                     // Nested ratings
                     foreach ($value as $subKey => $subValue) {
@@ -448,6 +515,36 @@ class VisitsAPI extends BaseAPI {
     private function updateRestaurantRating($restaurantId) {
         $sql = "CALL update_restaurant_average_rating(:restaurant_id)";
         $this->db->execute($sql, [':restaurant_id' => $restaurantId]);
+    }
+    
+    /**
+     * Validate quotes array structure
+     */
+    private function validateQuotes($quotes) {
+        if (!is_array($quotes)) {
+            $this->sendError('Quotes must be an array');
+        }
+        
+        foreach ($quotes as $index => $quote) {
+            if (!is_array($quote)) {
+                $this->sendError("Quote at index $index must be an object");
+            }
+            
+            // Text is required for a quote
+            if (!isset($quote['text']) || !is_string($quote['text']) || trim($quote['text']) === '') {
+                $this->sendError("Quote at index $index must have a non-empty 'text' field");
+            }
+            
+            // Author is optional but must be a string if provided
+            if (isset($quote['author']) && !is_string($quote['author'])) {
+                $this->sendError("Quote at index $index 'author' field must be a string");
+            }
+            
+            // Optional validation for additional fields that might be present
+            if (isset($quote['context']) && !is_string($quote['context'])) {
+                $this->sendError("Quote at index $index 'context' field must be a string");
+            }
+        }
     }
 }
 

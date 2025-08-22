@@ -120,7 +120,10 @@ export const dataService = {
           if (nestedRatings[PARENT_CATEGORIES.OTHER_STUFF]) {
             const other = nestedRatings[PARENT_CATEGORIES.OTHER_STUFF];
             if (typeof other === 'object' && !Array.isArray(other)) {
-              Object.keys(other).forEach(key => categories.add(key));
+              Object.keys(other).forEach(key => {
+                console.log('Found other-stuff category:', key);
+                categories.add(key);
+              });
             }
           }
           
@@ -175,6 +178,10 @@ export const dataService = {
           if (otherRatings[category] !== undefined) {
             validRatings.push(otherRatings[category]);
           }
+        }
+        // Also check for direct properties that might be nested categories
+        else if (nestedRatings[category] !== undefined && typeof nestedRatings[category] === 'number') {
+          validRatings.push(nestedRatings[category] as number);
         }
       } else {
         // Handle flat structure
