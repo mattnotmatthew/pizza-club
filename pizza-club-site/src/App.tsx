@@ -57,11 +57,13 @@ function App() {
               <Route path="restaurants/compare" element={<RestaurantsCompare />} />
               <Route path="restaurants/:slug" element={<RestaurantDetail />} />
               <Route path="events" element={<Events />} />
-              <Route path="links" element={<Links />} />
               <Route path="infographics" element={<Infographics />} />
               <Route path="infographics/:id" element={<InfographicView />} />
               <Route path="test" element={<Test />} />
             </Route>
+            
+            {/* Links page without navigation */}
+            <Route path="links" element={<Links />} />
             
             {/* Admin routes */}
             <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>

@@ -345,9 +345,8 @@ export const apiService = {
   async saveLink(link: Partial<SocialLink>): Promise<SocialLink> {
     const isUpdate = !!link.id;
     const method = isUpdate ? 'PUT' : 'POST';
-    const endpoint = isUpdate ? `links?id=${link.id}` : 'links';
     
-    return await apiRequest<SocialLink>(endpoint, {
+    return await apiRequest<SocialLink>('links', {
       method,
       body: JSON.stringify(link)
     });
@@ -376,8 +375,8 @@ export const apiService = {
    * Track link click
    */
   async trackLinkClick(id: string): Promise<void> {
-    await apiRequest(`links/${id}/click`, {
-      method: 'POST'
+    await apiRequest(`links/click?id=${id}`, {
+      method: 'PATCH'
     });
   }
 };

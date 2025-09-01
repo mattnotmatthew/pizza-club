@@ -584,6 +584,15 @@ class RestaurantAPI extends BaseAPI {
         
         $this->sendResponse(['message' => 'Restaurant deleted successfully']);
     }
+    
+    /**
+     * PATCH method handler - not implemented for restaurants
+     */
+    protected function patch() {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        return;
+    }
 }
 
 // Handle the request

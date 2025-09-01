@@ -15,7 +15,7 @@ const About: React.FC = () => {
           </h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Welcome to the Greater Chicagoland Pizza Club - where we took a
-            casual activity and racheted it up to 11.
+            casual activity and took it way too seriously.
           </p>
         </div>
 
@@ -46,7 +46,7 @@ const About: React.FC = () => {
                 in the complexities of our collective human journey. It is a
                 place where we can come together, regardless of our dietary
                 differences, and celebrate the cheese that binds us all
-                together
+                together.
               </p>
             </div>
           </section>
@@ -81,8 +81,8 @@ const About: React.FC = () => {
                     Group Visits
                   </h3>
                   <p>
-                    We organize regular visits to pizzerias throughout
-                    Chicagoland, trying new places and revisiting favorites.
+                    We organize regular visits to pizzerias throughout the
+                    Chicagoland area, with a focus on new places while revisiting favorites.
                   </p>
                 </div>
                 <div>
@@ -90,15 +90,18 @@ const About: React.FC = () => {
                     Reviews & Ratings
                   </h3>
                   <p>
-                    Members share detailed reviews and ratings to help build our
-                    comprehensive{" "}
+                    After every visit, our members fill out a survey to provide
+                    feedback and insights about their experience. This helps us
+                    maintain a comprehensive{" "}
                     <Link
                       to="/restaurants"
                       className="text-red-600 hover:text-red-800"
                     >
                       restaurant database
                     </Link>
-                    .
+                    . That said, everyone's experiences are unique and even with a structured rating and review process, rating and reviewing 
+                    is still extremely subjective. While we standby our ratings our intent is not to disuade anyone from visiting any of the 
+                    restaurants in our database.
                   </p>
                 </div>
                 <div>

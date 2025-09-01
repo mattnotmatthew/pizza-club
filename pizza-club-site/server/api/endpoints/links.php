@@ -1,6 +1,6 @@
 <?php
 /**
- * Links API Endpoints
+ * Links API Endpoints - Complete Working Version
  * 
  * Handles CRUD operations for social links
  */
@@ -10,63 +10,68 @@ require_once __DIR__ . '/../core/BaseAPI.php';
 class LinksAPI extends BaseAPI {
     
     /**
-     * GET /api/links - Get all active links ordered by sort_order
+     * GET /api/links - Get all active links
+     * GET /api/links?all=true - Get all links including inactive
      * GET /api/links?id=123 - Get specific link
-     * GET /api/links?all=true - Get all links (admin only)
      */
     protected function get() {
         $id = $_GET['id'] ?? null;
-        $all = isset($_GET['all']);
         
         if ($id) {
             $this->getLink($id);
         } else {
-            $this->getLinks($all);
+            $this->getLinks();
         }
     }
     
     /**
-     * POST /api/links - Create new link (admin only)
+     * POST /api/links - Create new link
      */
     protected function post() {
         $input = json_decode(file_get_contents('php://input'), true);
         
         if (!$input) {
-            $this->sendError('Invalid JSON data', 400);
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid JSON data']);
+            return;
         }
         
         $this->createLink($input);
     }
     
     /**
-     * PUT /api/links - Update existing link (admin only)
+     * PUT /api/links - Update existing link
      */
     protected function put() {
         $input = json_decode(file_get_contents('php://input'), true);
         
         if (!$input || !isset($input['id'])) {
-            $this->sendError('Invalid JSON data or missing ID', 400);
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid JSON data or missing ID']);
+            return;
         }
         
         $this->updateLink($input);
     }
     
     /**
-     * DELETE /api/links?id=123 - Delete link (admin only)
+     * DELETE /api/links?id=123 - Delete link
      */
     protected function delete() {
         $id = $_GET['id'] ?? null;
         
         if (!$id) {
-            $this->sendError('Missing link ID', 400);
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing link ID']);
+            return;
         }
         
         $this->deleteLink($id);
     }
     
     /**
-     * PATCH /api/links/reorder - Update sort order for multiple links (admin only)
-     * PATCH /api/links/click?id=123 - Increment click counter (no auth)
+     * PATCH /api/links/reorder - Reorder links
+     * PATCH /api/links/click?id=123 - Track click
      */
     protected function patch() {
         $path = $_SERVER['REQUEST_URI'] ?? '';
@@ -74,64 +79,62 @@ class LinksAPI extends BaseAPI {
         if (strpos($path, '/reorder') !== false) {
             $input = json_decode(file_get_contents('php://input'), true);
             if (!$input || !isset($input['linkIds'])) {
-                $this->sendError('Invalid JSON data or missing linkIds', 400);
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid JSON data or missing linkIds']);
+                return;
             }
             $this->reorderLinks($input['linkIds']);
         } elseif (strpos($path, '/click') !== false) {
             $id = $_GET['id'] ?? null;
             if (!$id) {
-                $this->sendError('Missing link ID', 400);
+                http_response_code(400);
+                echo json_encode(['error' => 'Missing link ID']);
+                return;
             }
             $this->trackClick($id);
         } else {
-            $this->sendError('Invalid PATCH endpoint', 404);
+            http_response_code(404);
+            echo json_encode(['error' => 'Invalid PATCH endpoint']);
+            return;
         }
     }
     
     /**
-     * Get all links with optional filtering
+     * Get all links
      */
-    private function getLinks($includeInactive = false) {
-        $whereClause = $includeInactive ? '' : 'WHERE is_active = 1';
+    private function getLinks() {
+        $all = isset($_GET['all']);
+        $whereClause = $all ? '' : 'WHERE is_active = 1';
         
         $sql = "SELECT * FROM social_links 
                 $whereClause
                 ORDER BY sort_order ASC, created_at ASC";
         
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            $links = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Convert to frontend format
-            $formattedLinks = array_map([$this, 'formatLink'], $links);
-            
-            $this->sendSuccess($formattedLinks);
-        } catch (Exception $e) {
-            $this->sendError('Failed to fetch links: ' . $e->getMessage(), 500);
-        }
+        $stmt = $this->db->execute($sql);
+        $links = $stmt->fetchAll();
+        
+        // Format for frontend
+        $formattedLinks = array_map([$this, 'formatLink'], $links);
+        
+        $this->sendResponse($formattedLinks);
     }
     
     /**
-     * Get specific link by ID
+     * Get specific link
      */
     private function getLink($id) {
         $sql = "SELECT * FROM social_links WHERE id = ?";
+        $stmt = $this->db->execute($sql, [$id]);
+        $link = $stmt->fetch();
         
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([$id]);
-            $link = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$link) {
-                $this->sendError('Link not found', 404);
-            }
-            
-            $formattedLink = $this->formatLink($link);
-            $this->sendSuccess($formattedLink);
-        } catch (Exception $e) {
-            $this->sendError('Failed to fetch link: ' . $e->getMessage(), 500);
+        if (!$link) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Link not found']);
+            return;
         }
+        
+        $formattedLink = $this->formatLink($link);
+        $this->sendResponse($formattedLink);
     }
     
     /**
@@ -139,11 +142,10 @@ class LinksAPI extends BaseAPI {
      */
     private function createLink($data) {
         // Validate required fields
-        $required = ['title', 'url'];
-        foreach ($required as $field) {
-            if (!isset($data[$field]) || empty(trim($data[$field]))) {
-                $this->sendError("Missing required field: $field", 400);
-            }
+        if (!isset($data['title']) || !isset($data['url'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing required fields: title and url']);
+            return;
         }
         
         // Generate ID
@@ -154,32 +156,42 @@ class LinksAPI extends BaseAPI {
         $iconValue = $data['iconValue'] ?? null;
         $customImageUrl = $data['customImageUrl'] ?? null;
         $description = $data['description'] ?? null;
-        $isActive = isset($data['isActive']) ? (bool)$data['isActive'] : true;
+        $isActive = isset($data['isActive']) ? ($data['isActive'] ? 1 : 0) : 1;
         $sortOrder = $data['sortOrder'] ?? $this->getNextSortOrder();
         
         $sql = "INSERT INTO social_links 
                 (id, title, url, description, icon_type, icon_value, custom_image_url, is_active, sort_order)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([
-                $id,
-                trim($data['title']),
-                trim($data['url']),
-                $description ? trim($description) : null,
-                $iconType,
-                $iconValue,
-                $customImageUrl,
-                $isActive ? 1 : 0,
-                $sortOrder
-            ]);
-            
-            // Return created link
-            $this->getLink($id);
-        } catch (Exception $e) {
-            $this->sendError('Failed to create link: ' . $e->getMessage(), 500);
-        }
+        $stmt = $this->db->execute($sql, [
+            $id,
+            trim($data['title']),
+            trim($data['url']),
+            $description ? trim($description) : null,
+            $iconType,
+            $iconValue,
+            $customImageUrl,
+            $isActive,
+            $sortOrder
+        ]);
+        
+        // Return the created link
+        $createdLink = [
+            'id' => $id,
+            'title' => trim($data['title']),
+            'url' => trim($data['url']),
+            'description' => $description,
+            'iconType' => $iconType,
+            'iconValue' => $iconValue,
+            'customImageUrl' => $customImageUrl,
+            'isActive' => (bool)$isActive,
+            'sortOrder' => (int)$sortOrder,
+            'clickCount' => 0,
+            'createdAt' => date('Y-m-d H:i:s'),
+            'updatedAt' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->sendResponse($createdLink);
     }
     
     /**
@@ -190,14 +202,15 @@ class LinksAPI extends BaseAPI {
         
         // Check if link exists
         $checkSql = "SELECT id FROM social_links WHERE id = ?";
-        $checkStmt = $this->db->prepare($checkSql);
-        $checkStmt->execute([$id]);
+        $checkStmt = $this->db->execute($checkSql, [$id]);
         
         if (!$checkStmt->fetch()) {
-            $this->sendError('Link not found', 404);
+            http_response_code(404);
+            echo json_encode(['error' => 'Link not found']);
+            return;
         }
         
-        // Build update query dynamically
+        // Build update query
         $updateFields = [];
         $params = [];
         
@@ -211,7 +224,7 @@ class LinksAPI extends BaseAPI {
             $params[] = trim($data['url']);
         }
         
-        if (isset($data['description'])) {
+        if (array_key_exists('description', $data)) {
             $updateFields[] = 'description = ?';
             $params[] = $data['description'] ? trim($data['description']) : null;
         }
@@ -221,12 +234,12 @@ class LinksAPI extends BaseAPI {
             $params[] = $data['iconType'];
         }
         
-        if (isset($data['iconValue'])) {
+        if (array_key_exists('iconValue', $data)) {
             $updateFields[] = 'icon_value = ?';
             $params[] = $data['iconValue'];
         }
         
-        if (isset($data['customImageUrl'])) {
+        if (array_key_exists('customImageUrl', $data)) {
             $updateFields[] = 'custom_image_url = ?';
             $params[] = $data['customImageUrl'];
         }
@@ -242,7 +255,9 @@ class LinksAPI extends BaseAPI {
         }
         
         if (empty($updateFields)) {
-            $this->sendError('No fields to update', 400);
+            http_response_code(400);
+            echo json_encode(['error' => 'No fields to update']);
+            return;
         }
         
         // Add updated_at
@@ -251,15 +266,15 @@ class LinksAPI extends BaseAPI {
         
         $sql = "UPDATE social_links SET " . implode(', ', $updateFields) . " WHERE id = ?";
         
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            
-            // Return updated link
-            $this->getLink($id);
-        } catch (Exception $e) {
-            $this->sendError('Failed to update link: ' . $e->getMessage(), 500);
-        }
+        $stmt = $this->db->execute($sql, $params);
+        
+        // Fetch and return the updated link
+        $sql = "SELECT * FROM social_links WHERE id = ?";
+        $stmt = $this->db->execute($sql, [$id]);
+        $link = $stmt->fetch();
+        
+        $formattedLink = $this->formatLink($link);
+        $this->sendResponse($formattedLink);
     }
     
     /**
@@ -268,86 +283,80 @@ class LinksAPI extends BaseAPI {
     private function deleteLink($id) {
         $sql = "DELETE FROM social_links WHERE id = ?";
         
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([$id]);
-            
-            if ($stmt->rowCount() === 0) {
-                $this->sendError('Link not found', 404);
-            }
-            
-            $this->sendSuccess(['message' => 'Link deleted successfully']);
-        } catch (Exception $e) {
-            $this->sendError('Failed to delete link: ' . $e->getMessage(), 500);
+        $stmt = $this->db->execute($sql, [$id]);
+        
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Link not found']);
+            return;
         }
+        
+        $this->sendResponse(['message' => 'Link deleted successfully']);
     }
     
     /**
-     * Reorder links by updating sort_order
+     * Reorder links
      */
     private function reorderLinks($linkIds) {
         if (!is_array($linkIds) || empty($linkIds)) {
-            $this->sendError('Invalid linkIds array', 400);
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid linkIds array']);
+            return;
         }
         
+        $this->db->beginTransaction();
+        
         try {
-            $this->db->beginTransaction();
-            
             $sql = "UPDATE social_links SET sort_order = ? WHERE id = ?";
-            $stmt = $this->db->prepare($sql);
             
             foreach ($linkIds as $index => $linkId) {
-                $stmt->execute([$index, $linkId]);
+                $this->db->execute($sql, [$index, $linkId]);
             }
             
             $this->db->commit();
-            $this->sendSuccess(['message' => 'Links reordered successfully']);
+            $this->sendResponse(['message' => 'Links reordered successfully']);
         } catch (Exception $e) {
             $this->db->rollBack();
-            $this->sendError('Failed to reorder links: ' . $e->getMessage(), 500);
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to reorder links: ' . $e->getMessage()]);
+            return;
         }
     }
     
     /**
-     * Track click for analytics (no auth required)
+     * Track click
      */
     private function trackClick($id) {
         $sql = "UPDATE social_links SET click_count = click_count + 1 WHERE id = ? AND is_active = 1";
         
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([$id]);
-            
-            if ($stmt->rowCount() === 0) {
-                $this->sendError('Link not found or inactive', 404);
-            }
-            
-            $this->sendSuccess(['message' => 'Click tracked successfully']);
-        } catch (Exception $e) {
-            $this->sendError('Failed to track click: ' . $e->getMessage(), 500);
+        $stmt = $this->db->execute($sql, [$id]);
+        
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Link not found or inactive']);
+            return;
         }
+        
+        $this->sendResponse(['message' => 'Click tracked successfully']);
     }
     
     /**
-     * Get next sort order value
+     * Get next sort order
      */
     private function getNextSortOrder() {
         $sql = "SELECT COALESCE(MAX(sort_order), -1) + 1 as next_order FROM social_links";
         
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return (int)$result['next_order'];
-        } catch (Exception $e) {
-            return 0; // Fallback
-        }
+        $stmt = $this->db->execute($sql);
+        $result = $stmt->fetch();
+        return (int)$result['next_order'];
     }
     
     /**
-     * Format link data for frontend
+     * Format link for frontend
      */
     private function formatLink($link) {
+        if (!$link) return null;
+        
         return [
             'id' => $link['id'],
             'title' => $link['title'],
@@ -365,16 +374,15 @@ class LinksAPI extends BaseAPI {
     }
     
     /**
-     * Check if this endpoint requires authentication
+     * Check if requires auth
      */
     protected function requiresAuth() {
-        // Only track click doesn't require auth
-        if ($this->method === 'PATCH' && strpos($_SERVER['REQUEST_URI'] ?? '', '/click') !== false) {
+        // Public endpoints: GET without 'all' param, and PATCH for click tracking
+        if ($this->method === 'GET' && !isset($_GET['all'])) {
             return false;
         }
         
-        // GET requests don't require auth for public viewing
-        if ($this->method === 'GET' && !isset($_GET['all'])) {
+        if ($this->method === 'PATCH' && strpos($_SERVER['REQUEST_URI'] ?? '', '/click') !== false) {
             return false;
         }
         

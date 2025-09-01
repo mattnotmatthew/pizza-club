@@ -146,7 +146,7 @@ const Links: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100">
+      <div className="min-h-screen bg-red-700 bg-checkered-border">
         <div className="max-w-md mx-auto px-4 py-8">
           {/* Header Skeleton */}
           <div className="text-center mb-8">
@@ -168,7 +168,7 @@ const Links: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-red-700 bg-checkered-border flex items-center justify-center px-4">
         <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full text-center">
           <div className="text-red-500 text-4xl mb-4">❌</div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Oops!</h2>
@@ -185,17 +185,21 @@ const Links: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100">
+    <div className="min-h-screen bg-red-700 bg-checkered-border">
       {/* Header */}
       <div className="text-center py-8 px-4">
-        <div className="w-24 h-24 mx-auto mb-4 bg-red-600 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
-          🍕
+        <div className="w-24 h-24 mx-auto mb-4 rounded-full shadow-lg overflow-hidden">
+          <img 
+            src="/pizza/logo.png" 
+            alt="Greater Chicagoland Pizza Club Logo" 
+            className="w-full h-full object-cover"
+          />
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-          George's Culinary Pizza Club
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+          GCPC Links!
         </h1>
-        <p className="text-gray-600 max-w-md mx-auto">
-          Connect with our pizza-loving community across all platforms
+        <p className="text-red-100 max-w-md mx-auto">
+          Links and stuff.
         </p>
       </div>
 
@@ -221,8 +225,8 @@ const Links: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="text-center py-6 px-4 text-gray-500 text-sm">
-        <p>© 2024 George's Culinary Pizza Club</p>
+      <div className="text-center py-6 px-4 text-red-200 text-sm">
+        <p>© 2025 Greater Chicagoland Pizza Club</p>
       </div>
     </div>
   );

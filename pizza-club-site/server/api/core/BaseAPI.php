@@ -261,4 +261,5 @@ abstract class BaseAPI {
     abstract protected function post();
     abstract protected function put();
     abstract protected function delete();
+    abstract protected function patch();
 }
