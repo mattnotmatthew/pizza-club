@@ -114,7 +114,7 @@ const LinksEditor: React.FC = () => {
         sortOrder: formData.sortOrder
       };
 
-      const savedLink = await dataService.saveLink(linkData);
+      await dataService.saveLink(linkData);
       alert(`Link ${isEditing ? 'updated' : 'created'} successfully!`);
       
       navigate('/admin/links');
