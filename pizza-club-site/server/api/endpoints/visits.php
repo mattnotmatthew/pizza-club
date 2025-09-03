@@ -39,7 +39,9 @@ class VisitsAPI extends BaseAPI {
         $visit = $stmt->fetch();
         
         if (!$visit) {
-            $this->sendError('Visit not found', 404);
+            http_response_code(404);
+            echo json_encode(['error' => 'Visit not found']);
+            return;
         }
         
         // Get attendees
@@ -70,11 +72,11 @@ class VisitsAPI extends BaseAPI {
                 GROUP_CONCAT(va.member_id) as attendee_ids
                 FROM restaurant_visits rv
                 LEFT JOIN visit_attendees va ON rv.id = va.visit_id
-                WHERE rv.restaurant_id = :restaurant_id
+                WHERE rv.restaurant_id = ?
                 GROUP BY rv.id
                 ORDER BY rv.visit_date DESC";
         
-        $stmt = $this->db->execute($sql, [':restaurant_id' => $restaurantId]);
+        $stmt = $this->db->execute($sql, [$restaurantId]);
         $visits = $stmt->fetchAll();
         
         foreach ($visits as &$visit) {
@@ -159,10 +161,10 @@ class VisitsAPI extends BaseAPI {
         $sql = "SELECT va.member_id, m.name
                 FROM visit_attendees va
                 JOIN members m ON va.member_id = m.id
-                WHERE va.visit_id = :visit_id
+                WHERE va.visit_id = ?
                 ORDER BY m.name";
         
-        $stmt = $this->db->execute($sql, [':visit_id' => $visitId]);
+        $stmt = $this->db->execute($sql, [$visitId]);
         return $stmt->fetchAll();
     }
     
@@ -173,10 +175,10 @@ class VisitsAPI extends BaseAPI {
         $sql = "SELECT r.*, rc.name as category_name, rc.parent_category
                 FROM ratings r
                 JOIN rating_categories rc ON r.category_id = rc.id
-                WHERE r.visit_id = :visit_id
+                WHERE r.visit_id = ?
                 ORDER BY rc.display_order, r.pizza_order";
         
-        $stmt = $this->db->execute($sql, [':visit_id' => $visitId]);
+        $stmt = $this->db->execute($sql, [$visitId]);
         $ratings = $stmt->fetchAll();
         
         // Group ratings by structure
@@ -185,10 +187,7 @@ class VisitsAPI extends BaseAPI {
         foreach ($ratings as $rating) {
             $value = (float)$rating['rating'];
             
-            if ($rating['parent_category'] === null) {
-                // Top-level rating
-                $structured[$rating['category_name']] = $value;
-            } elseif ($rating['parent_category'] === 'pizzas' && $rating['pizza_order']) {
+            if ($rating['category_name'] === 'pizzas' && $rating['pizza_order']) {
                 // Pizza with order
                 if (!isset($structured['pizzas'])) {
                     $structured['pizzas'] = [];
@@ -197,7 +196,7 @@ class VisitsAPI extends BaseAPI {
                     'order' => $rating['pizza_order'],
                     'rating' => $value
                 ];
-            } elseif ($rating['parent_category'] === 'appetizers' && $rating['pizza_order']) {
+            } elseif ($rating['category_name'] === 'appetizers' && $rating['pizza_order']) {
                 // Appetizer with order (reusing pizza_order field for consistency)
                 if (!isset($structured['appetizers'])) {
                     $structured['appetizers'] = [];
@@ -206,8 +205,11 @@ class VisitsAPI extends BaseAPI {
                     'order' => $rating['pizza_order'],
                     'rating' => $value
                 ];
+            } elseif ($rating['parent_category'] === null) {
+                // Top-level rating (like 'overall')
+                $structured[$rating['category_name']] = $value;
             } else {
-                // Nested rating
+                // Nested rating (like 'crust' under 'pizza-components')
                 if (!isset($structured[$rating['parent_category']])) {
                     $structured[$rating['parent_category']] = [];
                 }
@@ -222,18 +224,30 @@ class VisitsAPI extends BaseAPI {
      * POST /api/visits - Create new visit
      */
     protected function post() {
-        $data = $this->getRequestBody();
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        if (!$input) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid JSON data']);
+            return;
+        }
         
         // Validate required fields
-        $this->validateRequired($data, ['restaurant_id', 'visit_date', 'attendees']);
+        if (!isset($input['restaurant_id']) || !isset($input['visit_date']) || !isset($input['attendees'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing required fields: restaurant_id, visit_date, attendees']);
+            return;
+        }
         
-        if (!is_array($data['attendees']) || empty($data['attendees'])) {
-            $this->sendError('At least one attendee is required');
+        if (!is_array($input['attendees']) || empty($input['attendees'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'At least one attendee is required']);
+            return;
         }
         
         // Validate quotes if provided
-        if (isset($data['quotes'])) {
-            $this->validateQuotes($data['quotes']);
+        if (isset($input['quotes'])) {
+            $this->validateQuotes($input['quotes']);
         }
         
         $this->db->beginTransaction();
@@ -241,34 +255,34 @@ class VisitsAPI extends BaseAPI {
         try {
             // Insert visit
             $visitSql = "INSERT INTO restaurant_visits (restaurant_id, visit_date, notes, quotes) 
-                        VALUES (:restaurant_id, :visit_date, :notes, :quotes)";
+                        VALUES (?, ?, ?, ?)";
             
             $quotesJson = null;
-            if (isset($data['quotes']) && is_array($data['quotes'])) {
-                $quotesJson = json_encode($data['quotes']);
+            if (isset($input['quotes']) && is_array($input['quotes'])) {
+                $quotesJson = json_encode($input['quotes']);
             }
             
             $this->db->execute($visitSql, [
-                ':restaurant_id' => $data['restaurant_id'],
-                ':visit_date' => $data['visit_date'],
-                ':notes' => $data['notes'] ?? null,
-                ':quotes' => $quotesJson
+                $input['restaurant_id'],
+                $input['visit_date'],
+                $input['notes'] ?? null,
+                $quotesJson
             ]);
             
             $visitId = $this->db->lastInsertId();
             
             // Add attendees
-            $this->addVisitAttendees($visitId, $data['attendees']);
+            $this->addVisitAttendees($visitId, $input['attendees']);
             
             // Add ratings if provided
-            if (isset($data['ratings']) && !empty($data['ratings'])) {
-                $this->addVisitRatings($visitId, $data['ratings']);
+            if (isset($input['ratings']) && !empty($input['ratings'])) {
+                $this->addVisitRatings($visitId, $input['ratings']);
             }
             
             $this->db->commit();
             
             // Update restaurant average rating
-            $this->updateRestaurantRating($data['restaurant_id']);
+            $this->updateRestaurantRating($input['restaurant_id']);
             
             $this->sendResponse([
                 'id' => $visitId,
@@ -285,26 +299,30 @@ class VisitsAPI extends BaseAPI {
      * PUT /api/visits - Update visit
      */
     protected function put() {
-        $data = $this->getRequestBody();
+        $input = json_decode(file_get_contents('php://input'), true);
         
-        if (!isset($data['id'])) {
-            $this->sendError('Visit ID is required');
+        if (!$input || !isset($input['id'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Visit ID is required']);
+            return;
         }
         
-        $visitId = $data['id'];
+        $visitId = $input['id'];
         
         // Check if visit exists
-        $checkSql = "SELECT restaurant_id FROM restaurant_visits WHERE id = :id";
-        $checkStmt = $this->db->execute($checkSql, [':id' => $visitId]);
+        $checkSql = "SELECT restaurant_id FROM restaurant_visits WHERE id = ?";
+        $checkStmt = $this->db->execute($checkSql, [$visitId]);
         $existingVisit = $checkStmt->fetch();
         
         if (!$existingVisit) {
-            $this->sendError('Visit not found', 404);
+            http_response_code(404);
+            echo json_encode(['error' => 'Visit not found']);
+            return;
         }
         
         // Validate quotes if provided
-        if (isset($data['quotes'])) {
-            $this->validateQuotes($data['quotes']);
+        if (isset($input['quotes'])) {
+            $this->validateQuotes($input['quotes']);
         }
         
         $this->db->beginTransaction();
@@ -312,51 +330,52 @@ class VisitsAPI extends BaseAPI {
         try {
             // Update visit basic info
             $updates = [];
-            $params = [':id' => $visitId];
+            $params = [];
             
-            if (isset($data['visit_date'])) {
-                $updates[] = "visit_date = :visit_date";
-                $params[':visit_date'] = $data['visit_date'];
+            if (isset($input['visit_date'])) {
+                $updates[] = "visit_date = ?";
+                $params[] = $input['visit_date'];
             }
             
-            if (isset($data['notes'])) {
-                $updates[] = "notes = :notes";
-                $params[':notes'] = $data['notes'];
+            if (isset($input['notes'])) {
+                $updates[] = "notes = ?";
+                $params[] = $input['notes'];
             }
             
-            if (isset($data['quotes'])) {
-                $updates[] = "quotes = :quotes";
-                if (is_array($data['quotes'])) {
-                    $params[':quotes'] = json_encode($data['quotes']);
+            if (isset($input['quotes'])) {
+                $updates[] = "quotes = ?";
+                if (is_array($input['quotes'])) {
+                    $params[] = json_encode($input['quotes']);
                 } else {
-                    $params[':quotes'] = null;
+                    $params[] = null;
                 }
             }
             
             if (!empty($updates)) {
-                $sql = "UPDATE restaurant_visits SET " . implode(', ', $updates) . " WHERE id = :id";
+                $params[] = $visitId; // Add ID for WHERE clause
+                $sql = "UPDATE restaurant_visits SET " . implode(', ', $updates) . " WHERE id = ?";
                 $this->db->execute($sql, $params);
             }
             
             // Update attendees if provided
-            if (isset($data['attendees'])) {
+            if (isset($input['attendees'])) {
                 // Remove existing attendees
-                $this->db->execute("DELETE FROM visit_attendees WHERE visit_id = :visit_id", [':visit_id' => $visitId]);
+                $this->db->execute("DELETE FROM visit_attendees WHERE visit_id = ?", [$visitId]);
                 
                 // Add new attendees
-                if (!empty($data['attendees'])) {
-                    $this->addVisitAttendees($visitId, $data['attendees']);
+                if (!empty($input['attendees'])) {
+                    $this->addVisitAttendees($visitId, $input['attendees']);
                 }
             }
             
             // Update ratings if provided
-            if (isset($data['ratings'])) {
+            if (isset($input['ratings'])) {
                 // Remove existing ratings
-                $this->db->execute("DELETE FROM ratings WHERE visit_id = :visit_id", [':visit_id' => $visitId]);
+                $this->db->execute("DELETE FROM ratings WHERE visit_id = ?", [$visitId]);
                 
                 // Add new ratings
-                if (!empty($data['ratings'])) {
-                    $this->addVisitRatings($visitId, $data['ratings']);
+                if (!empty($input['ratings'])) {
+                    $this->addVisitRatings($visitId, $input['ratings']);
                 }
             }
             
@@ -376,41 +395,17 @@ class VisitsAPI extends BaseAPI {
     /**
      * DELETE /api/visits?id=123 - Delete visit
      */
-    protected function delete() {
-        $id = $_GET['id'] ?? null;
-        
-        if (!$id) {
-            $this->sendError('Visit ID is required');
-        }
-        
-        // Get restaurant ID before deletion for rating update
-        $checkSql = "SELECT restaurant_id FROM restaurant_visits WHERE id = :id";
-        $checkStmt = $this->db->execute($checkSql, [':id' => $id]);
-        $visit = $checkStmt->fetch();
-        
-        if (!$visit) {
-            $this->sendError('Visit not found', 404);
-        }
-        
-        $sql = "DELETE FROM restaurant_visits WHERE id = :id";
-        $stmt = $this->db->execute($sql, [':id' => $id]);
-        
-        // Update restaurant average rating
-        $this->updateRestaurantRating($visit['restaurant_id']);
-        
-        $this->sendResponse(['message' => 'Visit deleted successfully']);
-    }
     
     /**
      * Add attendees to a visit
      */
     private function addVisitAttendees($visitId, $attendees) {
-        $attendeeSql = "INSERT INTO visit_attendees (visit_id, member_id) VALUES (:visit_id, :member_id)";
+        $attendeeSql = "INSERT INTO visit_attendees (visit_id, member_id) VALUES (?, ?)";
         
         foreach ($attendees as $memberId) {
             $this->db->execute($attendeeSql, [
-                ':visit_id' => $visitId,
-                ':member_id' => $memberId
+                $visitId,
+                $memberId
             ]);
         }
     }
@@ -420,11 +415,11 @@ class VisitsAPI extends BaseAPI {
      */
     private function addVisitRatings($visitId, $ratings) {
         $ratingSql = "INSERT INTO ratings (visit_id, member_id, category_id, rating, pizza_order)
-                     VALUES (:visit_id, :member_id, :category_id, :rating, :pizza_order)";
+                     VALUES (?, ?, ?, ?, ?)";
         
         // Use first attendee as the rating member (admin entered ratings)
-        $memberSql = "SELECT member_id FROM visit_attendees WHERE visit_id = :visit_id LIMIT 1";
-        $memberStmt = $this->db->execute($memberSql, [':visit_id' => $visitId]);
+        $memberSql = "SELECT member_id FROM visit_attendees WHERE visit_id = ? LIMIT 1";
+        $memberStmt = $this->db->execute($memberSql, [$visitId]);
         $member = $memberStmt->fetch();
         $memberId = $member ? $member['member_id'] : 'admin';
         
@@ -435,11 +430,11 @@ class VisitsAPI extends BaseAPI {
                     foreach ($value as $pizza) {
                         $categoryId = $this->getCategoryId('pizzas');
                         $this->db->execute($ratingSql, [
-                            ':visit_id' => $visitId,
-                            ':member_id' => $memberId,
-                            ':category_id' => $categoryId,
-                            ':rating' => $pizza['rating'],
-                            ':pizza_order' => $pizza['order']
+                            $visitId,
+                            $memberId,
+                            $categoryId,
+                            $pizza['rating'],
+                            $pizza['order']
                         ]);
                     }
                 } elseif ($key === 'appetizers') {
@@ -447,11 +442,11 @@ class VisitsAPI extends BaseAPI {
                     foreach ($value as $appetizer) {
                         $categoryId = $this->getCategoryId('appetizers');
                         $this->db->execute($ratingSql, [
-                            ':visit_id' => $visitId,
-                            ':member_id' => $memberId,
-                            ':category_id' => $categoryId,
-                            ':rating' => $appetizer['rating'],
-                            ':pizza_order' => $appetizer['order']
+                            $visitId,
+                            $memberId,
+                            $categoryId,
+                            $appetizer['rating'],
+                            $appetizer['order']
                         ]);
                     }
                 } else {
@@ -459,11 +454,11 @@ class VisitsAPI extends BaseAPI {
                     foreach ($value as $subKey => $subValue) {
                         $categoryId = $this->getCategoryId($subKey, $key);
                         $this->db->execute($ratingSql, [
-                            ':visit_id' => $visitId,
-                            ':member_id' => $memberId,
-                            ':category_id' => $categoryId,
-                            ':rating' => $subValue,
-                            ':pizza_order' => null
+                            $visitId,
+                            $memberId,
+                            $categoryId,
+                            $subValue,
+                            null
                         ]);
                     }
                 }
@@ -471,11 +466,11 @@ class VisitsAPI extends BaseAPI {
                 // Flat rating
                 $categoryId = $this->getCategoryId($key);
                 $this->db->execute($ratingSql, [
-                    ':visit_id' => $visitId,
-                    ':member_id' => $memberId,
-                    ':category_id' => $categoryId,
-                    ':rating' => $value,
-                    ':pizza_order' => null
+                    $visitId,
+                    $memberId,
+                    $categoryId,
+                    $value,
+                    null
                 ]);
             }
         }
@@ -485,12 +480,12 @@ class VisitsAPI extends BaseAPI {
      * Get or create category ID
      */
     private function getCategoryId($name, $parent = null) {
-        $sql = "SELECT id FROM rating_categories WHERE name = :name AND ";
-        $params = [':name' => $name];
+        $sql = "SELECT id FROM rating_categories WHERE name = ? AND ";
+        $params = [$name];
         
         if ($parent) {
-            $sql .= "parent_category = :parent";
-            $params[':parent'] = $parent;
+            $sql .= "parent_category = ?";
+            $params[] = $parent;
         } else {
             $sql .= "parent_category IS NULL";
         }
@@ -503,8 +498,8 @@ class VisitsAPI extends BaseAPI {
         }
         
         // Create new category
-        $insertSql = "INSERT INTO rating_categories (name, parent_category) VALUES (:name, :parent)";
-        $this->db->execute($insertSql, [':name' => $name, ':parent' => $parent]);
+        $insertSql = "INSERT INTO rating_categories (name, parent_category) VALUES (?, ?)";
+        $this->db->execute($insertSql, [$name, $parent]);
         
         return $this->db->lastInsertId();
     }
@@ -513,8 +508,8 @@ class VisitsAPI extends BaseAPI {
      * Update restaurant average rating
      */
     private function updateRestaurantRating($restaurantId) {
-        $sql = "CALL update_restaurant_average_rating(:restaurant_id)";
-        $this->db->execute($sql, [':restaurant_id' => $restaurantId]);
+        $sql = "CALL update_restaurant_average_rating(?)";
+        $this->db->execute($sql, [$restaurantId]);
     }
     
     /**
@@ -522,29 +517,88 @@ class VisitsAPI extends BaseAPI {
      */
     private function validateQuotes($quotes) {
         if (!is_array($quotes)) {
-            $this->sendError('Quotes must be an array');
+            http_response_code(400);
+            echo json_encode(['error' => 'Quotes must be an array']);
+            return;
         }
         
         foreach ($quotes as $index => $quote) {
             if (!is_array($quote)) {
-                $this->sendError("Quote at index $index must be an object");
+                http_response_code(400);
+                echo json_encode(['error' => "Quote at index $index must be an object"]);
+                return;
             }
             
             // Text is required for a quote
             if (!isset($quote['text']) || !is_string($quote['text']) || trim($quote['text']) === '') {
-                $this->sendError("Quote at index $index must have a non-empty 'text' field");
+                http_response_code(400);
+                echo json_encode(['error' => "Quote at index $index must have a non-empty 'text' field"]);
+                return;
             }
             
             // Author is optional but must be a string if provided
             if (isset($quote['author']) && !is_string($quote['author'])) {
-                $this->sendError("Quote at index $index 'author' field must be a string");
+                http_response_code(400);
+                echo json_encode(['error' => "Quote at index $index 'author' field must be a string"]);
+                return;
             }
             
             // Optional validation for additional fields that might be present
             if (isset($quote['context']) && !is_string($quote['context'])) {
-                $this->sendError("Quote at index $index 'context' field must be a string");
+                http_response_code(400);
+                echo json_encode(['error' => "Quote at index $index 'context' field must be a string"]);
+                return;
             }
         }
+    }
+    
+    /**
+     * DELETE /api/visits?id=123 - Delete visit (admin only)
+     */
+    protected function delete() {
+        $id = $_GET['id'] ?? null;
+        
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Visit ID is required']);
+            return;
+        }
+        
+        // Get restaurant ID before deletion for rating update
+        $checkSql = "SELECT restaurant_id FROM restaurant_visits WHERE id = ?";
+        $checkStmt = $this->db->execute($checkSql, [$id]);
+        $visit = $checkStmt->fetch();
+        
+        if (!$visit) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Visit not found']);
+            return;
+        }
+        
+        $sql = "DELETE FROM restaurant_visits WHERE id = ?";
+        $stmt = $this->db->execute($sql, [$id]);
+        
+        // Update restaurant average rating
+        $this->updateRestaurantRating($visit['restaurant_id']);
+        
+        $this->sendResponse(['message' => 'Visit deleted successfully']);
+    }
+    
+    /**
+     * PATCH /api/visits - Not implemented
+     */
+    protected function patch() {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        return;
+    }
+    
+    /**
+     * Check if endpoint requires authentication
+     */
+    protected function requiresAuth() {
+        // GET requests are public, all other operations require auth
+        return $this->method !== 'GET';
     }
 }
 

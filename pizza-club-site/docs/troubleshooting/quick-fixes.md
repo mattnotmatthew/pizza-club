@@ -18,6 +18,7 @@ This document provides a quick reference for common issues and their immediate s
 | CORS blocked | Add localhost to allowed origins in PHP |
 | 400 bad request | Fix "blob" filename in optimization |
 | 404 on endpoint | Check directory name (underscore vs hyphen) |
+| Saved ratings not displaying | Check API endpoints use consistent field checks (`category_name` vs `parent_category`) |
 | Empty $_FILES | Don't set Content-Type header manually |
 | No progress | Use XMLHttpRequest, not fetch |
 | Invalid Date on visits | Map `visit_date` to `date` in API endpoints |

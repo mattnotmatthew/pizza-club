@@ -504,3 +504,47 @@ curl -X POST -H "Content-Type: application/json" \
 | 405 - Method not allowed | Missing HTTP method | Implement all abstract methods |
 
 This guide should prevent the issues encountered during LinkTree development!
+
+## Data Consistency Across Endpoints
+
+### Critical: Shared Data Structure Logic
+
+When multiple endpoints return the same data structure, ensure they use **identical logic**. Different endpoints may need to return the same nested data (e.g., visit ratings, member details).
+
+**Example Issue Fixed (Sept 2024):**
+Pizza ratings weren't displaying in admin interface because two endpoints used different field checks:
+- `visits.php`: `$rating['category_name'] === 'pizzas'` ✅ 
+- `restaurants.php`: `$rating['parent_category'] === 'pizzas'` ❌
+
+**Solution Pattern:**
+```php
+// CORRECT: Both endpoints use same logic
+if ($rating['category_name'] === 'pizzas' && $rating['pizza_order']) {
+    if (!isset($structured['pizzas'])) {
+        $structured['pizzas'] = [];
+    }
+    $structured['pizzas'][] = [
+        'order' => $rating['pizza_order'],
+        'rating' => (float)$rating['rating']
+    ];
+}
+```
+
+### Consistency Checklist
+
+Before deploying endpoints that share data structures:
+
+1. ✅ **Identical Database Queries**: Use same JOIN conditions and field selections
+2. ✅ **Identical Processing Logic**: Same conditional checks (`category_name`, `parent_category`, etc.)
+3. ✅ **Identical Output Structure**: Same array/object format and field names
+4. ✅ **Cross-Test Both Endpoints**: Save via one, retrieve via another to verify consistency
+
+### Common Shared Data Types
+
+| Data Type | Endpoints That Share It | Key Logic to Match |
+|-----------|------------------------|-------------------|
+| Visit Ratings | `visits.php`, `restaurants.php` | Pizza/appetizer categorization logic |
+| Member Details | `members.php`, `visits.php` | Field mapping and formatting |
+| Restaurant Info | `restaurants.php`, `infographics.php` | Coordinate formatting, image paths |
+
+**Pro Tip:** Extract shared logic into private methods that both endpoints can call, or create utility classes for complex data transformations.

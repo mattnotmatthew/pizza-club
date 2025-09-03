@@ -62,6 +62,20 @@ class MigrateAPI extends BaseAPI {
     protected function delete() {
         $this->sendError('Method not allowed', 405);
     }
+    
+    /**
+     * PATCH not supported
+     */
+    protected function patch() {
+        $this->sendError('Method not allowed', 405);
+    }
+    
+    /**
+     * Check if endpoint requires authentication
+     */
+    protected function requiresAuth() {
+        return false;  // Migration endpoint doesn't need auth
+    }
 }
 
 // Handle the request

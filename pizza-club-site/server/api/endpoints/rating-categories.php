@@ -54,31 +54,43 @@ class RatingCategoriesAPI extends BaseAPI {
      * POST /api/rating-categories - Create new rating category (admin only)
      */
     protected function post() {
-        $data = $this->getRequestBody();
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        if (!$input) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid JSON data']);
+            return;
+        }
         
         // Validate required fields
-        $this->validateRequired($data, ['name']);
+        if (!isset($input['name'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing required field: name']);
+            return;
+        }
         
         $params = [
-            ':name' => $this->sanitize($data['name']),
-            ':parent_category' => $data['parent_category'] ?? null,
-            ':display_order' => (int)($data['display_order'] ?? 0)
+            $input['name'],
+            $input['parent_category'] ?? null,
+            (int)($input['display_order'] ?? 0)
         ];
         
         $sql = "INSERT INTO rating_categories (name, parent_category, display_order) 
-                VALUES (:name, :parent_category, :display_order)";
+                VALUES (?, ?, ?)";
         
         try {
-            $this->db->execute($sql, $params);
+            $stmt = $this->db->execute($sql, $params);
             $id = $this->db->lastInsertId();
             
             $this->sendResponse([
                 'id' => $id,
                 'message' => 'Rating category created successfully'
-            ], 201);
+            ]);
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
-                $this->sendError('Rating category with this name already exists in this parent category', 409);
+                http_response_code(409);
+                echo json_encode(['error' => 'Rating category with this name already exists']);
+                return;
             }
             throw $e;
         }
@@ -88,35 +100,42 @@ class RatingCategoriesAPI extends BaseAPI {
      * PUT /api/rating-categories - Update rating category (admin only)
      */
     protected function put() {
-        $data = $this->getRequestBody();
+        $input = json_decode(file_get_contents('php://input'), true);
         
-        if (!isset($data['id'])) {
-            $this->sendError('Category ID is required');
+        if (!$input || !isset($input['id'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Category ID is required']);
+            return;
         }
         
         // Build update query dynamically
         $updates = [];
-        $params = [':id' => $data['id']];
+        $params = [];
         
         $allowedFields = ['name', 'parent_category', 'display_order'];
         
         foreach ($allowedFields as $field) {
-            if (isset($data[$field])) {
-                $updates[] = "$field = :$field";
-                $params[":$field"] = $field === 'display_order' ? (int)$data[$field] : $this->sanitize($data[$field]);
+            if (isset($input[$field])) {
+                $updates[] = "$field = ?";
+                $params[] = $field === 'display_order' ? (int)$input[$field] : $input[$field];
             }
         }
         
         if (empty($updates)) {
-            $this->sendError('No fields to update');
+            http_response_code(400);
+            echo json_encode(['error' => 'No fields to update']);
+            return;
         }
         
-        $sql = "UPDATE rating_categories SET " . implode(', ', $updates) . " WHERE id = :id";
+        $params[] = $input['id']; // Add ID for WHERE clause
+        $sql = "UPDATE rating_categories SET " . implode(', ', $updates) . " WHERE id = ?";
         
         $stmt = $this->db->execute($sql, $params);
         
         if ($stmt->rowCount() === 0) {
-            $this->sendError('Rating category not found', 404);
+            http_response_code(404);
+            echo json_encode(['error' => 'Rating category not found']);
+            return;
         }
         
         $this->sendResponse(['message' => 'Rating category updated successfully']);
@@ -129,26 +148,49 @@ class RatingCategoriesAPI extends BaseAPI {
         $id = $_GET['id'] ?? null;
         
         if (!$id) {
-            $this->sendError('Category ID is required');
+            http_response_code(400);
+            echo json_encode(['error' => 'Category ID is required']);
+            return;
         }
         
         // Check if category has ratings
-        $checkSql = "SELECT COUNT(*) as count FROM ratings WHERE category_id = :id";
-        $checkStmt = $this->db->execute($checkSql, [':id' => $id]);
+        $checkSql = "SELECT COUNT(*) as count FROM ratings WHERE category_id = ?";
+        $checkStmt = $this->db->execute($checkSql, [$id]);
         $result = $checkStmt->fetch();
         
         if ($result['count'] > 0) {
-            $this->sendError('Cannot delete category that has ratings associated with it', 409);
+            http_response_code(409);
+            echo json_encode(['error' => 'Cannot delete category that has ratings associated with it']);
+            return;
         }
         
-        $sql = "DELETE FROM rating_categories WHERE id = :id";
-        $stmt = $this->db->execute($sql, [':id' => $id]);
+        $sql = "DELETE FROM rating_categories WHERE id = ?";
+        $stmt = $this->db->execute($sql, [$id]);
         
         if ($stmt->rowCount() === 0) {
-            $this->sendError('Rating category not found', 404);
+            http_response_code(404);
+            echo json_encode(['error' => 'Rating category not found']);
+            return;
         }
         
         $this->sendResponse(['message' => 'Rating category deleted successfully']);
+    }
+    
+    /**
+     * PATCH /api/rating-categories - Not implemented
+     */
+    protected function patch() {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        return;
+    }
+    
+    /**
+     * Check if endpoint requires authentication
+     */
+    protected function requiresAuth() {
+        // GET requests are public, all other operations require auth
+        return $this->method !== 'GET';
     }
 }
 

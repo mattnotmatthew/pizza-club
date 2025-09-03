@@ -205,6 +205,22 @@ class QuoteAPI extends BaseAPI {
         
         $this->sendResponse(['message' => 'Quote deleted successfully']);
     }
+    
+    /**
+     * PATCH method - not supported
+     */
+    protected function patch() {
+        http_response_code(405);
+        echo json_encode(['error' => 'PATCH method not supported']);
+        exit;
+    }
+    
+    /**
+     * Check if endpoint requires authentication
+     */
+    protected function requiresAuth() {
+        return $this->method !== 'GET';
+    }
 }
 
 // Handle the request

@@ -243,10 +243,7 @@ class RestaurantAPI extends BaseAPI {
         foreach ($ratings as $rating) {
             $value = (float)$rating['rating'];
             
-            if ($rating['parent_category'] === null) {
-                // Top-level rating
-                $structured[$rating['category_name']] = $value;
-            } elseif ($rating['parent_category'] === 'pizzas' && $rating['pizza_order']) {
+            if ($rating['category_name'] === 'pizzas' && $rating['pizza_order']) {
                 // Pizza with order
                 if (!isset($structured['pizzas'])) {
                     $structured['pizzas'] = [];
@@ -255,7 +252,7 @@ class RestaurantAPI extends BaseAPI {
                     'order' => $rating['pizza_order'],
                     'rating' => $value
                 ];
-            } elseif ($rating['parent_category'] === 'appetizers' && $rating['pizza_order']) {
+            } elseif ($rating['category_name'] === 'appetizers' && $rating['pizza_order']) {
                 // Appetizer with order (reusing pizza_order field)
                 if (!isset($structured['appetizers'])) {
                     $structured['appetizers'] = [];
@@ -264,6 +261,9 @@ class RestaurantAPI extends BaseAPI {
                     'order' => $rating['pizza_order'],
                     'rating' => $value
                 ];
+            } elseif ($rating['parent_category'] === null) {
+                // Top-level rating
+                $structured[$rating['category_name']] = $value;
             } else {
                 // Nested rating
                 if (!isset($structured[$rating['parent_category']])) {

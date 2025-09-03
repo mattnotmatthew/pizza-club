@@ -121,21 +121,40 @@ const RatingForm: React.FC<RatingFormProps> = ({
     console.log('RatingForm - pizzas in initialRatings:', initialRatings.pizzas);
     console.log('RatingForm - pizzas is array?', Array.isArray(initialRatings.pizzas));
     
-    setRatings(initialRatings);
+    // Force state synchronization with functional update
+    setRatings(prevRatings => {
+      // If initialRatings has meaningful data, use it
+      if (initialRatings && (
+        initialRatings.overall !== undefined ||
+        (initialRatings.pizzas && Array.isArray(initialRatings.pizzas) && initialRatings.pizzas.length > 0) ||
+        (initialRatings.appetizers && Array.isArray(initialRatings.appetizers) && initialRatings.appetizers.length > 0) ||
+        (initialRatings['pizza-components'] && Object.keys(initialRatings['pizza-components']).length > 0) ||
+        (initialRatings['the-other-stuff'] && Object.keys(initialRatings['the-other-stuff']).length > 0)
+      )) {
+        console.log('RatingForm - Using initialRatings data');
+        return { ...initialRatings };
+      }
+      
+      // Keep existing state if initialRatings is empty/undefined
+      console.log('RatingForm - Keeping existing ratings state');
+      return prevRatings;
+    });
     
-    // Initialize toppings state from existing pizza order descriptions
+    // Initialize toppings state from existing pizza order descriptions with immediate effect
     if (initialRatings.pizzas && Array.isArray(initialRatings.pizzas)) {
-      const initialToppings: Record<number, string[]> = {};
-      
-      initialRatings.pizzas.forEach((pizza, index) => {
-        const toppingsMatch = pizza.order.match(/- Toppings: (.+)$/);
-        if (toppingsMatch) {
-          const toppings = toppingsMatch[1].split(', ').map(t => t.trim());
-          initialToppings[index] = toppings.filter(t => COMMON_TOPPINGS.includes(t));
-        }
+      setPizzaToppings(prevToppings => {
+        const initialToppings: Record<number, string[]> = {};
+        
+        initialRatings.pizzas!.forEach((pizza, index) => {
+          const toppingsMatch = pizza.order.match(/- Toppings: (.+)$/);
+          if (toppingsMatch) {
+            const toppings = toppingsMatch[1].split(', ').map(t => t.trim());
+            initialToppings[index] = toppings.filter(t => COMMON_TOPPINGS.includes(t));
+          }
+        });
+        
+        return { ...prevToppings, ...initialToppings };
       });
-      
-      setPizzaToppings(initialToppings);
     }
   }, [initialRatings]);
 
@@ -344,8 +363,9 @@ const RatingForm: React.FC<RatingFormProps> = ({
           </h3>
 
           {parent.name === 'pizzas' ? (
-            <div className="space-y-4">
-              {ratings.pizzas && Array.isArray(ratings.pizzas) && ratings.pizzas.map((pizza, index) => (
+            <div key={`pizzas-section-${ratings.pizzas?.length || 0}`} className="space-y-4">
+              {ratings.pizzas && Array.isArray(ratings.pizzas) && ratings.pizzas.length > 0 ? 
+                ratings.pizzas.map((pizza, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-3 bg-white">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-gray-700">Pizza {index + 1}</h4>
@@ -404,7 +424,11 @@ const RatingForm: React.FC<RatingFormProps> = ({
                     />
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-4 text-gray-500">
+                  No pizzas added yet. Click "Add Pizza" to get started.
+                </div>
+              )}
               <button
                 type="button"
                 onClick={addPizza}
