@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Quote } from '@/types/infographics';
+import QuotePositioner from './QuotePositioner';
 
 interface QuoteSelectorProps {
   visitNotes: string;
@@ -42,11 +43,13 @@ const QuoteSelector: React.FC<QuoteSelectorProps> = ({
 
   const potentialQuotes = extractPotentialQuotes(visitNotes);
   
+  const [expandedQuoteIndex, setExpandedQuoteIndex] = useState<number | null>(null);
+
   const handleAddQuote = (text: string, author: string = 'Anonymous') => {
     const newQuote: Quote = {
       text,
-      author,
-      position: { x: 50, y: 50 } // Default center position
+      author
+      // No default position - will appear in normal flow unless positioned
     };
     onQuotesChange([...selectedQuotes, newQuote]);
   };
@@ -99,8 +102,8 @@ const QuoteSelector: React.FC<QuoteSelectorProps> = ({
         <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Quotes ({selectedQuotes.length})</h3>
         <div className="space-y-2">
           {selectedQuotes.map((quote, index) => (
-            <div key={index} className="border border-gray-200 rounded-md p-3 bg-white">
-              <div className="space-y-2">
+            <div key={index} className="border border-gray-200 rounded-md overflow-hidden bg-white">
+              <div className="p-3 space-y-2">
                 <textarea
                   value={quote.text}
                   onChange={(e) => handleEditQuote(index, { text: e.target.value })}
@@ -116,6 +119,12 @@ const QuoteSelector: React.FC<QuoteSelectorProps> = ({
                     placeholder="Author"
                   />
                   <button
+                    onClick={() => setExpandedQuoteIndex(expandedQuoteIndex === index ? null : index)}
+                    className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                  >
+                    {expandedQuoteIndex === index ? 'Hide Position' : 'Position'}
+                  </button>
+                  <button
                     onClick={() => handleRemoveQuote(index)}
                     className="text-red-600 hover:text-red-700 text-sm"
                   >
@@ -123,6 +132,17 @@ const QuoteSelector: React.FC<QuoteSelectorProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Positioning Controls */}
+              {expandedQuoteIndex === index && (
+                <div className="border-t border-gray-200">
+                  <QuotePositioner
+                    quote={quote}
+                    index={index}
+                    onUpdate={handleEditQuote}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>

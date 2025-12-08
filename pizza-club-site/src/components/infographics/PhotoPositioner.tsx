@@ -15,6 +15,12 @@ const PhotoPositioner: React.FC<PhotoPositionerProps> = ({ photo, onUpdate }) =>
     updateLayer
   } = usePhotoPositioning(photo, (updates) => onUpdate(photo.id, updates));
 
+  const handleMoveLayer = (direction: 'up' | 'down') => {
+    const currentZ = photo.zIndex || (photo.layer === 'background' ? 10 : 40);
+    const newZ = direction === 'up' ? currentZ + 1 : currentZ - 1;
+    onUpdate(photo.id, { zIndex: Math.max(0, Math.min(100, newZ)) });
+  };
+
   const updateFocalPoint = (x: number, y: number) => {
     onUpdate(photo.id, {
       focalPoint: { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) }
@@ -221,6 +227,30 @@ const PhotoPositioner: React.FC<PhotoPositionerProps> = ({ photo, onUpdate }) =>
             Foreground
           </button>
         </div>
+      </div>
+
+      {/* Z-Index Control */}
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-2">
+          Layer Order (Z-Index: {photo.zIndex || (photo.layer === 'background' ? 10 : 40)})
+        </label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleMoveLayer('down')}
+            className="flex-1 px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+          >
+            Send Back
+          </button>
+          <button
+            onClick={() => handleMoveLayer('up')}
+            className="flex-1 px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+          >
+            Bring Forward
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Controls stacking within {photo.layer} layer
+        </p>
       </div>
 
       {/* Quick Presets */}

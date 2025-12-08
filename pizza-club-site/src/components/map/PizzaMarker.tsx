@@ -82,7 +82,7 @@ const PizzaMarker: React.FC<PizzaMarkerProps> = ({
             shadow-md
           `}
         >
-          {rating.toFixed(1)}
+          {rating.toFixed(2)}
         </div>
       </div>
       

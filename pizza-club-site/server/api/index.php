@@ -22,8 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Set JSON response header
-header('Content-Type: application/json; charset=UTF-8');
+// Note: Content-Type is set by individual endpoints (JSON, HTML, etc.)
+// Do NOT set a default Content-Type here as it prevents endpoints from using other types
 
 // Get the request URI and method
 $requestUri = $_SERVER['REQUEST_URI'];
@@ -93,19 +93,21 @@ try {
             
         case 'health':
             // Health check endpoint
+            header('Content-Type: application/json; charset=UTF-8');
             echo json_encode([
                 'success' => true,
                 'message' => 'API is running',
                 'timestamp' => date('c'),
                 'available_endpoints' => [
-                    'restaurants', 'members', 'events', 'quotes', 
+                    'restaurants', 'members', 'events', 'quotes',
                     'infographics', 'links', 'ratings', 'rating-categories', 'visits', 'migrate'
                 ]
             ]);
             break;
-            
+
         case '':
             // Root endpoint - show API info
+            header('Content-Type: application/json; charset=UTF-8');
             echo json_encode([
                 'success' => true,
                 'message' => 'Pizza Club API v1.0',
@@ -125,9 +127,10 @@ try {
                 ]
             ]);
             break;
-            
+
         default:
             http_response_code(404);
+            header('Content-Type: application/json; charset=UTF-8');
             echo json_encode([
                 'success' => false,
                 'error' => 'Endpoint not found'
@@ -137,6 +140,7 @@ try {
 } catch (Exception $e) {
     error_log('API Error: ' . $e->getMessage());
     http_response_code(500);
+    header('Content-Type: application/json; charset=UTF-8');
     echo json_encode([
         'success' => false,
         'error' => 'Internal server error'

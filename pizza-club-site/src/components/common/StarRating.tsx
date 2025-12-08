@@ -54,7 +54,7 @@ const StarRating: React.FC<StarRatingProps> = ({
       <div className="flex">{stars}</div>
       {showValue && (
         <span className="ml-2 text-gray-600 text-sm">
-          {rating.toFixed(1)}
+          {rating.toFixed(2)}
         </span>
       )}
     </div>

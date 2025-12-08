@@ -86,7 +86,7 @@ const WholePizzaRating: React.FC<WholePizzaRatingProps> = ({
       <div className="flex">{pizzas}</div>
       {showValue && (
         <span className="ml-2 text-gray-600 text-sm">
-          {rating.toFixed(1)}
+          {rating.toFixed(2)}
         </span>
       )}
     </div>

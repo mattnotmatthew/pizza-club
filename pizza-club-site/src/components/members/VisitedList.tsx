@@ -35,7 +35,7 @@ const VisitedList: React.FC<VisitedListProps> = ({ restaurants, showRatings = fa
               {showRatings && (
                 <div className="flex items-center gap-1 mb-1">
                   <span className="text-yellow-500">★</span>
-                  <span className="font-semibold">{restaurant.averageRating.toFixed(1)}</span>
+                  <span className="font-semibold">{restaurant.averageRating.toFixed(2)}</span>
                 </div>
               )}
               <p className="text-sm text-gray-500">

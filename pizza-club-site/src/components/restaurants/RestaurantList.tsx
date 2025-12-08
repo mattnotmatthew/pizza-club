@@ -147,7 +147,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                   <div className="flex items-center gap-2 mb-2">
                     <WholePizzaRating rating={restaurant.averageRating} size="small" />
                     <span className={`text-sm ${hasImage ? 'text-white/90' : 'text-gray-600'}`}>
-                      ({restaurant.averageRating.toFixed(1)})
+                      ({restaurant.averageRating.toFixed(2)})
                     </span>
                     <span className={`text-sm ${hasImage ? 'text-white/80' : 'text-gray-500'}`}>
                       • {restaurant.totalVisits} visit{restaurant.totalVisits !== 1 ? 's' : ''}

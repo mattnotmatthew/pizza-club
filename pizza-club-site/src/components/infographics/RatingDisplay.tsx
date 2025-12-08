@@ -1,5 +1,4 @@
 import React from 'react';
-import WholePizzaRating from '@/components/common/WholePizzaRating';
 import { dataService } from '@/services/dataWithApi';
 import type { RatingStructure, NestedRatings } from '@/types';
 import { isNestedRatings, PARENT_CATEGORIES } from '@/types';
@@ -29,7 +28,7 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
       <div key={key} className="space-y-2">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-gray-700">{label}</span>
-          <span className="text-sm font-bold text-gray-900">{value.toFixed(1)}</span>
+          <span className="text-sm font-bold text-gray-900">{value.toFixed(2)}</span>
         </div>
         <div className="relative w-full bg-gray-200 rounded-full h-3">
           <div
@@ -51,14 +50,9 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
         {(!showRatings || showRatings.overall !== false) && nestedRatings.overall !== undefined && (
           <div className="text-center py-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Overall Rating</h3>
-            <div className="flex justify-center items-center gap-4">
-              <WholePizzaRating 
-                rating={nestedRatings.overall} 
-                size="large" 
-                showValue={false}
-              />
+            <div className="flex justify-center items-center">
               <span className="text-4xl font-bold text-gray-900">
-                {nestedRatings.overall.toFixed(1)}
+                {nestedRatings.overall.toFixed(2)}
               </span>
             </div>
           </div>
@@ -114,14 +108,9 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
         {(!showRatings || showRatings.overall !== false) && nestedRatings.overall !== undefined && (
           <div className="text-center py-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Overall Rating</h3>
-            <div className="flex justify-center items-center gap-4">
-              <WholePizzaRating 
-                rating={nestedRatings.overall} 
-                size="large" 
-                showValue={false}
-              />
+            <div className="flex justify-center items-center">
               <span className="text-4xl font-bold text-gray-900">
-                {nestedRatings.overall.toFixed(1)}
+                {nestedRatings.overall.toFixed(2)}
               </span>
             </div>
           </div>

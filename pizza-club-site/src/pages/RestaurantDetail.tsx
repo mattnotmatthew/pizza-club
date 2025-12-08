@@ -84,12 +84,12 @@ const RestaurantDetail: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Hero Section */}
-          <div className="bg-gradient-to-br from-red-600 to-red-800 text-white p-8 md:p-12">
+          <div className="bg-red-700 text-white p-8 md:p-12">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">{restaurant.name}</h1>
             <div className="flex items-center gap-3 mb-4">
               <WholePizzaRating rating={restaurant.averageRating} size="large" />
               <span className="text-2xl font-semibold">
-                {restaurant.averageRating.toFixed(1)}
+                {restaurant.averageRating.toFixed(2)}
               </span>
             </div>
             {restaurant.location && (
@@ -202,7 +202,7 @@ const RestaurantDetail: React.FC = () => {
                             <div className="flex items-center gap-2">
                               <WholePizzaRating rating={visit.ratings.overall || 0} size="small" />
                               <span className="text-sm font-medium">
-                                {(visit.ratings.overall || 0).toFixed(1)}
+                                {(visit.ratings.overall || 0).toFixed(2)}
                               </span>
                             </div>
                           </div>

@@ -117,7 +117,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
                         <div className="flex flex-col items-center">
                           <WholePizzaRating rating={restaurant.averageRating} size="small" />
                           <span className="text-sm text-gray-600 mt-1">
-                            {restaurant.averageRating.toFixed(1)}
+                            {restaurant.averageRating.toFixed(2)}
                           </span>
                         </div>
                       </td>
@@ -149,7 +149,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
                         return (
                           <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
                             <span className="text-sm text-gray-600">
-                              {rating > 0 ? rating.toFixed(1) : 'N/A'}
+                              {rating > 0 ? rating.toFixed(2) : 'N/A'}
                             </span>
                           </td>
                         );
@@ -191,7 +191,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
                             return (
                               <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
                                 <span className="text-sm text-gray-600">
-                                  {rating > 0 ? rating.toFixed(1) : 'N/A'}
+                                  {rating > 0 ? rating.toFixed(2) : 'N/A'}
                                 </span>
                               </td>
                             );

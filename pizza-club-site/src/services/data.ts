@@ -82,12 +82,12 @@ export const dataService = {
 
   calculateAverageRating(restaurant: Restaurant): number {
     if (!restaurant.visits || restaurant.visits.length === 0) return 0;
-    
+
     const totalRatings = restaurant.visits.reduce((sum, visit) => {
       return sum + (visit.ratings.overall || 0);
     }, 0);
-    
-    return Math.round((totalRatings / restaurant.visits.length) * 10) / 10;
+
+    return Math.round((totalRatings / restaurant.visits.length) * 100) / 100;
   },
 
   // Get all unique rating categories from restaurant data
@@ -193,9 +193,9 @@ export const dataService = {
     });
     
     if (validRatings.length === 0) return 0;
-    
+
     const sum = validRatings.reduce((acc, rating) => acc + rating, 0);
-    return Math.round((sum / validRatings.length) * 10) / 10;
+    return Math.round((sum / validRatings.length) * 100) / 100;
   },
 
   // New methods for parent-child structure
@@ -262,9 +262,9 @@ export const dataService = {
 
   getPizzaArrayAverage(pizzas: PizzaRating[]): number {
     if (!pizzas || !Array.isArray(pizzas) || pizzas.length === 0) return 0;
-    
+
     const sum = pizzas.reduce((acc, pizza) => acc + pizza.rating, 0);
-    return Math.round((sum / pizzas.length) * 10) / 10;
+    return Math.round((sum / pizzas.length) * 100) / 100;
   },
 
   // Utility function for future use - when members want to add new data

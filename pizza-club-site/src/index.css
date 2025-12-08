@@ -151,3 +151,21 @@
     background-image: none !important;
   }
 }
+
+/* Leaflet custom markers */
+.custom-pizza-marker {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Fix for Leaflet popup styling with Tailwind */
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 0.5rem;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}

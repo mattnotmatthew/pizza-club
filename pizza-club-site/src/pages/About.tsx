@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
 
 const About: React.FC = () => {
   useEffect(() => {
@@ -66,181 +65,42 @@ const About: React.FC = () => {
           </section>
 
           {/* Club Operations */}
+         
+          {/* Ratings */}
           <section>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              How We Operate
+              Ratings
             </h2>
             <div className="prose prose-lg text-gray-700 space-y-4">
               <p>
-                GCPC operates as a collaborative community where every member
-                contributes to our collective knowledge. Our activities include:
+                Look, we rate pizza places, but let's be real - it's not that serious. 
+                We do this for fun, just to remember how things stack up against each other. 
+                Everyone's taste is different, and what matters most is that we're all eating pizza in (generally) good company.
               </p>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    Group Visits
-                  </h3>
-                  <p>
-                    We organize regular visits to pizzerias throughout the
-                    Chicagoland area, with a focus on new places while revisiting favorites.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    Reviews & Ratings
-                  </h3>
-                  <p>
-                    After every visit, our members fill out a survey to provide
-                    feedback and insights about their experience. This helps us
-                    maintain a comprehensive{" "}
-                    <Link
-                      to="/restaurants"
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      restaurant database
-                    </Link>
-                    . That said, everyone's experiences are unique and even with a structured rating and review process, rating and reviewing 
-                    is still extremely subjective. While we standby our ratings our intent is not to disuade anyone from visiting any of the 
-                    restaurants in our database.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    Community Events
-                  </h3>
-                  <p>
-                    Beyond pizza visits, we host social events, pizza-making
-                    workshops, and special celebrations.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    Documentation
-                  </h3>
-                  <p>
-                    We maintain detailed records of our visits, create
-                    infographics, and share our discoveries with the broader
-                    community.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Meeting Details */}
-          <section>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Meeting Details
-            </h2>
-            <div className="prose prose-lg text-gray-700 space-y-4">
               <p>
-                GCPC meets regularly for pizza adventures throughout the Chicago
-                area. Our{" "}
-                <Link to="/events" className="text-red-600 hover:text-red-800">
-                  monthly events
-                </Link>{" "}
-                typically include:
-              </p>
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Typical Meeting Format
-                </h3>
-                <ul className="space-y-2">
-                  <li>
-                    <strong>Timing:</strong> Usually weekends, with occasional
-                    weekday events
-                  </li>
-                  <li>
-                    <strong>Duration:</strong> 2-3 hours including dining and
-                    discussion
-                  </li>
-                  <li>
-                    <strong>Location:</strong> Rotating among pizzerias across
-                    Chicagoland
-                  </li>
-                  <li>
-                    <strong>Group Size:</strong> Typically 8-15 members per
-                    event
-                  </li>
-                  <li>
-                    <strong>Activities:</strong> Pizza tasting, group
-                    discussion, rating/review session
-                  </li>
-                </ul>
-              </div>
-              <p>
-                Check our{" "}
-                <Link to="/events" className="text-red-600 hover:text-red-800">
-                  events page
-                </Link>{" "}
-                for upcoming meetings and RSVP information. All skill levels and
-                pizza preferences are welcome!
+                Don't take the ratings to seriously. If you like a place, you like it. Point is your mileage 
+                may vary, and that's perfectly fine with us.
               </p>
             </div>
           </section>
 
-          {/* Membership Information */}
+          {/* Becoming a Member */}
           <section>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Membership
+              Becoming a Member
             </h2>
             <div className="prose prose-lg text-gray-700 space-y-4">
               <p>
-                Joining GCPC is simple and open to anyone who shares our passion
-                for great pizza. Here's what you need to know:
+                Joining GCPC isn't as simple as just showing up (though we appreciate 
+                the enthusiasm). You have to be nominated by an existing standard member 
+                of the club. Think of it as a pizza-based sponsorship system.
               </p>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg p-6 shadow-sm border">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    Who Can Join
-                  </h3>
-                  <ul className="space-y-2">
-                    <li>Pizza enthusiasts of all experience levels</li>
-                    <li>Residents of Chicagoland and surrounding areas</li>
-                    <li>Visitors and newcomers to the region</li>
-                    <li>Anyone interested in local food culture</li>
-                  </ul>
-                </div>
-
-                <div className="bg-white rounded-lg p-6 shadow-sm border">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    Member Benefits
-                  </h3>
-                  <ul className="space-y-2">
-                    <li>Access to exclusive group events</li>
-                    <li>Priority RSVP for popular restaurants</li>
-                    <li>Member directory and networking</li>
-                    <li>Special discounts at partner establishments</li>
-                  </ul>
-                </div>
-              </div>
-
               <p>
-                Ready to join our pizza-loving community? Browse our{" "}
-                <Link to="/members" className="text-red-600 hover:text-red-800">
-                  member profiles
-                </Link>{" "}
-                to see who you'll be dining with, and reach out to any current
-                member to learn more about getting involved.
+                If your nomination is approved, congratulations! You become a "Friend of the Club" 
+                and enter a probation period of undetermined length. During this time, 
+               we'll see if you're a good fit for our particular brand of pizza enthusiasm.
               </p>
-
-              <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-red-900 mb-3">
-                  Getting Started
-                </h3>
-                <p className="text-red-800">
-                  The best way to join is to attend one of our upcoming events
-                  as a guest. Check our{" "}
-                  <Link
-                    to="/events"
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    events calendar
-                  </Link>{" "}
-                  and RSVP for your first pizza adventure with GCPC!
-                </p>
-              </div>
+            
             </div>
           </section>
         </div>

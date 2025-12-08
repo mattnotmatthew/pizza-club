@@ -44,7 +44,7 @@ const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
     width: `${photo.size.width}%`,
     height: `${photo.size.height}%`,
     opacity: photo.opacity,
-    zIndex: photo.layer === 'background' ? 1 : 10,
+    zIndex: photo.zIndex !== undefined ? photo.zIndex : (photo.layer === 'background' ? 10 : 40),
     pointerEvents: isPreview ? 'none' : 'auto'
   };
 

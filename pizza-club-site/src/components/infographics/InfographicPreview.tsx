@@ -1,5 +1,5 @@
 import React from 'react';
-import InfographicCanvas from './InfographicCanvas';
+import TemplateRenderer from './TemplateRenderer';
 import type { Restaurant, RestaurantVisit } from '@/types';
 import type { Infographic, InfographicWithData } from '@/types/infographics';
 
@@ -46,6 +46,15 @@ const InfographicPreview: React.FC<InfographicPreviewProps> = ({
     .map(attendeeId => members.find(m => m.id === attendeeId)?.name || attendeeId)
     .filter(Boolean);
 
+  // Calculate absentees (members who didn't attend)
+  const absenteeData = members
+    .filter(member => !visitData.attendees.includes(member.id))
+    .map(member => ({
+      id: member.id,
+      name: member.name,
+      missedCount: 0 // Placeholder - will be calculated properly when publishing
+    }));
+
   const previewData: InfographicWithData = {
     id: 'preview',
     restaurantId: restaurantData.id,
@@ -72,13 +81,14 @@ const InfographicPreview: React.FC<InfographicPreviewProps> = ({
       attendees: visitData.attendees,
       notes: visitData.notes || ''
     },
-    attendeeNames
+    attendeeNames,
+    absenteeData
   };
 
   return (
     <div className="h-full overflow-auto bg-gray-100 p-4">
       <div className="transform scale-75 origin-top">
-        <InfographicCanvas data={previewData} isPreview />
+        <TemplateRenderer data={previewData} isPreview />
       </div>
     </div>
   );

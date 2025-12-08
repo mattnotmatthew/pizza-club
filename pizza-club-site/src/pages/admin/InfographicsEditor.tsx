@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import VisitSelector from '@/components/infographics/VisitSelector';
-import QuoteSelector from '@/components/infographics/QuoteSelector';
 import PhotoUploader from '@/components/infographics/PhotoUploader';
 import PhotoPositioner from '@/components/infographics/PhotoPositioner';
 import InfographicPreview from '@/components/infographics/InfographicPreview';
+import TemplateSelector from '@/components/infographics/TemplateSelector';
+import TextBoxEditor from '@/components/infographics/TextBoxEditor';
+import SectionStyleEditor from '@/components/infographics/SectionStyleEditor';
 import Button from '@/components/common/Button';
 import { useInfographics } from '@/hooks/useInfographics';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 import { dataService } from '@/services/dataWithApi';
+import { calculateAbsentees } from '@/utils/absenteeCalculator';
 import type { Restaurant, RestaurantVisit, Member } from '@/types';
 import type { InfographicContent, CreateInfographicInput } from '@/types/infographics';
 
@@ -17,12 +20,16 @@ const InfographicsEditor: React.FC = () => {
   const navigate = useNavigate();
   const isEditing = !!id;
   
-  const { 
+  const {
     loadDraft,
-    createInfographic,
-    updateInfographic,
+    saveDraft,
+    deleteDraft,
+    publishInfographic,
+    updatePublished,
+    loadPublishedForEdit,
     enableAutoSave,
-    disableAutoSave
+    disableAutoSave,
+    updateDraftContent
   } = useInfographics();
 
   const [selectedRestaurantId, setSelectedRestaurantId] = useState('');
@@ -30,7 +37,10 @@ const InfographicsEditor: React.FC = () => {
   const [content, setContent] = useState<InfographicContent>({
     selectedQuotes: [],
     showRatings: {},
-    photos: []
+    photos: [],
+    textBoxes: [],
+    sectionStyles: [],
+    template: 'classic'
   });
   
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -41,7 +51,8 @@ const InfographicsEditor: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
-  
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
+
   // Photo management
   const { photos, addPhoto, removePhoto, updatePhoto, setPhotos } = usePhotoUpload(
     content.photos || []
@@ -60,12 +71,12 @@ const InfographicsEditor: React.FC = () => {
       if (draft) {
         setSelectedRestaurantId(draft.restaurantId || '');
         setSelectedVisitDate(draft.visitDate || '');
-        
+        setCurrentDraftId(draft.id); // Set the draft ID
+
         // Wait for categories to be loaded before setting content
         // This will be handled after loadInitialData completes
         if (draft.content) {
           setContent(prev => ({
-            selectedQuotes: draft.content?.selectedQuotes || [],
             ...draft.content,
             showRatings: prev.showRatings // Use initialized showRatings
           }));
@@ -117,24 +128,37 @@ const InfographicsEditor: React.FC = () => {
   const loadInfographic = async (infographicId: string) => {
     try {
       setLoading(true);
-      const infographic = await dataService.getInfographicById(infographicId);
+
+      // Check if it's a draft or published infographic
+      let infographic;
+      if (infographicId.startsWith('draft-')) {
+        // Load from localStorage
+        infographic = loadDraft(infographicId);
+      } else {
+        // It's published - load it for editing (creates a draft copy)
+        infographic = await loadPublishedForEdit(infographicId);
+      }
+
       if (infographic) {
         setSelectedRestaurantId(infographic.restaurantId);
         setSelectedVisitDate(infographic.visitDate);
-        
+
+        // Always set the current draft ID (infographic.id will be the draft ID)
+        setCurrentDraftId(infographic.id);
+
         // Merge existing showRatings with available categories
         const mergedRatings: Record<string, boolean> = {};
         availableCategories.forEach(category => {
           // Use existing value if available, otherwise default to true
           mergedRatings[category] = infographic.content.showRatings?.[category] ?? true;
         });
-        
+
         setContent({
           ...infographic.content,
           showRatings: mergedRatings,
           photos: infographic.content.photos || []
         });
-        
+
         // Set photos for the photo hook
         if (infographic.content.photos) {
           setPhotos(infographic.content.photos);
@@ -170,26 +194,51 @@ const InfographicsEditor: React.FC = () => {
     setContent(prev => ({ ...prev, photos }));
   }, [photos]);
 
-  // Enable auto-save when content changes
+  // Enable auto-save ONCE when creating new infographic
   useEffect(() => {
     if (selectedRestaurantId && selectedVisitDate && !isEditing) {
-      const draft: Partial<CreateInfographicInput> = {
+      // Create or reuse draft ID
+      const draftId = currentDraftId || `draft-${Date.now()}`;
+      if (!currentDraftId) {
+        setCurrentDraftId(draftId);
+      }
+
+      const draft = {
+        id: draftId, // Reuse the same draft ID
         restaurantId: selectedRestaurantId,
         visitDate: selectedVisitDate,
-        status: 'draft',
+        status: 'draft' as const,
         content: { ...content, photos }
       };
-      enableAutoSave(draft);
+      enableAutoSave(draft); // Start the auto-save interval
     }
-  }, [selectedRestaurantId, selectedVisitDate, content, photos, isEditing]);
+  }, [selectedRestaurantId, selectedVisitDate, isEditing, enableAutoSave]); // Only runs when these change, not content
+
+  // Update draft content reference when content/photos change (without saving)
+  useEffect(() => {
+    if (selectedRestaurantId && selectedVisitDate && !isEditing && currentDraftId) {
+      const draft = {
+        id: currentDraftId, // Include the draft ID
+        restaurantId: selectedRestaurantId,
+        visitDate: selectedVisitDate,
+        status: 'draft' as const,
+        content: { ...content, photos }
+      };
+      updateDraftContent(draft); // Just updates the ref, doesn't save
+    }
+  }, [content, photos, selectedRestaurantId, selectedVisitDate, isEditing, updateDraftContent, currentDraftId]); // Runs when content changes
 
   const handleVisitSelect = (restaurantId: string, visitDate: string) => {
     setSelectedRestaurantId(restaurantId);
     setSelectedVisitDate(visitDate);
   };
 
-  const handleQuotesChange = (quotes: typeof content.selectedQuotes) => {
-    setContent(prev => ({ ...prev, selectedQuotes: quotes }));
+  const handleTextBoxesChange = (textBoxes: typeof content.textBoxes) => {
+    setContent(prev => ({ ...prev, textBoxes }));
+  };
+
+  const handleSectionStylesChange = (sectionStyles: typeof content.sectionStyles) => {
+    setContent(prev => ({ ...prev, sectionStyles }));
   };
 
   const handleRatingToggle = (rating: string) => {
@@ -202,6 +251,48 @@ const InfographicsEditor: React.FC = () => {
     }));
   };
 
+  const handleTemplateChange = (template: 'classic' | 'magazine') => {
+    setContent(prev => ({
+      ...prev,
+      template
+    }));
+  };
+
+  const handleAbsenteesToggle = () => {
+    setContent(prev => ({
+      ...prev,
+      showAbsentees: !prev.showAbsentees
+    }));
+  };
+
+  const handleLogoToggle = () => {
+    setContent(prev => ({
+      ...prev,
+      showLogo: !prev.showLogo
+    }));
+  };
+
+  const handleLogoTypeChange = (logoType: 'classic' | 'alt') => {
+    setContent(prev => ({
+      ...prev,
+      logoType
+    }));
+  };
+
+  const handleLogoAlignChange = (logoAlign: 'left' | 'right') => {
+    setContent(prev => ({
+      ...prev,
+      logoAlign
+    }));
+  };
+
+  const handleBackgroundColorChange = (color: string) => {
+    setContent(prev => ({
+      ...prev,
+      backgroundColor: color
+    }));
+  };
+
   const handleSaveDraft = async () => {
     if (!selectedRestaurantId || !selectedVisitDate) {
       alert('Please select a restaurant and visit first');
@@ -210,21 +301,32 @@ const InfographicsEditor: React.FC = () => {
 
     setSaving(true);
     try {
-      const infographicData: CreateInfographicInput = {
+      const draftData: CreateInfographicInput = {
         restaurantId: selectedRestaurantId,
         visitDate: selectedVisitDate,
         status: 'draft',
         content: { ...content, photos }
       };
 
-      if (isEditing && id) {
-        await updateInfographic(id, { ...infographicData, status: 'draft' });
-        alert('Draft updated successfully!');
-      } else {
-        const created = await createInfographic(infographicData);
-        alert('Draft saved successfully!');
-        // Navigate to edit mode with the new draft ID
-        navigate(`/admin/infographics/edit/${created.id}`);
+      // Include the ID if editing OR if we have a currentDraftId from auto-save
+      const dataToSave = isEditing && id
+        ? { ...draftData, id }
+        : currentDraftId
+          ? { ...draftData, id: currentDraftId }
+          : draftData;
+
+      const saved = saveDraft(dataToSave);
+
+      // Set the currentDraftId if we didn't have one
+      if (!currentDraftId && !isEditing) {
+        setCurrentDraftId(saved.id);
+      }
+
+      alert('Draft saved successfully!');
+
+      // Navigate to edit mode with the draft ID if creating new
+      if (!isEditing) {
+        navigate(`/admin/infographics/edit/${saved.id}`);
       }
     } catch (error) {
       console.error('Failed to save draft:', error);
@@ -240,26 +342,80 @@ const InfographicsEditor: React.FC = () => {
       return;
     }
 
+    if (!selectedRestaurant || !selectedVisit) {
+      alert('Failed to load restaurant or visit data');
+      return;
+    }
+
     setSaving(true);
     try {
-      const infographicData: CreateInfographicInput = {
+      // Calculate accurate absentee data if enabled
+      let absenteeData;
+      if (content.showAbsentees && content.template === 'classic') {
+        absenteeData = calculateAbsentees(
+          members,
+          selectedVisit.attendees,
+          restaurants
+        );
+      }
+
+      // Keep track of draft ID for cleanup (use currentDraftId for drafts, id for published)
+      const draftId = currentDraftId || id;
+
+      // Determine if we're updating an existing published infographic
+      const isUpdatingPublished = isEditing && draftId && draftId.startsWith('draft-edit-');
+
+      // Generate published ID
+      const publishedId = isUpdatingPublished
+        ? draftId.replace('draft-edit-', '')  // Use original ID when updating
+        : (id && !id.startsWith('draft-'))
+          ? id  // Keep the ID if editing a published one directly
+          : `ig-${Date.now()}`; // Generate new ID for new drafts
+
+      // Build InfographicWithData for publishing
+      const infographicWithData = {
+        id: publishedId,
         restaurantId: selectedRestaurantId,
+        restaurantName: selectedRestaurant.name,
+        restaurantLocation: selectedRestaurant.location || '',
+        restaurantAddress: selectedRestaurant.address || '',
         visitDate: selectedVisitDate,
-        status: 'published',
-        content: { ...content, photos }
+        status: 'published' as const,
+        content: { ...content, photos },
+        visitData: {
+          ratings: selectedVisit.ratings,
+          attendees: selectedVisit.attendees,
+          notes: selectedVisit.notes || ''
+        },
+        attendeeNames: attendeeNames.map(m => m.name),
+        absenteeData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
 
-      if (isEditing && id) {
-        await updateInfographic(id, infographicData);
+      // Check if this is updating a published infographic
+      // (draft ID starts with 'draft-edit-' when editing a published one)
+      if (isUpdatingPublished) {
+        // Update the existing published infographic (publishedId already has the original ID)
+        await updatePublished(infographicWithData);
+        // Delete the draft-edit- version
+        if (draftId) {
+          deleteDraft(draftId);
+        }
       } else {
-        await createInfographic(infographicData);
+        // New publish
+        await publishInfographic(infographicWithData);
+        // Delete the draft if one exists
+        if (draftId && draftId.startsWith('draft-')) {
+          deleteDraft(draftId);
+        }
       }
-      
+
       alert('Infographic published successfully!');
       navigate('/admin/infographics');
     } catch (error) {
       console.error('Failed to publish:', error);
-      alert('Failed to publish infographic. Please try again.');
+      alert(`Failed to publish infographic: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -305,18 +461,14 @@ const InfographicsEditor: React.FC = () => {
               />
             </div>
 
-            {/* Quote Selection */}
-            {selectedVisit && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold mb-4">Quotes & Testimonials</h2>
-                <QuoteSelector
-                  visitNotes={selectedVisit.notes || ''}
-                  selectedQuotes={content.selectedQuotes}
-                  onQuotesChange={handleQuotesChange}
-                  attendeeNames={attendeeNames.map(m => m.name)}
-                />
-              </div>
-            )}
+            {/* Template Selection */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <TemplateSelector
+                selectedTemplate={content.template || 'classic'}
+                onTemplateChange={handleTemplateChange}
+                disabled={saving}
+              />
+            </div>
 
             {/* Photo Management */}
             {selectedVisit && (
@@ -401,6 +553,28 @@ const InfographicsEditor: React.FC = () => {
               </div>
             )}
 
+            {/* Section Styles */}
+            {selectedVisit && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-lg font-semibold mb-4">Section Styles</h2>
+                <SectionStyleEditor
+                  sectionStyles={content.sectionStyles || []}
+                  onSectionStylesChange={handleSectionStylesChange}
+                  visitNotes={selectedVisit.notes || ''}
+                  attendeeNames={attendeeNames.map(m => m.name)}
+                />
+              </div>
+            )}
+
+            {/* Custom Text Boxes */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-4">Custom Text Boxes</h2>
+              <TextBoxEditor
+                textBoxes={content.textBoxes || []}
+                onTextBoxesChange={handleTextBoxesChange}
+              />
+            </div>
+
             {/* Rating Toggles */}
             {selectedVisit && (
               <div className="bg-white rounded-lg shadow p-6">
@@ -419,6 +593,144 @@ const InfographicsEditor: React.FC = () => {
                       </span>
                     </label>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Logo Options (Classic Template Only) */}
+            {selectedVisit && content.template === 'classic' && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-lg font-semibold mb-4">Logo Options</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={content.showLogo ?? true}
+                        onChange={handleLogoToggle}
+                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
+                      />
+                      <span className="text-sm text-gray-700 font-medium">
+                        Show Pizza Club logo in header
+                      </span>
+                    </label>
+
+                    {/* Logo Type & Alignment - Only show when logo is enabled */}
+                    {(content.showLogo ?? true) && (
+                      <div className="mt-4 ml-6 space-y-4">
+                        {/* Logo Type Selector */}
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                            Logo Style
+                          </p>
+                          <div className="space-y-2">
+                            <label className="flex items-center cursor-pointer">
+                              <input
+                                type="radio"
+                                name="logoType"
+                                value="classic"
+                                checked={(content.logoType ?? 'classic') === 'classic'}
+                                onChange={() => handleLogoTypeChange('classic')}
+                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 mr-2"
+                              />
+                              <span className="text-sm text-gray-600">
+                                Classic Logo (Circle badge)
+                              </span>
+                            </label>
+                            <label className="flex items-center cursor-pointer">
+                              <input
+                                type="radio"
+                                name="logoType"
+                                value="alt"
+                                checked={content.logoType === 'alt'}
+                                onChange={() => handleLogoTypeChange('alt')}
+                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 mr-2"
+                              />
+                              <span className="text-sm text-gray-600">
+                                Alt Logo (Giardiniera jar)
+                              </span>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Logo Alignment Selector */}
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                            Logo Position
+                          </p>
+                          <div className="space-y-2">
+                            <label className="flex items-center cursor-pointer">
+                              <input
+                                type="radio"
+                                name="logoAlign"
+                                value="left"
+                                checked={(content.logoAlign ?? 'left') === 'left'}
+                                onChange={() => handleLogoAlignChange('left')}
+                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 mr-2"
+                              />
+                              <span className="text-sm text-gray-600">
+                                Left (Logo left, text right)
+                              </span>
+                            </label>
+                            <label className="flex items-center cursor-pointer">
+                              <input
+                                type="radio"
+                                name="logoAlign"
+                                value="right"
+                                checked={content.logoAlign === 'right'}
+                                onChange={() => handleLogoAlignChange('right')}
+                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 mr-2"
+                              />
+                              <span className="text-sm text-gray-600">
+                                Right (Text left, logo right)
+                              </span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Display Options (Classic Template Only) */}
+            {selectedVisit && content.template === 'classic' && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-lg font-semibold mb-4">Display Options</h2>
+                <div className="space-y-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={content.showAbsentees ?? false}
+                      onChange={handleAbsenteesToggle}
+                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
+                    />
+                    <span className="text-sm text-gray-700">
+                      Show members who didn't attend
+                    </span>
+                  </label>
+                  <p className="text-xs text-gray-500 ml-6">
+                    Displays absentees with their total missed count
+                  </p>
+
+                  {/* Background Color Picker */}
+                  <div className="pt-3 border-t border-gray-200">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Infographic Background Color
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={content.backgroundColor || '#FFF8E7'}
+                        onChange={(e) => handleBackgroundColorChange(e.target.value)}
+                        className="h-10 w-20 border border-gray-300 rounded cursor-pointer"
+                      />
+                      <span className="text-xs text-gray-500">
+                        {content.backgroundColor || '#FFF8E7'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

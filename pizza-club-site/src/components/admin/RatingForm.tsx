@@ -46,7 +46,7 @@ const RatingInput: React.FC<RatingInputProps> = React.memo(({ label, value, onCh
 
   const handleBlur = () => {
     setIsTyping(false);
-    
+
     // On blur, parse and validate the input
     const numValue = parseFloat(displayValue);
     if (isNaN(numValue) || numValue < 0) {
@@ -56,8 +56,8 @@ const RatingInput: React.FC<RatingInputProps> = React.memo(({ label, value, onCh
       setDisplayValue('5');
       onChange(5);
     } else {
-      // Round to 1 decimal place for clean display
-      const rounded = Math.round(numValue * 10) / 10;
+      // Round to 2 decimal places (hundredths) for precise display
+      const rounded = Math.round(numValue * 100) / 100;
       setDisplayValue(rounded.toString());
       onChange(rounded);
     }
@@ -86,7 +86,7 @@ const RatingInput: React.FC<RatingInputProps> = React.memo(({ label, value, onCh
           onKeyDown={handleKeyDown}
           onFocus={() => setIsTyping(true)}
           disabled={disabled}
-          placeholder="0.0"
+          placeholder="0.00"
           className="w-20 px-3 py-2 text-center border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm font-medium"
         />
         <span className="text-xs text-gray-500 w-8">/ 5</span>
@@ -100,7 +100,7 @@ const RatingInput: React.FC<RatingInputProps> = React.memo(({ label, value, onCh
          prevProps.label === nextProps.label;
 });
 
-const COMMON_TOPPINGS = ['Pepperoni', 'Sausage', 'Mushrooms', 'Bell Peppers', 'Onions', 'Extra Cheese', 'Olives', 'Pineapple'];
+const COMMON_TOPPINGS = ['Pepperoni', 'Sausage', 'Mushrooms', 'Green Pepper', 'Onion', 'Extra Cheese', 'Olives', 'Pineapple', 'Hot Giardinera','Garlic'];
 
 const RatingForm: React.FC<RatingFormProps> = ({
   initialRatings = {},
@@ -111,6 +111,7 @@ const RatingForm: React.FC<RatingFormProps> = ({
   const [ratings, setRatings] = useState<NestedRatings>(initialRatings);
   const [loading, setLoading] = useState(true);
   const [pizzaToppings, setPizzaToppings] = useState<Record<number, string[]>>({});
+  const [customToppingInputs, setCustomToppingInputs] = useState<Record<number, string>>({});
 
   useEffect(() => {
     loadCategories();
@@ -146,10 +147,10 @@ const RatingForm: React.FC<RatingFormProps> = ({
         const initialToppings: Record<number, string[]> = {};
         
         initialRatings.pizzas!.forEach((pizza, index) => {
-          const toppingsMatch = pizza.order.match(/- Toppings: (.+)$/);
-          if (toppingsMatch) {
-            const toppings = toppingsMatch[1].split(', ').map(t => t.trim());
-            initialToppings[index] = toppings.filter(t => COMMON_TOPPINGS.includes(t));
+          const toppingsMatch = pizza.order.match(/^(.+?) - Toppings: (.+)$/);
+          if (toppingsMatch && toppingsMatch[2]) {
+            const toppings = toppingsMatch[2].split(', ').map(t => t.trim());
+            initialToppings[index] = toppings;
           }
         });
         
@@ -267,7 +268,8 @@ const RatingForm: React.FC<RatingFormProps> = ({
     }
     
     const pizza = newRatings.pizzas[pizzaIndex];
-    const baseOrder = pizza.order.split(' - Toppings:')[0]; // Remove existing toppings from description
+    const toppingsMatch = pizza.order.match(/^(.+?) - Toppings: .+$/);
+    const baseOrder = toppingsMatch ? toppingsMatch[1] : pizza.order.replace(/ - Toppings: .+$/, '');
     
     let updatedOrder = baseOrder;
     if (newToppings.length > 0) {
@@ -277,6 +279,30 @@ const RatingForm: React.FC<RatingFormProps> = ({
     newRatings.pizzas[pizzaIndex].order = updatedOrder;
     setRatings(newRatings);
     onRatingsChange(newRatings);
+  };
+
+  const addCustomTopping = (pizzaIndex: number, toppingName: string) => {
+    const trimmedName = toppingName.trim();
+    if (!trimmedName || (pizzaToppings[pizzaIndex] || []).includes(trimmedName)) {
+      return; // Validation: empty or duplicate
+    }
+    
+    try {
+      updatePizzaToppings(pizzaIndex, trimmedName, true);
+      
+      // Clear input only on success
+      setCustomToppingInputs(prev => ({
+        ...prev,
+        [pizzaIndex]: ''
+      }));
+    } catch (error) {
+      console.error('Failed to add custom topping:', error);
+      // Input remains populated so user can retry
+    }
+  };
+
+  const removeTopping = (pizzaIndex: number, toppingName: string) => {
+    updatePizzaToppings(pizzaIndex, toppingName, false);
   };
 
   const addAppetizer = () => {
@@ -415,6 +441,67 @@ const RatingForm: React.FC<RatingFormProps> = ({
                           );
                         })}
                       </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Add Custom Topping
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={customToppingInputs[index] || ''}
+                          onChange={(e) => setCustomToppingInputs(prev => ({...prev, [index]: e.target.value}))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              addCustomTopping(index, customToppingInputs[index] || '');
+                            }
+                          }}
+                          placeholder="e.g., Artichokes, Prosciutto..."
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm"
+                          disabled={disabled}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => addCustomTopping(index, customToppingInputs[index] || '')}
+                          disabled={disabled || !customToppingInputs[index]?.trim()}
+                          className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Add
+                        </button>
+                      </div>
+                      {/* Show current toppings with remove option for custom ones */}
+                      {(pizzaToppings[index] || []).length > 0 && (
+                        <div className="mt-2">
+                          <div className="flex flex-wrap gap-1">
+                            {(pizzaToppings[index] || []).map((topping, toppingIndex) => {
+                              const isCustom = !COMMON_TOPPINGS.includes(topping);
+                              return (
+                                <span
+                                  key={toppingIndex}
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    isCustom 
+                                      ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                                      : 'bg-gray-100 text-gray-700'
+                                  }`}
+                                >
+                                  {topping}
+                                  {isCustom && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeTopping(index, topping)}
+                                      disabled={disabled}
+                                      className="ml-1 text-blue-600 hover:text-blue-800"
+                                    >
+                                      ×
+                                    </button>
+                                  )}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <RatingInput
                       label="Rating"

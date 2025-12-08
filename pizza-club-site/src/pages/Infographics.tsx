@@ -107,18 +107,24 @@ const Infographics: React.FC = () => {
                           })}
                         </span>
                         <span className="text-sm font-semibold text-gray-900">
-                          ★ {restaurant.averageRating.toFixed(1)}
+                          ★ {restaurant.averageRating.toFixed(2)}
                         </span>
                       </div>
 
                       {/* Quote Preview */}
-                      {infographic.content.selectedQuotes.length > 0 && (
-                        <div className="mb-4">
-                          <p className="text-sm text-gray-600 italic line-clamp-2">
-                            "{infographic.content.selectedQuotes[0].text}"
-                          </p>
-                        </div>
-                      )}
+                      {(() => {
+                        // Get quotes from either new section styles or legacy selectedQuotes
+                        const quotesSection = infographic.content.sectionStyles?.find(s => s.id === 'quotes');
+                        const quotes = quotesSection?.quotes || infographic.content.selectedQuotes || [];
+
+                        return quotes.length > 0 && (
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-600 italic line-clamp-2">
+                              "{quotes[0].text}"
+                            </p>
+                          </div>
+                        );
+                      })()}
 
                       {/* View Link */}
                       <div className="flex items-center text-red-600 group-hover:text-red-700">

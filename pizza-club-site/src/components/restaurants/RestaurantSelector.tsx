@@ -78,7 +78,7 @@ const RestaurantSelector: React.FC<RestaurantSelectorProps> = ({
                 <p className="text-xs text-gray-600">{restaurant.location}</p>
                 <div className="mt-2 flex items-center gap-2">
                   <span className="text-xs font-medium text-gray-700">
-                    {restaurant.averageRating.toFixed(1)} ★
+                    {restaurant.averageRating.toFixed(2)} ★
                   </span>
                   <span className="text-xs text-gray-500">
                     • {restaurant.totalVisits} visit{restaurant.totalVisits !== 1 ? 's' : ''}

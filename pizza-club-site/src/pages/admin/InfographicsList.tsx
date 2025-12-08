@@ -7,7 +7,7 @@ import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 
 const InfographicsList: React.FC = () => {
-  const { infographics, loading, deleteInfographic } = useInfographics();
+  const { infographics, loading, deleteDraft, deletePublished } = useInfographics();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -29,14 +29,19 @@ const InfographicsList: React.FC = () => {
     return restaurant?.name || restaurantId;
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, status: string) => {
     if (!confirm('Are you sure you want to delete this infographic?')) {
       return;
     }
 
     setDeleting(id);
     try {
-      await deleteInfographic(id);
+      // Check if it's a draft or published
+      if (id.startsWith('draft-') || status === 'draft') {
+        deleteDraft(id);
+      } else {
+        await deletePublished(id);
+      }
     } catch (error) {
       console.error('Failed to delete:', error);
       alert('Failed to delete infographic');
@@ -166,7 +171,7 @@ const InfographicsList: React.FC = () => {
                         </Link>
                       )}
                       <button
-                        onClick={() => handleDelete(infographic.id)}
+                        onClick={() => handleDelete(infographic.id, infographic.status)}
                         disabled={deleting === infographic.id}
                         className="text-red-600 hover:text-red-900 disabled:opacity-50"
                       >

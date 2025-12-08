@@ -421,7 +421,7 @@ const RestaurantVisits: React.FC = () => {
                             {Object.entries(visit.ratings).map(([category, rating]) => (
                               <div key={category} className="text-sm">
                                 <span className="text-gray-600 capitalize">{category}:</span>{' '}
-                                <span className="font-medium">{typeof rating === 'number' ? rating.toFixed(1) : '-'}</span>
+                                <span className="font-medium">{typeof rating === 'number' ? rating.toFixed(2) : '-'}</span>
                               </div>
                             ))}
                           </div>
