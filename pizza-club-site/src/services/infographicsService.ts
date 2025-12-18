@@ -14,6 +14,7 @@ import type {
   InfographicWithData
 } from '@/types/infographics';
 import { generateStaticHTML } from '@/utils/infographicExport';
+import { apiService } from '@/services/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const DRAFTS_STORAGE_KEY = 'infographic-drafts';
@@ -236,19 +237,10 @@ export const publishedService = {
 
   /**
    * Delete a published infographic
+   * Delegates to apiService for consistency
    */
   async delete(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/infographics?id=${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${API_TOKEN}`
-      }
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to delete infographic');
-    }
+    return await apiService.deleteInfographic(id);
   },
 
   /**
@@ -307,7 +299,7 @@ export const infographicsService = {
     // Then check published
     try {
       return await publishedService.getPublishedWithData(id);
-    } catch (e) {
+    } catch {
       return undefined;
     }
   }

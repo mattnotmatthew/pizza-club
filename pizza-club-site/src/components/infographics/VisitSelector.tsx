@@ -89,7 +89,7 @@ const VisitSelector: React.FC<VisitSelectorProps> = ({
             <option value="">Choose a visit...</option>
             {selectedRestaurant.visits.map(visit => (
               <option key={visit.date} value={visit.date}>
-                {new Date(visit.date).toLocaleDateString()} - {visit.attendees.length} attendees
+                {new Date(visit.date + 'T12:00:00').toLocaleDateString()} - {visit.attendees.length} attendees
               </option>
             ))}
           </select>
@@ -101,7 +101,7 @@ const VisitSelector: React.FC<VisitSelectorProps> = ({
           <h4 className="font-medium text-gray-900 mb-2">Selected Visit</h4>
           <p className="text-sm text-gray-600">
             <strong>Restaurant:</strong> {selectedRestaurant.name}<br />
-            <strong>Date:</strong> {new Date(selectedVisitDate).toLocaleDateString()}<br />
+            <strong>Date:</strong> {new Date(selectedVisitDate + 'T12:00:00').toLocaleDateString()}<br />
             <strong>Rating:</strong> {selectedRestaurant.visits?.find(v => v.date === selectedVisitDate)?.ratings.overall || 'N/A'}
           </p>
         </div>

@@ -36,7 +36,7 @@ const Home: React.FC = () => {
 
   // Background style for Cook County SVG
   const backgroundStyle: React.CSSProperties = {
-    backgroundImage: 'url("/pizza/images/cook-county/cook-county.svg")',
+    backgroundImage: 'url("/images/cook-county/cook-county.svg")',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: bgStyles.position,
     backgroundSize: bgStyles.size,
@@ -49,7 +49,7 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center ml-9 lg:ml-14 lg:mb-14">
             <img 
-              src="/pizza/logo.png" 
+              src="/logo.png" 
               alt="Greater Chicagoland Pizza Club Logo" 
               className="h-60 w-60 md:h-60 md:w-60 lg:h-100 lg:w-100 object-cover"
             />

@@ -6,9 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-htaccess-current
 # Server files - exclude sensitive configs but include API code
 server/api/config/db.config.php
+server/api/config/secrets.php
 server/.htaccess
 server/uploads/
 server/logs/
@@ -123,6 +123,8 @@ ehthumbs_vista.db
 # Deployment specific
 .vercel
 .netlify
+.htaccess
+.htaccess.*
 
 # Test files with sensitive data
 test-api.html
@@ -134,6 +136,10 @@ server/database/migrate.php
 # Debug
 debug/
 *.map
+
+# Documentation (keep only README.md)
+*.md
+!README.md
 
 # Miscellaneous
 .sass-cache/

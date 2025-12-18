@@ -8,7 +8,7 @@ interface MemberCardProps {
 }
 
 const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
-  const memberSince = member.joinDate ? new Date(member.joinDate).getFullYear() : new Date().getFullYear();
+  const memberSinceYear = member.memberSince ? new Date(member.memberSince).getFullYear() : new Date().getFullYear();
   
   // Use slug if available, otherwise generate from name
   const memberSlug = member.slug || nameToSlug(member.name);
@@ -21,7 +21,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
       {/* Image Container */}
       <div className="aspect-square overflow-hidden bg-gray-200">
         <img
-          src={member.photoUrl || '/api/placeholder/400/400'}
+          src={member.photo || '/api/placeholder/400/400'}
           alt={member.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
           loading="lazy"
@@ -35,9 +35,9 @@ const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
         </h3>
         
         {/* Favorite Style Badge */}
-        {member.favoriteStyle && (
+        {member.favoritePizzaStyle && (
           <span className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-xs mb-3">
-            {member.favoriteStyle}
+            {member.favoritePizzaStyle}
           </span>
         )}
         
@@ -48,7 +48,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member }) => {
         
         {/* Meta Info */}
         <div className="text-xs text-gray-500">
-          <span>Member since {memberSince}</span>
+          <span>Member since {memberSinceYear}</span>
         </div>
       </div>
     </Link>

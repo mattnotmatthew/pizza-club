@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
+import { useMatomo } from '@/hooks/useMatomo';
 import { dataService } from '@/services/dataWithApi';
 import type { Restaurant, Member } from '@/types';
 import type { Infographic } from '@/types/infographics';
@@ -9,6 +10,7 @@ import type { Infographic } from '@/types/infographics';
 const RestaurantDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { trackEvent } = useMatomo();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [infographics, setInfographics] = useState<Infographic[]>([]);
@@ -22,6 +24,8 @@ const RestaurantDetail: React.FC = () => {
         const foundRestaurant = await dataService.getRestaurantBySlug(slug || '');
         if (foundRestaurant) {
           setRestaurant(foundRestaurant);
+          // Track restaurant view
+          trackEvent('Restaurant', 'View', foundRestaurant.name);
           
           // Fetch members for attendee display
           const membersData = await dataService.getMembers();
@@ -148,6 +152,7 @@ const RestaurantDetail: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center text-blue-600 hover:text-blue-700"
+                      onClick={() => trackEvent('Restaurant', 'Website', restaurant.name)}
                     >
                       <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -160,6 +165,7 @@ const RestaurantDetail: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center text-blue-600 hover:text-blue-700"
+                    onClick={() => trackEvent('Restaurant', 'Directions', restaurant.name)}
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -183,7 +189,7 @@ const RestaurantDetail: React.FC = () => {
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium text-gray-900">
-                            {new Date(visit.date).toLocaleDateString('en-US', {
+                            {new Date(visit.date + 'T12:00:00').toLocaleDateString('en-US', {
                               weekday: 'long',
                               year: 'numeric',
                               month: 'long',
@@ -236,7 +242,7 @@ const RestaurantDetail: React.FC = () => {
                         {ig.content.title || 'Visit Summary'}
                       </h3>
                       <p className="text-sm text-gray-600 mt-1">
-                        {new Date(ig.visitDate).toLocaleDateString()}
+                        {new Date(ig.visitDate + 'T12:00:00').toLocaleDateString()}
                       </p>
                     </Link>
                   ))}

@@ -42,51 +42,28 @@ abstract class BaseAPI {
      * Set CORS headers
      */
     protected function setCorsHeaders() {
-        // TODO: For production, update this to restrict to specific domains:
-        // $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-        // $allowedOrigins = [
-        //     'https://greaterchicagolandpizza.club',
-        //     'https://www.greaterchicagolandpizza.club'
-        // ];
-        // if (in_array($origin, $allowedOrigins)) {
-        //     header("Access-Control-Allow-Origin: $origin");
-        // }
-        
-        // DEVELOPMENT ONLY - Remove for production
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-        header('Access-Control-Max-Age: 86400');
-        
-        // Handle preflight
-        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-            http_response_code(200);
-            exit();
-        }
-        
-        return; // Skip the origin checking below for now
-        
         $allowedOrigins = [
             'http://localhost:5173',
             'http://localhost:5174',
             'http://localhost:3000',
-            'https://pizzaclub.com',
-            'https://www.pizzaclub.com'
+            'https://greaterchicagolandpizza.club',
+            'https://www.greaterchicagolandpizza.club'
         ];
-        
+
         $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-        
-        if (in_array($origin, $allowedOrigins)) {
+
+        if (in_array($origin, $allowedOrigins, true)) {
             header("Access-Control-Allow-Origin: $origin");
+            header("Access-Control-Allow-Credentials: true");
         }
-        
-        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS");
-        header("Access-Control-Allow-Headers: Content-Type, Authorization");
-        header("Access-Control-Allow-Credentials: true");
-        header("Content-Type: application/json; charset=UTF-8");
-        
-        // Handle preflight requests
-        if ($this->method === 'OPTIONS') {
+        // Note: If origin not in list, no CORS header is set (browser will block)
+
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+        header('Access-Control-Max-Age: 86400');
+        header('Content-Type: application/json; charset=UTF-8');
+
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
             http_response_code(200);
             exit();
         }
@@ -105,20 +82,30 @@ abstract class BaseAPI {
      * Authenticate request
      */
     protected function authenticate() {
-        // Check for API token in header
         $authHeader = $this->headers['Authorization'] ?? '';
-        
+
         if (strpos($authHeader, 'Bearer ') !== 0) {
             return false;
         }
-        
+
         $token = substr($authHeader, 7);
-        
-        // Use the same token as upload API for consistency
-        // On shared hosting, environment variables don't work, so hardcode it
-        $validToken = 'ca5eeb6889def145f7561b0612e89258ed64c70e2577c3c225a90d0cd074740a'; // Your actual VITE_UPLOAD_API_TOKEN value
-        
-        return $token === $validToken;
+
+        // Load token from config file
+        $configFile = dirname(__DIR__) . '/config/secrets.php';
+        if (!file_exists($configFile)) {
+            error_log('Security config file missing: secrets.php');
+            return false;
+        }
+
+        $secrets = require $configFile;
+        $validToken = $secrets['api_token'] ?? null;
+
+        if (!$validToken) {
+            error_log('API token not configured in secrets.php');
+            return false;
+        }
+
+        return hash_equals($validToken, $token);
     }
     
     /**
@@ -129,6 +116,16 @@ abstract class BaseAPI {
         return json_decode($input, true) ?? [];
     }
     
+    /**
+     * Send a cacheable response for read-only public data
+     * @param mixed $data Response data
+     * @param int $maxAge Cache duration in seconds (default 5 minutes)
+     */
+    protected function sendCacheableResponse($data, int $maxAge = 300): void {
+        header("Cache-Control: public, max-age=$maxAge");
+        $this->sendResponse($data);
+    }
+
     /**
      * Send JSON response
      */

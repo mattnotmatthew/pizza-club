@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Skeleton from '@/components/common/Skeleton';
+import { useMatomo } from '@/hooks/useMatomo';
 import { dataService } from '@/services/dataWithApi';
 import type { SocialLink } from '@/types';
 
@@ -112,6 +113,7 @@ const LinkCardSkeleton: React.FC = () => (
 
 // Main LinkTree Component
 const Links: React.FC = () => {
+  const { trackEvent } = useMatomo();
   const [links, setLinks] = useState<SocialLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -135,9 +137,13 @@ const Links: React.FC = () => {
     }
   };
 
-  const handleLinkClick = async (linkId: string) => {
+  const handleLinkClick = async (link: SocialLink) => {
+    // Track with Matomo
+    trackEvent('Links', 'Click', link.title);
+
+    // Also track with internal analytics
     try {
-      await dataService.trackLinkClick(linkId);
+      await dataService.trackLinkClick(link.id);
     } catch (err) {
       console.error('Failed to track link click:', err);
       // Don't show error to user for analytics failures
@@ -190,7 +196,7 @@ const Links: React.FC = () => {
       <div className="text-center py-8 px-4">
         <div className="w-24 h-24 mx-auto mb-4 rounded-full shadow-lg overflow-hidden">
           <img 
-            src="/pizza/logo.png" 
+            src="/logo.png" 
             alt="Greater Chicagoland Pizza Club Logo" 
             className="w-full h-full object-cover"
           />
@@ -214,10 +220,10 @@ const Links: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {links.map((link) => (
-              <LinkCard 
-                key={link.id} 
-                link={link} 
-                onClick={() => handleLinkClick(link.id)}
+              <LinkCard
+                key={link.id}
+                link={link}
+                onClick={() => handleLinkClick(link)}
               />
             ))}
           </div>

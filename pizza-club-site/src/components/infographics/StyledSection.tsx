@@ -6,9 +6,11 @@ interface StyledSectionProps {
   style?: SectionStyle;
   data: {
     overall?: number;
+    pizzaOverall?: number;
     pizzas?: Array<{ order: string; rating: number }>;
     components?: Record<string, number>;
     otherStuff?: Record<string, number>;
+    appetizers?: Array<{ order: string; rating: number }>; // We only display names, not ratings
     attendees?: string[];
     absentees?: Array<{ id: string; name: string; missedCount: number }>;
     showAbsentees?: boolean;
@@ -73,16 +75,17 @@ const StyledSection: React.FC<StyledSectionProps> = ({
     );
   };
 
-  // Font size mapping
+  // Font size mapping with responsive breakpoints (mobile-first)
+  // Mobile gets smaller sizes, scales up on sm: and md: breakpoints
   const fontSizeClasses = {
-    xs: { title: 'text-xs', text: 'text-xs', value: 'text-sm' },
-    sm: { title: 'text-sm', text: 'text-sm', value: 'text-base' },
-    base: { title: 'text-lg', text: 'text-base', value: 'text-xl' },
-    lg: { title: 'text-xl', text: 'text-lg', value: 'text-2xl' },
-    xl: { title: 'text-2xl', text: 'text-xl', value: 'text-3xl' },
-    '2xl': { title: 'text-3xl', text: 'text-2xl', value: 'text-4xl' },
-    '3xl': { title: 'text-4xl', text: 'text-3xl', value: 'text-5xl' },
-    '4xl': { title: 'text-5xl', text: 'text-4xl', value: 'text-6xl' }
+    xs: { title: 'text-xs', text: 'text-xs', value: 'text-xs sm:text-sm' },
+    sm: { title: 'text-xs sm:text-sm', text: 'text-xs sm:text-sm', value: 'text-sm sm:text-base' },
+    base: { title: 'text-sm sm:text-base md:text-lg', text: 'text-sm sm:text-base', value: 'text-base sm:text-lg md:text-xl' },
+    lg: { title: 'text-base sm:text-lg md:text-xl', text: 'text-sm sm:text-base md:text-lg', value: 'text-lg sm:text-xl md:text-2xl' },
+    xl: { title: 'text-lg sm:text-xl md:text-2xl', text: 'text-base sm:text-lg md:text-xl', value: 'text-xl sm:text-2xl md:text-3xl' },
+    '2xl': { title: 'text-xl sm:text-2xl md:text-3xl', text: 'text-base sm:text-xl md:text-2xl', value: 'text-2xl sm:text-3xl md:text-4xl' },
+    '3xl': { title: 'text-2xl sm:text-3xl md:text-4xl', text: 'text-lg sm:text-2xl md:text-3xl', value: 'text-3xl sm:text-4xl md:text-5xl' },
+    '4xl': { title: 'text-3xl sm:text-4xl md:text-5xl', text: 'text-xl sm:text-3xl md:text-4xl', value: 'text-4xl sm:text-5xl md:text-6xl' }
   };
 
   const sizes = fontSizeClasses[appliedStyle.fontSize || 'base'];
@@ -125,6 +128,7 @@ const StyledSection: React.FC<StyledSectionProps> = ({
     pizzas: appliedStyle.customTitle || 'Pizzas',
     components: appliedStyle.customTitle || 'Pizza Components',
     'other-stuff': appliedStyle.customTitle || 'The Other Stuff',
+    appetizers: appliedStyle.customTitle || 'Appetizers',
     attendees: appliedStyle.customTitle || 'Attendees',
     quotes: appliedStyle.customTitle || 'What We Said'
   };
@@ -147,9 +151,9 @@ const StyledSection: React.FC<StyledSectionProps> = ({
             </h3>
             {/* Decorative divider */}
             <div className="flex items-center justify-center mb-4">
-              <div className="h-px w-12 bg-red-600"></div>
-              <div className="mx-2 text-red-600 text-xl">•</div>
-              <div className="h-px w-12 bg-red-600"></div>
+              <div className="h-px w-8 sm:w-12 bg-red-600"></div>
+              <div className="mx-1 sm:mx-2 text-red-600 text-sm sm:text-base md:text-xl">•</div>
+              <div className="h-px w-8 sm:w-12 bg-red-600"></div>
             </div>
           </>
         )}
@@ -190,7 +194,7 @@ const StyledSection: React.FC<StyledSectionProps> = ({
             {/* Decorative divider */}
             <div className="flex items-center mb-3">
               <div className="h-px flex-1 bg-red-600"></div>
-              <div className="mx-2 text-red-600 text-xl">•</div>
+              <div className="mx-1 sm:mx-2 text-red-600 text-sm sm:text-base md:text-xl">•</div>
               <div className="h-px flex-1 bg-red-600"></div>
             </div>
           </>
@@ -202,6 +206,13 @@ const StyledSection: React.FC<StyledSectionProps> = ({
             </div>
           ))}
         </div>
+
+        {/* Pizza Overall - displayed at the bottom */}
+        {data.pizzaOverall !== undefined && (
+          <div className="mt-4 pt-3 border-t-2 border-dashed" style={{ borderColor: appliedStyle.style?.accentColor }}>
+            {renderDottedRow('Pizza Overall', data.pizzaOverall.toFixed(2), `${sizes.text} font-semibold`, appliedStyle.style?.accentColor)}
+          </div>
+        )}
       </div>
     );
   }
@@ -225,7 +236,7 @@ const StyledSection: React.FC<StyledSectionProps> = ({
             {/* Decorative divider */}
             <div className="flex items-center mb-3">
               <div className="h-px flex-1 bg-red-600"></div>
-              <div className="mx-2 text-red-600 text-xl">•</div>
+              <div className="mx-1 sm:mx-2 text-red-600 text-sm sm:text-base md:text-xl">•</div>
               <div className="h-px flex-1 bg-red-600"></div>
             </div>
           </>
@@ -263,7 +274,7 @@ const StyledSection: React.FC<StyledSectionProps> = ({
             {/* Decorative divider */}
             <div className="flex items-center mb-3">
               <div className="h-px flex-1 bg-red-600"></div>
-              <div className="mx-2 text-red-600 text-xl">•</div>
+              <div className="mx-1 sm:mx-2 text-red-600 text-sm sm:text-base md:text-xl">•</div>
               <div className="h-px flex-1 bg-red-600"></div>
             </div>
           </>
@@ -278,6 +289,51 @@ const StyledSection: React.FC<StyledSectionProps> = ({
             );
           })}
         </div>
+      </div>
+    );
+  }
+
+  // Render appetizers (just names, no ratings, with bullet separators)
+  if (sectionId === 'appetizers' && data.appetizers && data.appetizers.length > 0) {
+    const isHorizontal = appliedStyle.layout === 'horizontal' || appliedStyle.layout === 'compact';
+
+    return (
+      <div
+        className={containerClasses}
+        style={{
+          backgroundColor: appliedStyle.style?.backgroundColor,
+          color: appliedStyle.style?.textColor,
+          borderColor: appliedStyle.style?.accentColor
+        }}
+      >
+        {appliedStyle.showTitle !== false && (
+          <>
+            <h3 className={`${sizes.title} font-bold font-serif mb-2 ${isHorizontal ? 'text-center' : ''} tracking-wide uppercase`}>
+              {sectionTitles.appetizers}
+            </h3>
+            {/* Decorative divider */}
+            <div className={`flex items-center ${isHorizontal ? 'justify-center' : ''} mb-3`}>
+              <div className={`h-px ${isHorizontal ? 'w-8 sm:w-12' : 'flex-1'} bg-red-600`}></div>
+              <div className="mx-1 sm:mx-2 text-red-600 text-sm sm:text-base md:text-xl">•</div>
+              <div className={`h-px ${isHorizontal ? 'w-8 sm:w-12' : 'flex-1'} bg-red-600`}></div>
+            </div>
+          </>
+        )}
+        {isHorizontal ? (
+          // Horizontal layout: join with bullet separators like attendees
+          <p className={`${sizes.text} text-center`}>
+            {data.appetizers.map(a => a.order).join(' • ')}
+          </p>
+        ) : (
+          // Vertical/grid layout: list items
+          <div className={layoutClasses[appliedStyle.layout || 'vertical']}>
+            {data.appetizers.map((appetizer, index) => (
+              <div key={index} className={`${sizes.text} font-medium`}>
+                {appetizer.order}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -300,9 +356,9 @@ const StyledSection: React.FC<StyledSectionProps> = ({
             </h3>
             {/* Decorative divider */}
             <div className="flex items-center justify-center mb-3">
-              <div className="h-px w-12 bg-red-600"></div>
-              <div className="mx-2 text-red-600 text-xl">•</div>
-              <div className="h-px w-12 bg-red-600"></div>
+              <div className="h-px w-8 sm:w-12 bg-red-600"></div>
+              <div className="mx-1 sm:mx-2 text-red-600 text-sm sm:text-base md:text-xl">•</div>
+              <div className="h-px w-8 sm:w-12 bg-red-600"></div>
             </div>
           </>
         )}
@@ -330,6 +386,7 @@ const StyledSection: React.FC<StyledSectionProps> = ({
   // Render quotes
   if (sectionId === 'quotes' && appliedStyle.quotes && appliedStyle.quotes.length > 0) {
     const sectionTitle = appliedStyle.customTitle || 'What We Said';
+    const isGridLayout = appliedStyle.layout === 'grid';
 
     return (
       <div
@@ -347,9 +404,9 @@ const StyledSection: React.FC<StyledSectionProps> = ({
             </h3>
             {/* Decorative divider */}
             <div className="flex items-center justify-center mb-3">
-              <div className="h-px w-12 bg-red-600"></div>
-              <div className="mx-2 text-red-600 text-xl">•</div>
-              <div className="h-px w-12 bg-red-600"></div>
+              <div className="h-px w-8 sm:w-12 bg-red-600"></div>
+              <div className="mx-1 sm:mx-2 text-red-600 text-sm sm:text-base md:text-xl">•</div>
+              <div className="h-px w-8 sm:w-12 bg-red-600"></div>
             </div>
           </>
         )}
@@ -357,15 +414,36 @@ const StyledSection: React.FC<StyledSectionProps> = ({
           {appliedStyle.quotes.map((quote, index) => (
             <blockquote
               key={index}
-              className={`relative italic ${appliedStyle.style?.border ? 'border-l-4 pl-4' : ''}`}
+              className={`
+                relative italic
+                ${isGridLayout ? 'p-4 rounded-lg bg-white/50 backdrop-blur-sm min-h-[120px] flex flex-col justify-center' : ''}
+                ${isGridLayout ? 'border-l-4 shadow-sm hover:shadow-md transition-shadow' : ''}
+                ${!isGridLayout && appliedStyle.style?.border ? 'border-l-4 pl-4' : ''}
+              `}
               style={{
-                borderColor: appliedStyle.style?.border ? appliedStyle.style?.accentColor : undefined
+                borderColor: appliedStyle.style?.accentColor || '#DC2626'
               }}
             >
-              <p className={`${sizes.text} mb-2`}>"{quote.text}"</p>
-              <footer className={`${sizes.text} text-right opacity-75`}>
-                — {quote.author}
-              </footer>
+              {/* Decorative quote mark - positioned behind text, left-aligned, vertically centered */}
+              {isGridLayout && (
+                <span
+                  className="absolute inset-0 flex items-center justify-start pl-2 text-7xl sm:text-8xl font-serif opacity-10 select-none pointer-events-none z-0"
+                  style={{ color: appliedStyle.style?.accentColor || '#DC2626' }}
+                >
+                  "
+                </span>
+              )}
+              <p className={`${sizes.text} relative z-10 ${quote.author ? 'mb-2' : ''}`}>
+                "{quote.text}"
+              </p>
+              {quote.author && (
+                <footer
+                  className={`${sizes.text} text-right opacity-75 relative z-10 ${isGridLayout ? 'pr-2' : ''}`}
+                  style={{ fontStyle: 'normal' }}
+                >
+                  — {quote.author}
+                </footer>
+              )}
             </blockquote>
           ))}
         </div>

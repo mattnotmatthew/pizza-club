@@ -9,8 +9,10 @@
  */
 
 require_once __DIR__ . '/../core/BaseAPI.php';
+require_once __DIR__ . '/../core/RatingTransformer.php';
 
 class InfographicAPI extends BaseAPI {
+    use RatingTransformer;
 
     /**
      * GET /api/infographics - Get all published infographics
@@ -184,50 +186,6 @@ class InfographicAPI extends BaseAPI {
         );
     }
 
-    /**
-     * Get visit ratings in nested structure
-     */
-    private function getVisitRatings($visitId) {
-        $sql = "SELECT r.*, rc.name as category_name, rc.parent_category
-                FROM ratings r
-                JOIN rating_categories rc ON r.category_id = rc.id
-                WHERE r.visit_id = :visit_id
-                ORDER BY rc.display_order, r.pizza_order";
-
-        $stmt = $this->db->execute($sql, [':visit_id' => $visitId]);
-        $ratings = $stmt->fetchAll();
-
-        // Group ratings into nested structure
-        $structured = [];
-
-        foreach ($ratings as $rating) {
-            $value = (float)$rating['rating'];
-
-            if ($rating['category_name'] === 'overall') {
-                $structured['overall'] = $value;
-            } elseif ($rating['parent_category'] === 'pizzas' && $rating['pizza_order']) {
-                if (!isset($structured['pizzas'])) {
-                    $structured['pizzas'] = [];
-                }
-                $structured['pizzas'][] = [
-                    'order' => $rating['pizza_order'],
-                    'rating' => $value
-                ];
-            } elseif ($rating['parent_category'] === 'pizza-components') {
-                if (!isset($structured['pizza-components'])) {
-                    $structured['pizza-components'] = [];
-                }
-                $structured['pizza-components'][$rating['category_name']] = $value;
-            } elseif ($rating['parent_category'] === 'the-other-stuff') {
-                if (!isset($structured['the-other-stuff'])) {
-                    $structured['the-other-stuff'] = [];
-                }
-                $structured['the-other-stuff'][$rating['category_name']] = $value;
-            }
-        }
-
-        return $structured;
-    }
 
     /**
      * POST /api/infographics - Publish new infographic

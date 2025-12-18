@@ -6,8 +6,10 @@
  */
 
 require_once __DIR__ . '/../core/BaseAPI.php';
+require_once __DIR__ . '/../core/RatingTransformer.php';
 
 class RestaurantAPI extends BaseAPI {
+    use RatingTransformer;
     
     /**
      * GET /api/restaurants - Get all restaurants
@@ -124,8 +126,8 @@ class RestaurantAPI extends BaseAPI {
             $pagination['page'],
             $pagination['limit']
         );
-        
-        $this->sendResponse($response);
+
+        $this->sendCacheableResponse($response, 300);
     }
     
     /**
@@ -182,8 +184,8 @@ class RestaurantAPI extends BaseAPI {
         
         // Get visits
         $restaurant['visits'] = $this->getRestaurantVisits($id);
-        
-        $this->sendResponse($restaurant);
+
+        $this->sendCacheableResponse($restaurant, 300);
     }
     
     /**
@@ -222,58 +224,6 @@ class RestaurantAPI extends BaseAPI {
         }
         
         return $visits;
-    }
-    
-    /**
-     * Get ratings for a visit
-     */
-    private function getVisitRatings($visitId) {
-        $sql = "SELECT r.*, rc.name as category_name, rc.parent_category
-                FROM ratings r
-                JOIN rating_categories rc ON r.category_id = rc.id
-                WHERE r.visit_id = :visit_id
-                ORDER BY rc.display_order, r.pizza_order";
-        
-        $stmt = $this->db->execute($sql, [':visit_id' => $visitId]);
-        $ratings = $stmt->fetchAll();
-        
-        // Group ratings by structure
-        $structured = [];
-        
-        foreach ($ratings as $rating) {
-            $value = (float)$rating['rating'];
-            
-            if ($rating['category_name'] === 'pizzas' && $rating['pizza_order']) {
-                // Pizza with order
-                if (!isset($structured['pizzas'])) {
-                    $structured['pizzas'] = [];
-                }
-                $structured['pizzas'][] = [
-                    'order' => $rating['pizza_order'],
-                    'rating' => $value
-                ];
-            } elseif ($rating['category_name'] === 'appetizers' && $rating['pizza_order']) {
-                // Appetizer with order (reusing pizza_order field)
-                if (!isset($structured['appetizers'])) {
-                    $structured['appetizers'] = [];
-                }
-                $structured['appetizers'][] = [
-                    'order' => $rating['pizza_order'],
-                    'rating' => $value
-                ];
-            } elseif ($rating['parent_category'] === null) {
-                // Top-level rating
-                $structured[$rating['category_name']] = $value;
-            } else {
-                // Nested rating
-                if (!isset($structured[$rating['parent_category']])) {
-                    $structured[$rating['parent_category']] = [];
-                }
-                $structured[$rating['parent_category']][$rating['category_name']] = $value;
-            }
-        }
-        
-        return $structured;
     }
     
     /**

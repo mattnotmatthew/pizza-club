@@ -7,6 +7,7 @@ import InfographicPreview from '@/components/infographics/InfographicPreview';
 import TemplateSelector from '@/components/infographics/TemplateSelector';
 import TextBoxEditor from '@/components/infographics/TextBoxEditor';
 import SectionStyleEditor from '@/components/infographics/SectionStyleEditor';
+import FocalPointEditor from '@/components/admin/FocalPointEditor';
 import Button from '@/components/common/Button';
 import { useInfographics } from '@/hooks/useInfographics';
 import { usePhotoUpload } from '@/hooks/usePhotoUpload';
@@ -39,8 +40,152 @@ const InfographicsEditor: React.FC = () => {
     showRatings: {},
     photos: [],
     textBoxes: [],
-    sectionStyles: [],
-    template: 'classic'
+    sectionStyles: [
+      // Header section: 2XL font
+      {
+        id: 'header',
+        enabled: true,
+        fontSize: '2xl',
+        layout: 'vertical',
+        showTitle: true,
+        style: {
+          backgroundColor: '#FFF8E7',
+          textColor: '#1F2937',
+          accentColor: '#DC2626',
+          padding: 'md',
+          borderRadius: 'md',
+          border: false,
+          shadow: false
+        }
+      },
+      // Overall rating: 3XL font, horizontal layout, border checked
+      {
+        id: 'overall',
+        enabled: true,
+        fontSize: '3xl',
+        layout: 'horizontal',
+        showTitle: true,
+        style: {
+          backgroundColor: '#FFF8E7',
+          textColor: '#1F2937',
+          accentColor: '#DC2626',
+          padding: 'md',
+          borderRadius: 'md',
+          border: true,
+          shadow: false
+        }
+      },
+      // Attendees: Base font, horizontal layout, border checked (after overall)
+      {
+        id: 'attendees',
+        enabled: true,
+        fontSize: 'base',
+        layout: 'horizontal',
+        showTitle: true,
+        style: {
+          backgroundColor: '#FFF8E7',
+          textColor: '#1F2937',
+          accentColor: '#DC2626',
+          padding: 'md',
+          borderRadius: 'md',
+          border: true,
+          shadow: false
+        }
+      },
+      // Pizza rating: 2XL font, vertical layout, border checked
+      {
+        id: 'pizzas',
+        enabled: true,
+        fontSize: '2xl',
+        layout: 'vertical',
+        showTitle: true,
+        style: {
+          backgroundColor: '#FFF8E7',
+          textColor: '#1F2937',
+          accentColor: '#DC2626',
+          padding: 'md',
+          borderRadius: 'md',
+          border: true,
+          shadow: false
+        }
+      },
+      // Appetizers: Base font, horizontal layout, border checked (after pizzas)
+      {
+        id: 'appetizers',
+        enabled: true,
+        fontSize: 'base',
+        layout: 'horizontal',
+        showTitle: true,
+        style: {
+          backgroundColor: '#FFF8E7',
+          textColor: '#1F2937',
+          accentColor: '#DC2626',
+          padding: 'md',
+          borderRadius: 'md',
+          border: true,
+          shadow: false
+        }
+      },
+      // Pizza components: Large font, vertical layout, border checked
+      {
+        id: 'components',
+        enabled: true,
+        fontSize: 'lg',
+        layout: 'vertical',
+        showTitle: true,
+        style: {
+          backgroundColor: '#FFF8E7',
+          textColor: '#1F2937',
+          accentColor: '#DC2626',
+          padding: 'md',
+          borderRadius: 'md',
+          border: true,
+          shadow: false
+        }
+      },
+      // The other stuff: Base font, vertical layout, border checked
+      {
+        id: 'other-stuff',
+        enabled: true,
+        fontSize: 'base',
+        layout: 'vertical',
+        showTitle: true,
+        style: {
+          backgroundColor: '#FFF8E7',
+          textColor: '#1F2937',
+          accentColor: '#DC2626',
+          padding: 'md',
+          borderRadius: 'md',
+          border: true,
+          shadow: false
+        }
+      },
+      // Quotes: XL font, grid layout, border UNCHECKED
+      {
+        id: 'quotes',
+        enabled: true,
+        fontSize: 'xl',
+        layout: 'grid',
+        showTitle: true,
+        style: {
+          backgroundColor: '#FFF8E7',
+          textColor: '#1F2937',
+          accentColor: '#DC2626',
+          padding: 'md',
+          borderRadius: 'md',
+          border: false,
+          shadow: false
+        }
+      }
+    ],
+    template: 'classic',
+    // Logo defaults: Alt logo, left position
+    showLogo: true,
+    logoType: 'alt',
+    logoAlign: 'left',
+    logoSize: 'lg',
+    // Show absentees checked by default
+    showAbsentees: true
   });
   
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -52,6 +197,7 @@ const InfographicsEditor: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'setup' | 'content' | 'style'>('setup');
 
   // Photo management
   const { photos, addPhoto, removePhoto, updatePhoto, setPhotos } = usePhotoUpload(
@@ -128,6 +274,10 @@ const InfographicsEditor: React.FC = () => {
   const loadInfographic = async (infographicId: string) => {
     try {
       setLoading(true);
+
+      // Re-fetch fresh restaurants data to get latest visit info
+      const freshRestaurants = await dataService.getRestaurants();
+      setRestaurants(freshRestaurants);
 
       // Check if it's a draft or published infographic
       let infographic;
@@ -272,6 +422,27 @@ const InfographicsEditor: React.FC = () => {
     }));
   };
 
+  const handleHeaderHeroImageToggle = () => {
+    setContent(prev => ({
+      ...prev,
+      showHeaderHeroImage: !prev.showHeaderHeroImage
+    }));
+  };
+
+  const handleHeaderHeroImageOpacityChange = (opacity: number) => {
+    setContent(prev => ({
+      ...prev,
+      headerHeroImageOpacity: opacity
+    }));
+  };
+
+  const handleHeaderHeroFocalPointChange = (focalPoint: { x: number; y: number } | undefined) => {
+    setContent(prev => ({
+      ...prev,
+      headerHeroFocalPoint: focalPoint
+    }));
+  };
+
   const handleLogoTypeChange = (logoType: 'classic' | 'alt') => {
     setContent(prev => ({
       ...prev,
@@ -283,6 +454,13 @@ const InfographicsEditor: React.FC = () => {
     setContent(prev => ({
       ...prev,
       logoAlign
+    }));
+  };
+
+  const handleLogoSizeChange = (logoSize: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl') => {
+    setContent(prev => ({
+      ...prev,
+      logoSize
     }));
   };
 
@@ -379,6 +557,7 @@ const InfographicsEditor: React.FC = () => {
         restaurantName: selectedRestaurant.name,
         restaurantLocation: selectedRestaurant.location || '',
         restaurantAddress: selectedRestaurant.address || '',
+        restaurantHeroImage: selectedRestaurant.heroImage,
         visitDate: selectedVisitDate,
         status: 'published' as const,
         content: { ...content, photos },
@@ -438,325 +617,407 @@ const InfographicsEditor: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto px-4 py-6">
-        <div className="mb-6">
-          <Link to="/admin/infographics" className="text-blue-600 hover:text-blue-700 text-sm">
-            ← Back to Infographics
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mt-2">
-            {isEditing ? 'Edit' : 'Create'} Infographic
-          </h1>
-        </div>
-        
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Editor Panel */}
-          <div className="space-y-6">
-            {/* Visit Selection */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold mb-4">Select Restaurant Visit</h2>
-              <VisitSelector
-                onVisitSelect={handleVisitSelect}
-                selectedRestaurantId={selectedRestaurantId}
-                selectedVisitDate={selectedVisitDate}
-              />
+      <div className="mx-auto px-4 py-4">
+        {/* Compact Header with Sticky Actions */}
+        <div className="sticky top-0 z-20 bg-gray-50 pb-3 -mx-4 px-4 border-b border-gray-200 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link to="/admin/infographics" className="text-gray-500 hover:text-gray-700">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+              <h1 className="text-xl font-bold text-gray-900">
+                {isEditing ? 'Edit' : 'Create'} Infographic
+              </h1>
+              {selectedRestaurant && (
+                <span className="text-sm text-gray-500">• {selectedRestaurant.name}</span>
+              )}
             </div>
-
-            {/* Template Selection */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <TemplateSelector
-                selectedTemplate={content.template || 'classic'}
-                onTemplateChange={handleTemplateChange}
-                disabled={saving}
-              />
-            </div>
-
-            {/* Photo Management */}
-            {selectedVisit && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <PhotoUploader
-                  infographicId={id || 'new-infographic'}
-                  photos={photos}
-                  onPhotoAdd={addPhoto}
-                  onPhotoRemove={(photoId) => {
-                    removePhoto(photoId);
-                    if (selectedPhotoId === photoId) {
-                      setSelectedPhotoId(null);
-                    }
-                  }}
-                />
-                
-                {/* Photo Positioning Controls */}
-                {selectedPhotoId && photos.find(p => p.id === selectedPhotoId) && (
-                  <div className="mt-4">
-                    <PhotoPositioner
-                      photo={photos.find(p => p.id === selectedPhotoId)!}
-                      onUpdate={updatePhoto}
-                    />
-                  </div>
-                )}
-                
-                {/* Photo Selection for Positioning */}
-                {photos.length > 0 && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-2">
-                      {selectedPhotoId 
-                        ? "Select a different photo or click the same photo to deselect:"
-                        : "Select a photo to adjust its position and settings:"}
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {photos.map((photo) => (
-                        <button
-                          key={photo.id}
-                          onClick={() => setSelectedPhotoId(
-                            photo.id === selectedPhotoId ? null : photo.id
-                          )}
-                          className={`
-                            relative group cursor-pointer border-2 rounded overflow-hidden transition-all bg-gray-100
-                            ${photo.id === selectedPhotoId 
-                              ? 'border-blue-500 ring-2 ring-blue-300' 
-                              : 'border-transparent hover:border-blue-500'
-                            }
-                          `}
-                        >
-                          <div className="relative w-full h-20">
-                            <img
-                              src={photo.url}
-                              alt=""
-                              className="absolute inset-0 w-full h-full object-cover"
-                              onError={(e) => {
-                                console.error('Failed to load photo:', photo.url);
-                                const target = e.currentTarget as HTMLImageElement;
-                                target.style.display = 'none';
-                                target.parentElement?.classList.add('bg-red-100');
-                              }}
-                            />
-                          </div>
-                          <div className={`
-                            absolute inset-0 transition-opacity pointer-events-none
-                            ${photo.id === selectedPhotoId 
-                              ? 'bg-blue-500 bg-opacity-20' 
-                              : 'bg-black bg-opacity-0 group-hover:bg-opacity-20'
-                            }
-                          `} />
-                          {photo.id === selectedPhotoId && (
-                            <div className="absolute top-1 right-1 bg-blue-500 text-white rounded-full p-1">
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Section Styles */}
-            {selectedVisit && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold mb-4">Section Styles</h2>
-                <SectionStyleEditor
-                  sectionStyles={content.sectionStyles || []}
-                  onSectionStylesChange={handleSectionStylesChange}
-                  visitNotes={selectedVisit.notes || ''}
-                  attendeeNames={attendeeNames.map(m => m.name)}
-                />
-              </div>
-            )}
-
-            {/* Custom Text Boxes */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold mb-4">Custom Text Boxes</h2>
-              <TextBoxEditor
-                textBoxes={content.textBoxes || []}
-                onTextBoxesChange={handleTextBoxesChange}
-              />
-            </div>
-
-            {/* Rating Toggles */}
-            {selectedVisit && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold mb-4">Rating Display Options</h2>
-                <div className="grid grid-cols-2 gap-3">
-                  {availableCategories.map((category) => (
-                    <label key={category} className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={content.showRatings?.[category] ?? true}
-                        onChange={() => handleRatingToggle(category)}
-                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
-                      />
-                      <span className="text-sm text-gray-700 capitalize">
-                        {category === 'overall' ? 'Overall Rating' : category}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Logo Options (Classic Template Only) */}
-            {selectedVisit && content.template === 'classic' && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold mb-4">Logo Options</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={content.showLogo ?? true}
-                        onChange={handleLogoToggle}
-                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
-                      />
-                      <span className="text-sm text-gray-700 font-medium">
-                        Show Pizza Club logo in header
-                      </span>
-                    </label>
-
-                    {/* Logo Type & Alignment - Only show when logo is enabled */}
-                    {(content.showLogo ?? true) && (
-                      <div className="mt-4 ml-6 space-y-4">
-                        {/* Logo Type Selector */}
-                        <div>
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                            Logo Style
-                          </p>
-                          <div className="space-y-2">
-                            <label className="flex items-center cursor-pointer">
-                              <input
-                                type="radio"
-                                name="logoType"
-                                value="classic"
-                                checked={(content.logoType ?? 'classic') === 'classic'}
-                                onChange={() => handleLogoTypeChange('classic')}
-                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 mr-2"
-                              />
-                              <span className="text-sm text-gray-600">
-                                Classic Logo (Circle badge)
-                              </span>
-                            </label>
-                            <label className="flex items-center cursor-pointer">
-                              <input
-                                type="radio"
-                                name="logoType"
-                                value="alt"
-                                checked={content.logoType === 'alt'}
-                                onChange={() => handleLogoTypeChange('alt')}
-                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 mr-2"
-                              />
-                              <span className="text-sm text-gray-600">
-                                Alt Logo (Giardiniera jar)
-                              </span>
-                            </label>
-                          </div>
-                        </div>
-
-                        {/* Logo Alignment Selector */}
-                        <div>
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                            Logo Position
-                          </p>
-                          <div className="space-y-2">
-                            <label className="flex items-center cursor-pointer">
-                              <input
-                                type="radio"
-                                name="logoAlign"
-                                value="left"
-                                checked={(content.logoAlign ?? 'left') === 'left'}
-                                onChange={() => handleLogoAlignChange('left')}
-                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 mr-2"
-                              />
-                              <span className="text-sm text-gray-600">
-                                Left (Logo left, text right)
-                              </span>
-                            </label>
-                            <label className="flex items-center cursor-pointer">
-                              <input
-                                type="radio"
-                                name="logoAlign"
-                                value="right"
-                                checked={content.logoAlign === 'right'}
-                                onChange={() => handleLogoAlignChange('right')}
-                                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 mr-2"
-                              />
-                              <span className="text-sm text-gray-600">
-                                Right (Text left, logo right)
-                              </span>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Display Options (Classic Template Only) */}
-            {selectedVisit && content.template === 'classic' && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold mb-4">Display Options</h2>
-                <div className="space-y-4">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={content.showAbsentees ?? false}
-                      onChange={handleAbsenteesToggle}
-                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
-                    />
-                    <span className="text-sm text-gray-700">
-                      Show members who didn't attend
-                    </span>
-                  </label>
-                  <p className="text-xs text-gray-500 ml-6">
-                    Displays absentees with their total missed count
-                  </p>
-
-                  {/* Background Color Picker */}
-                  <div className="pt-3 border-t border-gray-200">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Infographic Background Color
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="color"
-                        value={content.backgroundColor || '#FFF8E7'}
-                        onChange={(e) => handleBackgroundColorChange(e.target.value)}
-                        className="h-10 w-20 border border-gray-300 rounded cursor-pointer"
-                      />
-                      <span className="text-xs text-gray-500">
-                        {content.backgroundColor || '#FFF8E7'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <Button 
+            <div className="flex items-center gap-3">
+              {currentDraftId && (
+                <span className="text-xs text-gray-400">Auto-saving...</span>
+              )}
+              <Button
                 onClick={handleSaveDraft}
                 disabled={!selectedRestaurantId || !selectedVisitDate || saving}
-                className="flex-1"
+                variant="secondary"
+                className="text-sm py-1.5 px-3"
               >
-                {saving && !isEditing ? 'Saving...' : 'Save Draft'}
+                Save Draft
               </Button>
-              <Button 
+              <Button
                 onClick={handlePublish}
                 disabled={!selectedRestaurantId || !selectedVisitDate || saving}
-                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                className="text-sm py-1.5 px-4 bg-red-600 text-white hover:bg-red-700"
               >
                 {saving ? 'Publishing...' : 'Publish'}
               </Button>
             </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          {/* Editor Panel */}
+          <div className="xl:col-span-5 space-y-4">
+            {/* Tabs Navigation */}
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="border-b border-gray-200">
+                <nav className="flex -mb-px">
+                  {[
+                    { id: 'setup', label: 'Setup', icon: '📋' },
+                    { id: 'content', label: 'Content', icon: '📸' },
+                    { id: 'style', label: 'Style', icon: '🎨' }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                      className={`
+                        flex-1 py-3 px-4 text-sm font-medium border-b-2 transition-colors
+                        ${activeTab === tab.id
+                          ? 'border-red-500 text-red-600 bg-red-50/50'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                        }
+                      `}
+                    >
+                      <span className="mr-1.5">{tab.icon}</span>
+                      {tab.label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-4 space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto">
+                {/* SETUP TAB */}
+                {activeTab === 'setup' && (
+                  <>
+                    {/* Visit Selection */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Restaurant Visit</h3>
+                      <VisitSelector
+                        onVisitSelect={handleVisitSelect}
+                        selectedRestaurantId={selectedRestaurantId}
+                        selectedVisitDate={selectedVisitDate}
+                      />
+                    </div>
+
+                    {/* Template Selection */}
+                    {selectedVisit && (
+                      <div className="pt-4 border-t border-gray-100">
+                        <TemplateSelector
+                          selectedTemplate={content.template || 'classic'}
+                          onTemplateChange={handleTemplateChange}
+                          disabled={saving}
+                        />
+                      </div>
+                    )}
+
+                    {/* Rating Display Options */}
+                    {selectedVisit && (
+                      <div className="pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-semibold text-gray-700">Show Ratings</h3>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                const allOn: Record<string, boolean> = {};
+                                availableCategories.forEach(c => allOn[c] = true);
+                                setContent(prev => ({ ...prev, showRatings: allOn }));
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-700"
+                            >
+                              All
+                            </button>
+                            <span className="text-gray-300">|</span>
+                            <button
+                              onClick={() => {
+                                const allOff: Record<string, boolean> = {};
+                                availableCategories.forEach(c => allOff[c] = false);
+                                setContent(prev => ({ ...prev, showRatings: allOff }));
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-700"
+                            >
+                              None
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {availableCategories.map((category) => (
+                            <button
+                              key={category}
+                              onClick={() => handleRatingToggle(category)}
+                              className={`
+                                px-3 py-1.5 rounded-full text-xs font-medium transition-colors
+                                ${content.showRatings?.[category] ?? true
+                                  ? 'bg-red-100 text-red-700 ring-1 ring-red-200'
+                                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                }
+                              `}
+                            >
+                              {category === 'overall' ? 'Overall' : category}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* CONTENT TAB */}
+                {activeTab === 'content' && selectedVisit && (
+                  <>
+                    {/* Photo Management */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Photos</h3>
+                      <PhotoUploader
+                        infographicId={id || 'new-infographic'}
+                        photos={photos}
+                        onPhotoAdd={addPhoto}
+                        onPhotoRemove={(photoId) => {
+                          removePhoto(photoId);
+                          if (selectedPhotoId === photoId) {
+                            setSelectedPhotoId(null);
+                          }
+                        }}
+                      />
+
+                      {/* Inline Photo Grid with Selection */}
+                      {photos.length > 0 && (
+                        <div className="mt-3 grid grid-cols-4 gap-2">
+                          {photos.map((photo) => (
+                            <div key={photo.id} className="space-y-2">
+                              <button
+                                onClick={() => setSelectedPhotoId(
+                                  photo.id === selectedPhotoId ? null : photo.id
+                                )}
+                                className={`
+                                  relative w-full aspect-square rounded overflow-hidden transition-all
+                                  ${photo.id === selectedPhotoId
+                                    ? 'ring-2 ring-blue-500 ring-offset-1'
+                                    : 'hover:ring-2 hover:ring-gray-300'
+                                  }
+                                `}
+                              >
+                                <img
+                                  src={photo.url}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                                {photo.id === selectedPhotoId && (
+                                  <div className="absolute top-1 right-1 bg-blue-500 text-white rounded-full p-0.5">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  </div>
+                                )}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Inline Photo Controls */}
+                      {selectedPhotoId && photos.find(p => p.id === selectedPhotoId) && (
+                        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <PhotoPositioner
+                            photo={photos.find(p => p.id === selectedPhotoId)!}
+                            onUpdate={updatePhoto}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Section Styles */}
+                    <div className="pt-4 border-t border-gray-100">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Section Layout</h3>
+                      <SectionStyleEditor
+                        sectionStyles={content.sectionStyles || []}
+                        onSectionStylesChange={handleSectionStylesChange}
+                        visitNotes={selectedVisit.notes || ''}
+                        visitQuotes={selectedVisit.quotes || []}
+                        photos={photos}
+                        onPhotoUpdate={updatePhoto}
+                        onPhotoSelect={(photo) => setSelectedPhotoId(photo.id)}
+                      />
+                    </div>
+
+                    {/* Custom Text Boxes */}
+                    <div className="pt-4 border-t border-gray-100">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Custom Text</h3>
+                      <TextBoxEditor
+                        textBoxes={content.textBoxes || []}
+                        onTextBoxesChange={handleTextBoxesChange}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* STYLE TAB */}
+                {activeTab === 'style' && selectedVisit && (
+                  <>
+                    {/* Logo & Branding */}
+                    {content.template === 'classic' && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Logo & Branding</h3>
+                        <div className="space-y-3">
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={content.showLogo ?? true}
+                              onChange={handleLogoToggle}
+                              className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
+                            />
+                            <span className="text-sm text-gray-700">Show logo</span>
+                          </label>
+
+                          {(content.showLogo ?? true) && (
+                            <div className="ml-6 space-y-3">
+                              <div className="flex gap-3">
+                                <div className="flex-1">
+                                  <label className="block text-xs text-gray-500 mb-1">Style</label>
+                                  <select
+                                    value={content.logoType || 'classic'}
+                                    onChange={(e) => handleLogoTypeChange(e.target.value as 'classic' | 'alt')}
+                                    className="w-full text-sm border-gray-300 rounded-md"
+                                  >
+                                    <option value="classic">Classic</option>
+                                    <option value="alt">Alt (Jar)</option>
+                                  </select>
+                                </div>
+                                <div className="flex-1">
+                                  <label className="block text-xs text-gray-500 mb-1">Position</label>
+                                  <select
+                                    value={content.logoAlign || 'left'}
+                                    onChange={(e) => handleLogoAlignChange(e.target.value as 'left' | 'right')}
+                                    className="w-full text-sm border-gray-300 rounded-md"
+                                  >
+                                    <option value="left">Left</option>
+                                    <option value="right">Right</option>
+                                  </select>
+                                </div>
+                                <div className="flex-1">
+                                  <label className="block text-xs text-gray-500 mb-1">Size</label>
+                                  <select
+                                    value={content.logoSize || 'lg'}
+                                    onChange={(e) => handleLogoSizeChange(e.target.value as any)}
+                                    className="w-full text-sm border-gray-300 rounded-md"
+                                  >
+                                    <option value="sm">S</option>
+                                    <option value="base">M</option>
+                                    <option value="lg">L</option>
+                                    <option value="xl">XL</option>
+                                    <option value="2xl">2XL</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Header Background */}
+                    {content.template === 'classic' && selectedRestaurant?.heroImage && (
+                      <div className="pt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Header Background</h3>
+                        <div className="space-y-3">
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={content.showHeaderHeroImage ?? false}
+                              onChange={handleHeaderHeroImageToggle}
+                              className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
+                            />
+                            <span className="text-sm text-gray-700">Use restaurant photo</span>
+                          </label>
+
+                          {content.showHeaderHeroImage && (
+                            <div className="ml-6 space-y-3">
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">
+                                  Gradient: {Math.round((content.headerHeroImageOpacity ?? 0.4) * 100)}%
+                                </label>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="1"
+                                  step="0.05"
+                                  value={content.headerHeroImageOpacity ?? 0.4}
+                                  onChange={(e) => handleHeaderHeroImageOpacityChange(parseFloat(e.target.value))}
+                                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                              </div>
+                              <FocalPointEditor
+                                imageUrl={selectedRestaurant.heroImage}
+                                focalPoint={content.headerHeroFocalPoint}
+                                onFocalPointChange={handleHeaderHeroFocalPointChange}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Display Options */}
+                    {content.template === 'classic' && (
+                      <div className="pt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Display Options</h3>
+                        <div className="space-y-3">
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={content.showAbsentees ?? false}
+                              onChange={handleAbsenteesToggle}
+                              className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
+                            />
+                            <span className="text-sm text-gray-700">Show absentees</span>
+                          </label>
+
+                          <div className="flex items-center gap-3">
+                            <label className="text-xs text-gray-500">Background:</label>
+                            <input
+                              type="color"
+                              value={content.backgroundColor || '#FFF8E7'}
+                              onChange={(e) => handleBackgroundColorChange(e.target.value)}
+                              className="h-7 w-12 border border-gray-300 rounded cursor-pointer"
+                            />
+                            <span className="text-xs text-gray-400">
+                              {content.backgroundColor || '#FFF8E7'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Empty state for Content/Style tabs when no visit selected */}
+                {activeTab !== 'setup' && !selectedVisit && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-sm">Select a restaurant visit first</p>
+                    <button
+                      onClick={() => setActiveTab('setup')}
+                      className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      Go to Setup →
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Preview Panel */}
-          <div className="bg-gray-100 rounded-lg p-4 h-auto xl:h-[calc(100vh-200px)] xl:sticky xl:top-6 overflow-auto">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">Preview</h3>
+          <div className="xl:col-span-7 bg-gray-100 rounded-lg p-4 xl:sticky xl:top-20 xl:h-[calc(100vh-100px)] overflow-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-600">Preview</h3>
+              {selectedVisit && (
+                <span className="text-xs text-gray-400">
+                  {new Date(selectedVisitDate + 'T12:00:00').toLocaleDateString()}
+                </span>
+              )}
+            </div>
             <InfographicPreview
               infographic={{
                 restaurantId: selectedRestaurantId,

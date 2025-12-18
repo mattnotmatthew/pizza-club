@@ -27,49 +27,47 @@ interface RatingInputProps {
   disabled?: boolean;
 }
 
-const RatingInput: React.FC<RatingInputProps> = React.memo(({ label, value, onChange, disabled }) => {
+const RatingInput: React.FC<RatingInputProps> = ({ label, value, onChange, disabled }) => {
   const [displayValue, setDisplayValue] = React.useState(value.toString());
-  const [isTyping, setIsTyping] = React.useState(false);
+  const lastCommittedValue = React.useRef(value);
 
-  // Update display value when prop value changes (but not when user is actively typing)
+  // Only sync displayValue from prop when the prop value actually changes from external source
+  // (not from our own onChange call)
   React.useEffect(() => {
-    if (!isTyping) {
+    if (value !== lastCommittedValue.current) {
       setDisplayValue(value.toString());
+      lastCommittedValue.current = value;
     }
-  }, [value, isTyping]);
+  }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    setDisplayValue(inputValue);
-    setIsTyping(true);
+    setDisplayValue(e.target.value);
   };
 
   const handleBlur = () => {
-    setIsTyping(false);
-
     // On blur, parse and validate the input
     const numValue = parseFloat(displayValue);
+    let finalValue: number;
+
     if (isNaN(numValue) || numValue < 0) {
-      setDisplayValue('0');
-      onChange(0);
+      finalValue = 0;
     } else if (numValue > 5) {
-      setDisplayValue('5');
-      onChange(5);
+      finalValue = 5;
     } else {
-      // Round to 2 decimal places (hundredths) for precise display
-      const rounded = Math.round(numValue * 100) / 100;
-      setDisplayValue(rounded.toString());
-      onChange(rounded);
+      // Round to 2 decimal places
+      finalValue = Math.round(numValue * 100) / 100;
     }
+
+    setDisplayValue(finalValue.toString());
+    lastCommittedValue.current = finalValue;
+    onChange(finalValue);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Handle Enter key to commit the value
     if (e.key === 'Enter') {
       handleBlur();
       (e.target as HTMLInputElement).blur();
     }
-    // Let Tab work naturally - don't prevent default
   };
 
   return (
@@ -84,7 +82,6 @@ const RatingInput: React.FC<RatingInputProps> = React.memo(({ label, value, onCh
           onChange={handleInputChange}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          onFocus={() => setIsTyping(true)}
           disabled={disabled}
           placeholder="0.00"
           className="w-20 px-3 py-2 text-center border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm font-medium"
@@ -93,12 +90,7 @@ const RatingInput: React.FC<RatingInputProps> = React.memo(({ label, value, onCh
       </div>
     </div>
   );
-}, (prevProps, nextProps) => {
-  // Custom comparison to prevent re-renders
-  return prevProps.value === nextProps.value && 
-         prevProps.disabled === nextProps.disabled &&
-         prevProps.label === nextProps.label;
-});
+};
 
 const COMMON_TOPPINGS = ['Pepperoni', 'Sausage', 'Mushrooms', 'Green Pepper', 'Onion', 'Extra Cheese', 'Olives', 'Pineapple', 'Hot Giardinera','Garlic'];
 
@@ -117,47 +109,38 @@ const RatingForm: React.FC<RatingFormProps> = ({
     loadCategories();
   }, []);
 
+  // Track if we've initialized - reset when component remounts (key changes)
+  const hasInitializedRef = React.useRef(false);
+
   useEffect(() => {
-    console.log('RatingForm - initialRatings received:', initialRatings);
-    console.log('RatingForm - pizzas in initialRatings:', initialRatings.pizzas);
-    console.log('RatingForm - pizzas is array?', Array.isArray(initialRatings.pizzas));
-    
-    // Force state synchronization with functional update
-    setRatings(prevRatings => {
-      // If initialRatings has meaningful data, use it
-      if (initialRatings && (
-        initialRatings.overall !== undefined ||
-        (initialRatings.pizzas && Array.isArray(initialRatings.pizzas) && initialRatings.pizzas.length > 0) ||
-        (initialRatings.appetizers && Array.isArray(initialRatings.appetizers) && initialRatings.appetizers.length > 0) ||
-        (initialRatings['pizza-components'] && Object.keys(initialRatings['pizza-components']).length > 0) ||
-        (initialRatings['the-other-stuff'] && Object.keys(initialRatings['the-other-stuff']).length > 0)
-      )) {
-        console.log('RatingForm - Using initialRatings data');
-        return { ...initialRatings };
-      }
-      
-      // Keep existing state if initialRatings is empty/undefined
-      console.log('RatingForm - Keeping existing ratings state');
-      return prevRatings;
-    });
-    
-    // Initialize toppings state from existing pizza order descriptions with immediate effect
-    if (initialRatings.pizzas && Array.isArray(initialRatings.pizzas)) {
-      setPizzaToppings(prevToppings => {
+    // Only initialize once per mount (key prop forces remount for different visits)
+    if (hasInitializedRef.current) {
+      return;
+    }
+
+    // Initialize ratings from props
+    if (initialRatings && Object.keys(initialRatings).length > 0) {
+      setRatings({ ...initialRatings });
+
+      // Initialize toppings state from existing pizza order descriptions
+      if (initialRatings.pizzas && Array.isArray(initialRatings.pizzas)) {
         const initialToppings: Record<number, string[]> = {};
-        
-        initialRatings.pizzas!.forEach((pizza, index) => {
+
+        initialRatings.pizzas.forEach((pizza, index) => {
           const toppingsMatch = pizza.order.match(/^(.+?) - Toppings: (.+)$/);
           if (toppingsMatch && toppingsMatch[2]) {
             const toppings = toppingsMatch[2].split(', ').map(t => t.trim());
             initialToppings[index] = toppings;
           }
         });
-        
-        return { ...prevToppings, ...initialToppings };
-      });
+
+        setPizzaToppings(initialToppings);
+      }
     }
-  }, [initialRatings]);
+
+    hasInitializedRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadCategories = async () => {
     try {
@@ -174,10 +157,13 @@ const RatingForm: React.FC<RatingFormProps> = ({
     const newRatings = { ...ratings };
 
     if (parentKey) {
-      if (!newRatings[parentKey] || typeof newRatings[parentKey] !== 'object') {
-        newRatings[parentKey] = {};
-      }
-      (newRatings[parentKey] as Record<string, number>)[key] = value;
+      // Deep copy the nested object to avoid mutating state
+      const existingParent = ratings[parentKey];
+      const parentObj = (existingParent && typeof existingParent === 'object' && !Array.isArray(existingParent))
+        ? { ...(existingParent as Record<string, number>) }
+        : {};
+      parentObj[key] = value;
+      newRatings[parentKey] = parentObj;
     } else {
       newRatings[key] = value;
     }
@@ -197,6 +183,30 @@ const RatingForm: React.FC<RatingFormProps> = ({
       order: `Pizza ${pizzaCount}`,
       rating: 0
     });
+
+    setRatings(newRatings);
+    onRatingsChange(newRatings);
+  };
+
+  const calculatePizzaOverall = () => {
+    const newRatings = { ...ratings };
+    if (!newRatings.pizzas || !Array.isArray(newRatings.pizzas) || newRatings.pizzas.length === 0) {
+      console.log('[calculatePizzaOverall] No pizzas found');
+      return;
+    }
+
+    const validRatings = newRatings.pizzas.filter(p => p.rating > 0);
+    if (validRatings.length === 0) {
+      console.log('[calculatePizzaOverall] No valid ratings found');
+      return;
+    }
+
+    const sum = validRatings.reduce((acc, pizza) => acc + pizza.rating, 0);
+    const average = sum / validRatings.length;
+    newRatings.pizzaOverall = Math.round(average * 100) / 100; // Round to 2 decimal places
+
+    console.log('[calculatePizzaOverall] Calculated average:', newRatings.pizzaOverall);
+    console.log('[calculatePizzaOverall] Full ratings object:', JSON.stringify(newRatings));
 
     setRatings(newRatings);
     onRatingsChange(newRatings);
@@ -524,6 +534,33 @@ const RatingForm: React.FC<RatingFormProps> = ({
               >
                 + Add Pizza
               </button>
+
+              {/* Pizza Overall Section */}
+              {ratings.pizzas && ratings.pizzas.length > 0 && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-medium text-gray-700">Pizza Overall: </span>
+                      {ratings.pizzaOverall !== undefined ? (
+                        <span className="text-lg font-bold text-red-600">{ratings.pizzaOverall.toFixed(2)}</span>
+                      ) : (
+                        <span className="text-gray-400 italic">Not calculated</span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={calculatePizzaOverall}
+                      disabled={disabled}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-sm"
+                    >
+                      Calculate Average
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Calculates the average rating across all pizzas with ratings {'>'} 0
+                  </p>
+                </div>
+              )}
             </div>
           ) : parent.name === 'appetizers' ? (
             <div className="space-y-4">

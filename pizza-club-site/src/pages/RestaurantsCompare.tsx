@@ -1,24 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
 import RestaurantSelector from '@/components/restaurants/RestaurantSelector';
 import CompareTable from '@/components/restaurants/CompareTable';
 import { useCompareSelection } from '@/hooks/useCompareSelection';
 import { useCompareUrl } from '@/hooks/useCompareUrl';
+import { useMatomo } from '@/hooks/useMatomo';
 import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 import { PARENT_CATEGORIES } from '@/types';
 
 const RestaurantsCompare: React.FC = () => {
+  const { trackEvent } = useMatomo();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggleableCategories, setToggleableCategories] = useState<string[]>([]);
   const [ratingToggles, setRatingToggles] = useState<Record<string, boolean>>({});
-  
+  const hasTrackedComparison = useRef(false);
+
   // Parse initial IDs from URL
   const searchParams = new URLSearchParams(window.location.search);
   const urlIds = searchParams.get('ids')?.split(',').filter(id => id.length > 0) || [];
-  
+
   // Initialize selection state
   const selection = useCompareSelection(urlIds);
   
@@ -108,6 +111,16 @@ const RestaurantsCompare: React.FC = () => {
 
     fetchData();
   }, []);
+
+  // Track comparison view when restaurants are selected
+  useEffect(() => {
+    if (!loading && selection.selectedIds.length >= 2 && restaurants.length > 0 && !hasTrackedComparison.current) {
+      const selectedRestaurants = restaurants.filter(r => selection.selectedIds.includes(r.id));
+      const names = selectedRestaurants.map(r => r.name).join(' vs ');
+      trackEvent('Compare', 'View', names);
+      hasTrackedComparison.current = true;
+    }
+  }, [loading, selection.selectedIds, restaurants, trackEvent]);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -140,7 +140,7 @@ const InfographicsList: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {new Date(infographic.visitDate).toLocaleDateString()}
+                        {new Date(infographic.visitDate + 'T12:00:00').toLocaleDateString()}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

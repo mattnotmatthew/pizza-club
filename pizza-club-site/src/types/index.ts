@@ -4,11 +4,8 @@ export interface Member {
   slug?: string; // URL-friendly version of the member's name
   bio: string;
   photo?: string;
-  photoUrl?: string; // Deprecated: use photo
   memberSince?: string;
-  joinDate?: Date; // Deprecated: use memberSince
   favoritePizzaStyle?: string;
-  favoriteStyle?: string; // Deprecated: use favoritePizzaStyle
   restaurantsVisited?: number;
   displayOrder?: number;
   focalPoint?: { x: number; y: number }; // Focal point percentages (0-100) for hero image positioning
@@ -41,6 +38,7 @@ export interface Quote {
 
 export interface NestedRatings {
   overall?: number;
+  pizzaOverall?: number; // Average of all pizza ratings
   pizzas?: PizzaRating[];
   appetizers?: AppetizerRating[];
   'pizza-components'?: Record<string, number>;
@@ -100,6 +98,13 @@ export interface RestaurantVisit {
   attendees: string[]; // member ids
   notes?: string;
   quotes?: Quote[];
+}
+
+export interface RatingCategory {
+  id: string;
+  name: string;
+  parentCategory?: string;
+  displayOrder?: number;
 }
 
 export interface Restaurant {

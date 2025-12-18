@@ -9,14 +9,14 @@ const Footer: React.FC = () => {
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-3">
             <img 
-              src="/pizza/logo.png" 
+              src="/logo.png" 
               alt="Greater Chicagoland Pizza Club Logo" 
               className="h-8 w-8 object-contain"
             />
             <p className="text-lg font-semibold">Greater Chicagoland Pizza Club</p>
           </div>
           <p className="text-gray-400 text-sm">
-            © {currentYear} GCPC. All rights reserved. | Dedicated to the pursuit of perfect pizza.
+            © {currentYear} GCPC. All rights reserved. | Nella pizza, il volto di Dio.
           </p>
         </div>
       </div>

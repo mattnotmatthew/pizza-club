@@ -29,13 +29,11 @@ class LinksAPI extends BaseAPI {
      */
     protected function post() {
         $input = json_decode(file_get_contents('php://input'), true);
-        
+
         if (!$input) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid JSON data']);
-            return;
+            $this->sendError('Invalid JSON data', 400);
         }
-        
+
         $this->createLink($input);
     }
     
@@ -44,13 +42,11 @@ class LinksAPI extends BaseAPI {
      */
     protected function put() {
         $input = json_decode(file_get_contents('php://input'), true);
-        
+
         if (!$input || !isset($input['id'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid JSON data or missing ID']);
-            return;
+            $this->sendError('Invalid JSON data or missing ID', 400);
         }
-        
+
         $this->updateLink($input);
     }
     
@@ -59,13 +55,11 @@ class LinksAPI extends BaseAPI {
      */
     protected function delete() {
         $id = $_GET['id'] ?? null;
-        
+
         if (!$id) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Missing link ID']);
-            return;
+            $this->sendError('Missing link ID', 400);
         }
-        
+
         $this->deleteLink($id);
     }
     
@@ -79,23 +73,17 @@ class LinksAPI extends BaseAPI {
         if (strpos($path, '/reorder') !== false) {
             $input = json_decode(file_get_contents('php://input'), true);
             if (!$input || !isset($input['linkIds'])) {
-                http_response_code(400);
-                echo json_encode(['error' => 'Invalid JSON data or missing linkIds']);
-                return;
+                $this->sendError('Invalid JSON data or missing linkIds', 400);
             }
             $this->reorderLinks($input['linkIds']);
         } elseif (strpos($path, '/click') !== false) {
             $id = $_GET['id'] ?? null;
             if (!$id) {
-                http_response_code(400);
-                echo json_encode(['error' => 'Missing link ID']);
-                return;
+                $this->sendError('Missing link ID', 400);
             }
             $this->trackClick($id);
         } else {
-            http_response_code(404);
-            echo json_encode(['error' => 'Invalid PATCH endpoint']);
-            return;
+            $this->sendError('Invalid PATCH endpoint', 404);
         }
     }
     
@@ -126,13 +114,11 @@ class LinksAPI extends BaseAPI {
         $sql = "SELECT * FROM social_links WHERE id = ?";
         $stmt = $this->db->execute($sql, [$id]);
         $link = $stmt->fetch();
-        
+
         if (!$link) {
-            http_response_code(404);
-            echo json_encode(['error' => 'Link not found']);
-            return;
+            $this->sendError('Link not found', 404);
         }
-        
+
         $formattedLink = $this->formatLink($link);
         $this->sendResponse($formattedLink);
     }
@@ -143,9 +129,7 @@ class LinksAPI extends BaseAPI {
     private function createLink($data) {
         // Validate required fields
         if (!isset($data['title']) || !isset($data['url'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Missing required fields: title and url']);
-            return;
+            $this->sendError('Missing required fields: title and url', 400);
         }
         
         // Generate ID
@@ -203,11 +187,9 @@ class LinksAPI extends BaseAPI {
         // Check if link exists
         $checkSql = "SELECT id FROM social_links WHERE id = ?";
         $checkStmt = $this->db->execute($checkSql, [$id]);
-        
+
         if (!$checkStmt->fetch()) {
-            http_response_code(404);
-            echo json_encode(['error' => 'Link not found']);
-            return;
+            $this->sendError('Link not found', 404);
         }
         
         // Build update query
@@ -255,9 +237,7 @@ class LinksAPI extends BaseAPI {
         }
         
         if (empty($updateFields)) {
-            http_response_code(400);
-            echo json_encode(['error' => 'No fields to update']);
-            return;
+            $this->sendError('No fields to update', 400);
         }
         
         // Add updated_at
@@ -284,13 +264,11 @@ class LinksAPI extends BaseAPI {
         $sql = "DELETE FROM social_links WHERE id = ?";
         
         $stmt = $this->db->execute($sql, [$id]);
-        
+
         if ($stmt->rowCount() === 0) {
-            http_response_code(404);
-            echo json_encode(['error' => 'Link not found']);
-            return;
+            $this->sendError('Link not found', 404);
         }
-        
+
         $this->sendResponse(['message' => 'Link deleted successfully']);
     }
     
@@ -299,9 +277,7 @@ class LinksAPI extends BaseAPI {
      */
     private function reorderLinks($linkIds) {
         if (!is_array($linkIds) || empty($linkIds)) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid linkIds array']);
-            return;
+            $this->sendError('Invalid linkIds array', 400);
         }
         
         $this->db->beginTransaction();
@@ -317,9 +293,7 @@ class LinksAPI extends BaseAPI {
             $this->sendResponse(['message' => 'Links reordered successfully']);
         } catch (Exception $e) {
             $this->db->rollBack();
-            http_response_code(500);
-            echo json_encode(['error' => 'Failed to reorder links: ' . $e->getMessage()]);
-            return;
+            $this->sendError('Failed to reorder links: ' . $e->getMessage(), 500);
         }
     }
     
@@ -330,13 +304,11 @@ class LinksAPI extends BaseAPI {
         $sql = "UPDATE social_links SET click_count = click_count + 1 WHERE id = ? AND is_active = 1";
         
         $stmt = $this->db->execute($sql, [$id]);
-        
+
         if ($stmt->rowCount() === 0) {
-            http_response_code(404);
-            echo json_encode(['error' => 'Link not found or inactive']);
-            return;
+            $this->sendError('Link not found or inactive', 404);
         }
-        
+
         $this->sendResponse(['message' => 'Click tracked successfully']);
     }
     

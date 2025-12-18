@@ -46,8 +46,8 @@ class RatingCategoriesAPI extends BaseAPI {
                 $organized['children'][$category['parent_category']][] = $category;
             }
         }
-        
-        $this->sendResponse($organized);
+
+        $this->sendCacheableResponse($organized, 3600);
     }
     
     /**

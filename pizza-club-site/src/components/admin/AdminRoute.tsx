@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import Skeleton from '@/components/common/Skeleton';
 
 interface AdminRouteProps {
@@ -7,76 +8,11 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isChecking, setIsChecking] = useState(true);
-
-  useEffect(() => {
-    checkAdminAccess();
-  }, []);
-
-  const checkAdminAccess = () => {
-    // Check if already authenticated in session
-    const sessionAuth = sessionStorage.getItem('admin-authenticated');
-    if (sessionAuth === 'true') {
-      setIsAuthenticated(true);
-      setIsChecking(false);
-      return;
-    }
-
-    // Check environment variable
-    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
-    if (!adminPassword) {
-      console.warn('Admin password not configured. Set VITE_ADMIN_PASSWORD in your .env file.');
-      setIsAuthenticated(false);
-      setIsChecking(false);
-      return;
-    }
-
-    // Check if password is in URL query params (for easy access during development)
-    const urlParams = new URLSearchParams(window.location.search);
-    const providedPassword = urlParams.get('password');
-
-    if (providedPassword === adminPassword) {
-      // Store in session to avoid re-checking
-      sessionStorage.setItem('admin-authenticated', 'true');
-      setIsAuthenticated(true);
-      
-      // Remove password from URL for security
-      urlParams.delete('password');
-      const newUrl = window.location.pathname + 
-        (urlParams.toString() ? '?' + urlParams.toString() : '') + 
-        window.location.hash;
-      window.history.replaceState({}, '', newUrl);
-    } else if (!providedPassword) {
-      // No password provided, prompt for it
-      promptForPassword(adminPassword);
-    } else {
-      // Wrong password
-      alert('Invalid admin password');
-      setIsAuthenticated(false);
-    }
-    
-    setIsChecking(false);
-  };
-
-  const promptForPassword = (correctPassword: string) => {
-    const password = prompt('Enter admin password:');
-    
-    if (password === correctPassword) {
-      sessionStorage.setItem('admin-authenticated', 'true');
-      setIsAuthenticated(true);
-    } else if (password !== null) {
-      // User entered wrong password (not cancelled)
-      alert('Invalid admin password');
-      setIsAuthenticated(false);
-    } else {
-      // User cancelled
-      setIsAuthenticated(false);
-    }
-  };
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
   // Show loading while checking authentication
-  if (isChecking) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -88,9 +24,9 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
 
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
+  // Redirect to login if not authenticated
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Render children if authenticated

@@ -9,6 +9,7 @@ const Infographics: React.FC = () => {
   const [infographics, setInfographics] = useState<Infographic[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageLoadStates, setImageLoadStates] = useState<Record<string, { loaded: boolean; error: boolean }>>({});
 
   useEffect(() => {
     loadData();
@@ -31,6 +32,24 @@ const Infographics: React.FC = () => {
 
   const getRestaurant = (restaurantId: string) => {
     return restaurants.find(r => r.id === restaurantId);
+  };
+
+  const handleImageLoad = (restaurantId: string) => {
+    setImageLoadStates(prev => ({
+      ...prev,
+      [restaurantId]: { loaded: true, error: false }
+    }));
+  };
+
+  const handleImageError = (restaurantId: string) => {
+    setImageLoadStates(prev => ({
+      ...prev,
+      [restaurantId]: { loaded: false, error: true }
+    }));
+  };
+
+  const getImageState = (restaurantId: string) => {
+    return imageLoadStates[restaurantId] || { loaded: false, error: false };
   };
 
   if (loading) {
@@ -83,24 +102,66 @@ const Infographics: React.FC = () => {
               const restaurant = getRestaurant(infographic.restaurantId);
               if (!restaurant) return null;
 
+              const imageState = getImageState(restaurant.id);
+              const hasImage = restaurant.heroImage && !imageState.error;
+
               return (
                 <Link
                   key={infographic.id}
                   to={`/infographics/${infographic.id}`}
-                  className="group"
+                  className="group h-full"
                 >
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 group-hover:shadow-xl group-hover:-translate-y-1">
-                    {/* Preview Header */}
-                    <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 text-white">
-                      <h3 className="text-xl font-bold mb-1">{restaurant.name}</h3>
-                      <p className="text-red-100">{restaurant.location}</p>
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 group-hover:shadow-xl group-hover:-translate-y-1 h-full flex flex-col">
+                    {/* Preview Header with Hero Image */}
+                    <div className="relative h-40 overflow-hidden flex-shrink-0">
+                      {hasImage ? (
+                        <>
+                          {/* Hidden image to trigger load/error events */}
+                          <img
+                            src={restaurant.heroImage}
+                            alt=""
+                            className="hidden"
+                            onLoad={() => handleImageLoad(restaurant.id)}
+                            onError={() => handleImageError(restaurant.id)}
+                          />
+
+                          {/* Background image - center positioned for card thumbnails */}
+                          <div
+                            className={`
+                              absolute inset-0 bg-cover bg-center
+                              transition-transform duration-300 group-hover:scale-105
+                              ${imageState.loaded ? 'opacity-100' : 'opacity-0'}
+                            `}
+                            style={{
+                              backgroundImage: `url(${restaurant.heroImage})`
+                            }}
+                          />
+
+                          {/* Gradient overlay for text readability */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+
+                          {/* Loading skeleton */}
+                          {!imageState.loaded && (
+                            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                          )}
+                        </>
+                      ) : (
+                        /* Fallback gradient when no image */
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700" />
+                      )}
+
+                      {/* Text content */}
+                      <div className="absolute inset-0 flex flex-col justify-end p-5 text-white">
+                        <h3 className="text-xl font-bold mb-1 drop-shadow-lg line-clamp-1">{restaurant.name}</h3>
+                        <p className="text-white/90 drop-shadow text-sm line-clamp-1">{restaurant.location}</p>
+                      </div>
                     </div>
 
-                    {/* Preview Content */}
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
+                    {/* Preview Content - Fixed height for uniformity */}
+                    <div className="p-5 flex flex-col flex-grow">
+                      <div className="flex items-center justify-between mb-3">
                         <span className="text-sm text-gray-600">
-                          {new Date(infographic.visitDate).toLocaleDateString('en-US', {
+                          {new Date(infographic.visitDate + 'T12:00:00').toLocaleDateString('en-US', {
                             month: 'long',
                             day: 'numeric',
                             year: 'numeric'
@@ -111,23 +172,26 @@ const Infographics: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Quote Preview */}
-                      {(() => {
-                        // Get quotes from either new section styles or legacy selectedQuotes
-                        const quotesSection = infographic.content.sectionStyles?.find(s => s.id === 'quotes');
-                        const quotes = quotesSection?.quotes || infographic.content.selectedQuotes || [];
+                      {/* Quote Preview - Fixed height area */}
+                      <div className="h-12 mb-3">
+                        {(() => {
+                          const quotesSection = infographic.content.sectionStyles?.find(s => s.id === 'quotes');
+                          const quotes = quotesSection?.quotes || infographic.content.selectedQuotes || [];
 
-                        return quotes.length > 0 && (
-                          <div className="mb-4">
+                          return quotes.length > 0 ? (
                             <p className="text-sm text-gray-600 italic line-clamp-2">
                               "{quotes[0].text}"
                             </p>
-                          </div>
-                        );
-                      })()}
+                          ) : (
+                            <p className="text-sm text-gray-400 italic">
+                              View the full infographic...
+                            </p>
+                          );
+                        })()}
+                      </div>
 
-                      {/* View Link */}
-                      <div className="flex items-center text-red-600 group-hover:text-red-700">
+                      {/* View Link - Pushed to bottom */}
+                      <div className="flex items-center text-red-600 group-hover:text-red-700 mt-auto">
                         <span className="text-sm font-medium">View Infographic</span>
                         <svg
                           className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1"

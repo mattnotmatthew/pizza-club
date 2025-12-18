@@ -9,7 +9,7 @@ const Header: React.FC = () => {
     { path: '/about', label: 'About GCPC' },
     { path: '/members', label: 'Members' },
     { path: '/restaurants', label: 'Restaurants' },
-    { path: '/events', label: 'Events' },
+    { path: '/standings', label: 'Standings' },
     { path: '/infographics', label: 'Infographics' },
   ];
   
@@ -24,7 +24,7 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2 bg-red-800/90 md:bg-transparent px-3 py-1 rounded-lg backdrop-blur-sm ml-4">
             <img 
-              src="/pizza/logo.png" 
+              src="/logo.png" 
               alt="Greater Chicagoland Pizza Club Logo" 
               className="h-12 w-12 md:h-10 md:w-10 rounded-full shadow-md object-cover"
             />

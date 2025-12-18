@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import WholePizzaRating from '@/components/common/WholePizzaRating';
+import { useMatomo } from '@/hooks/useMatomo';
 import { dataService } from '@/services/dataWithApi';
 import { restaurantNameToSlug } from '@/utils/urlUtils';
 import type { Restaurant, SortOption } from '@/types';
@@ -20,6 +21,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
   onRestaurantSelect,
   className = '',
 }) => {
+  const { trackEvent } = useMatomo();
   const [infographics, setInfographics] = useState<Infographic[]>([]);
   const [imageLoadStates, setImageLoadStates] = useState<Record<string, { loaded: boolean; error: boolean }>>({});
 
@@ -168,12 +170,15 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                       rel="noopener noreferrer"
                       className={`
                         text-sm font-medium transition-colors
-                        ${hasImage 
-                          ? 'text-white hover:text-red-300' 
+                        ${hasImage
+                          ? 'text-white hover:text-red-300'
                           : 'text-blue-600 hover:text-blue-700'
                         }
                       `}
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        trackEvent('Restaurant', 'Website', restaurant.name);
+                      }}
                     >
                       Website
                     </a>
@@ -184,12 +189,15 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                     rel="noopener noreferrer"
                     className={`
                       text-sm font-medium transition-colors
-                      ${hasImage 
-                        ? 'text-white hover:text-red-300' 
+                      ${hasImage
+                        ? 'text-white hover:text-red-300'
                         : 'text-blue-600 hover:text-blue-700'
                       }
                     `}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      trackEvent('Restaurant', 'Directions', restaurant.name);
+                    }}
                   >
                     Directions
                   </a>

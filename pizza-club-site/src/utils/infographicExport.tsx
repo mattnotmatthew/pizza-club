@@ -42,7 +42,95 @@ export function generateStaticHTML(data: InfographicWithData): string {
 
   <!-- Custom styles for infographic-specific features -->
   <style>
+    /* Fluid Typography - smooth scaling based on viewport */
+    .text-fluid-title-xs { font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem); }
+    .text-fluid-title-sm { font-size: clamp(1.125rem, 2.5vw + 0.5rem, 1.875rem); }
+    .text-fluid-title-base { font-size: clamp(1.25rem, 3vw + 0.5rem, 2.25rem); }
+    .text-fluid-title-lg { font-size: clamp(1.5rem, 3.5vw + 0.5rem, 3rem); }
+    .text-fluid-title-xl { font-size: clamp(1.5rem, 4vw + 0.5rem, 3.75rem); }
+    .text-fluid-title-2xl { font-size: clamp(1.75rem, 5vw + 0.5rem, 4.5rem); }
+    .text-fluid-title-3xl { font-size: clamp(2rem, 6vw + 0.5rem, 5rem); }
+    .text-fluid-title-4xl { font-size: clamp(2.25rem, 7vw + 0.5rem, 6rem); }
 
+    .text-fluid-sub-xs { font-size: clamp(0.75rem, 1vw + 0.25rem, 0.875rem); }
+    .text-fluid-sub-sm { font-size: clamp(0.75rem, 1.25vw + 0.25rem, 1rem); }
+    .text-fluid-sub-base { font-size: clamp(0.875rem, 1.5vw + 0.25rem, 1.25rem); }
+    .text-fluid-sub-lg { font-size: clamp(1rem, 1.75vw + 0.25rem, 1.5rem); }
+    .text-fluid-sub-xl { font-size: clamp(1rem, 2vw + 0.25rem, 1.75rem); }
+    .text-fluid-sub-2xl { font-size: clamp(1.125rem, 2.5vw + 0.25rem, 2rem); }
+    .text-fluid-sub-3xl { font-size: clamp(1.25rem, 3vw + 0.25rem, 2.25rem); }
+    .text-fluid-sub-4xl { font-size: clamp(1.5rem, 3.5vw + 0.25rem, 2.5rem); }
+
+    .text-fluid-sm-xs { font-size: clamp(0.625rem, 0.75vw + 0.25rem, 0.75rem); }
+    .text-fluid-sm-sm { font-size: clamp(0.625rem, 1vw + 0.25rem, 0.875rem); }
+    .text-fluid-sm-base { font-size: clamp(0.75rem, 1.25vw + 0.25rem, 1rem); }
+    .text-fluid-sm-lg { font-size: clamp(0.75rem, 1.5vw + 0.25rem, 1.125rem); }
+    .text-fluid-sm-xl { font-size: clamp(0.875rem, 1.5vw + 0.25rem, 1.25rem); }
+    .text-fluid-sm-2xl { font-size: clamp(0.875rem, 1.75vw + 0.25rem, 1.5rem); }
+    .text-fluid-sm-3xl { font-size: clamp(1rem, 2vw + 0.25rem, 1.75rem); }
+    .text-fluid-sm-4xl { font-size: clamp(1rem, 2.25vw + 0.25rem, 2rem); }
+
+    /* Fluid logo sizes - for infographic header logos */
+    .logo-fluid-xs { height: clamp(5rem, 8vw + 2rem, 8rem); }
+    .logo-fluid-sm { height: clamp(6rem, 10vw + 2rem, 10rem); }
+    .logo-fluid-base { height: clamp(7rem, 12vw + 2rem, 12rem); }
+    .logo-fluid-lg { height: clamp(8rem, 14vw + 2rem, 14rem); }
+    .logo-fluid-xl { height: clamp(9rem, 16vw + 2rem, 16rem); }
+    .logo-fluid-2xl { height: clamp(10rem, 18vw + 2rem, 18rem); }
+    .logo-fluid-3xl { height: clamp(11rem, 20vw + 2rem, 20rem); }
+    .logo-fluid-4xl { height: clamp(12rem, 22vw + 2rem, 22rem); }
+
+    /* Classic round logo sizes */
+    .logo-classic-fluid-xs { height: clamp(4rem, 6vw + 1.5rem, 6rem); width: clamp(4rem, 6vw + 1.5rem, 6rem); }
+    .logo-classic-fluid-sm { height: clamp(5rem, 8vw + 1.5rem, 8rem); width: clamp(5rem, 8vw + 1.5rem, 8rem); }
+    .logo-classic-fluid-base { height: clamp(6rem, 10vw + 1.5rem, 10rem); width: clamp(6rem, 10vw + 1.5rem, 10rem); }
+    .logo-classic-fluid-lg { height: clamp(7rem, 12vw + 1.5rem, 12rem); width: clamp(7rem, 12vw + 1.5rem, 12rem); }
+    .logo-classic-fluid-xl { height: clamp(8rem, 14vw + 1.5rem, 14rem); width: clamp(8rem, 14vw + 1.5rem, 14rem); }
+    .logo-classic-fluid-2xl { height: clamp(9rem, 16vw + 1.5rem, 16rem); width: clamp(9rem, 16vw + 1.5rem, 16rem); }
+    .logo-classic-fluid-3xl { height: clamp(10rem, 18vw + 1.5rem, 18rem); width: clamp(10rem, 18vw + 1.5rem, 18rem); }
+    .logo-classic-fluid-4xl { height: clamp(11rem, 20vw + 1.5rem, 20rem); width: clamp(11rem, 20vw + 1.5rem, 20rem); }
+
+    /* Checkered border component - scoped to infographic container */
+    .infographic-container .bg-checkered-border {
+      background-color: #b91c1c;
+      position: relative;
+    }
+    .infographic-container .bg-checkered-border::before,
+    .infographic-container .bg-checkered-border::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1.5rem;
+      background-image:
+        linear-gradient(45deg, #b91c1c 25%, transparent 25%),
+        linear-gradient(-45deg, #b91c1c 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #b91c1c 75%),
+        linear-gradient(-45deg, transparent 75%, #b91c1c 75%);
+      background-size: 1.5rem 1.5rem;
+      background-position: 0 0, 0 0.75rem, 0.75rem -0.75rem, -0.75rem 0;
+      background-color: white;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .infographic-container .bg-checkered-border::before { left: 0; }
+    .infographic-container .bg-checkered-border::after { right: 0; }
+    @media (min-width: 768px) {
+      .infographic-container .bg-checkered-border::before,
+      .infographic-container .bg-checkered-border::after {
+        width: 2.5rem;
+        background-size: 2.5rem 2.5rem;
+        background-position: 0 0, 0 1.25rem, 1.25rem -1.25rem, -1.25rem 0;
+      }
+    }
+    @media (min-width: 1024px) {
+      .infographic-container .bg-checkered-border::before,
+      .infographic-container .bg-checkered-border::after {
+        width: 3rem;
+        background-size: 3rem 3rem;
+        background-position: 0 0, 0 1.5rem, 1.5rem -1.5rem, -1.5rem 0;
+      }
+    }
 
     /* Print styles */
     @media print {
@@ -62,7 +150,7 @@ export function generateStaticHTML(data: InfographicWithData): string {
   </style>
 </head>
 <body class="bg-gray-50">
-  <div class="min-h-screen py-8">
+  <div class="min-h-screen py-4">
     ${markupWithAbsoluteUrls}
   </div>
 

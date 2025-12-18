@@ -12,7 +12,28 @@
  */
 
 // Configuration
-define('UPLOAD_DIR', dirname(__DIR__) . '/images/infographics/');
+// Try multiple possible upload directories for different deployment scenarios
+$possibleUploadDirs = [
+    dirname(__DIR__) . '/images/infographics/',           // Local dev or same parent directory
+    $_SERVER['DOCUMENT_ROOT'] . '/images/infographics/',  // Production: public_html/images/infographics/
+];
+
+$uploadDir = null;
+foreach ($possibleUploadDirs as $dir) {
+    // Check if parent directory exists (we'll create the infographics dir if needed)
+    $parentDir = dirname($dir);
+    if (is_dir($parentDir) && is_writable($parentDir)) {
+        $uploadDir = $dir;
+        break;
+    }
+}
+
+// Fallback to document root based path
+if (!$uploadDir) {
+    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/images/infographics/';
+}
+
+define('UPLOAD_DIR', $uploadDir);
 define('MAX_FILE_SIZE', 10 * 1024 * 1024); // 10MB
 define('ALLOWED_TYPES', ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
 define('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
@@ -53,11 +74,28 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $headers = getallheaders();
 $authToken = $headers['Authorization'] ?? '';
 
-// Get token - for shared hosting, set this directly
-// For production, store this securely and never commit to version control
-$expectedToken = 'your-secret-token-here'; // Replace with your actual token
+// Load token from config - try multiple locations for different deployment scenarios
+$possiblePaths = [
+    __DIR__ . '/api/config/secrets.php',           // Local dev: server/upload.php -> server/api/config/secrets.php
+    __DIR__ . '/../pizza_api/config/secrets.php',  // Production: pizza_upload/upload.php -> pizza_api/config/secrets.php
+    dirname(__DIR__) . '/pizza_api/config/secrets.php', // Alternative production path
+];
 
-if ($authToken !== 'Bearer ' . $expectedToken) {
+$configFile = null;
+foreach ($possiblePaths as $path) {
+    if (file_exists($path)) {
+        $configFile = $path;
+        break;
+    }
+}
+
+if (!$configFile) {
+    sendError('Server configuration error: secrets.php not found', 500);
+}
+$secrets = require $configFile;
+$expectedToken = $secrets['api_token'] ?? null;
+
+if (!$expectedToken || !hash_equals('Bearer ' . $expectedToken, $authToken)) {
     sendError('Unauthorized', 401);
 }
 
@@ -102,11 +140,12 @@ if (!in_array($extension, ALLOWED_EXTENSIONS)) {
 // Create directory structure
 $uploadPath = UPLOAD_DIR . $infographicId . '/';
 if (!file_exists($uploadPath)) {
-    if (!mkdir($uploadPath, 0755, true)) {
-        sendError('Failed to create upload directory');
+    if (!@mkdir($uploadPath, 0755, true)) {
+        $error = error_get_last();
+        sendError('Failed to create upload directory: ' . UPLOAD_DIR . ' - ' . ($error['message'] ?? 'unknown error'));
     }
     // Ensure directory is readable by web server
-    chmod($uploadPath, 0755);
+    @chmod($uploadPath, 0755);
 }
 
 // Generate filename with .webp extension (we'll convert if needed)

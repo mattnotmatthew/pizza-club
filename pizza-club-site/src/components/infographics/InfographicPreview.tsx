@@ -76,6 +76,7 @@ const InfographicPreview: React.FC<InfographicPreviewProps> = ({
     restaurantName: restaurantData.name,
     restaurantLocation: restaurantData.location || '',
     restaurantAddress: restaurantData.address || '',
+    restaurantHeroImage: restaurantData.heroImage,
     visitData: {
       ratings: visitData.ratings,
       attendees: visitData.attendees,

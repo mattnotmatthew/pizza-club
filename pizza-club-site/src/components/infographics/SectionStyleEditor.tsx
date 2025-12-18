@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import type { SectionStyle, Quote } from '@/types/infographics';
+import type { SectionStyle, Quote, InfographicPhoto } from '@/types/infographics';
 import QuoteSelector from './QuoteSelector';
 
 interface SectionStyleEditorProps {
@@ -12,59 +12,95 @@ interface SectionStyleEditorProps {
   onSectionStylesChange: (styles: SectionStyle[]) => void;
   // Props for quote selection
   visitNotes?: string;
-  attendeeNames?: string[];
+  visitQuotes?: Array<{ text: string; author?: string }>;
+  // Props for embedded photos
+  photos?: InfographicPhoto[];
+  onPhotoUpdate?: (photoId: string, updates: Partial<InfographicPhoto>) => void;
+  onPhotoSelect?: (photo: InfographicPhoto) => void;
 }
 
 const SECTION_DEFINITIONS = {
+  header: { name: 'Header', description: 'Restaurant name, address, date' },
   overall: { name: 'Overall Rating', description: 'Main rating score' },
+  attendees: { name: 'Attendees', description: 'Who was there' },
   pizzas: { name: 'Pizza Ratings', description: 'Individual pizza scores' },
+  appetizers: { name: 'Appetizers', description: 'Appetizers ordered (no ratings)' },
   components: { name: 'Pizza Components', description: 'Crust, sauce, etc.' },
   'other-stuff': { name: 'The Other Stuff', description: 'Service, atmosphere' },
-  attendees: { name: 'Attendees', description: 'Who was there' },
   quotes: { name: 'Quotes & Testimonials', description: 'Member quotes from visit' }
 } as const;
+
+// Type for unified ordering of sections and photos
+type OrderableItem =
+  | { type: 'section'; id: SectionStyle['id']; displayOrder: number }
+  | { type: 'photo'; id: string; photo: InfographicPhoto; displayOrder: number };
 
 const SectionStyleEditor: React.FC<SectionStyleEditorProps> = ({
   sectionStyles,
   onSectionStylesChange,
   visitNotes = '',
-  attendeeNames = []
+  visitQuotes = [],
+  photos = [],
+  onPhotoUpdate,
+  onPhotoSelect
 }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const [draggedSection, setDraggedSection] = useState<string | null>(null);
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
-  // Get ordered section IDs (maintains custom order or defaults to definition order)
-  const getOrderedSectionIds = (): SectionStyle['id'][] => {
+  // Get embedded photos (displayMode === 'embed')
+  const embeddedPhotos = photos.filter(p => p.displayMode === 'embed');
+
+  // Get ordered items (sections + embedded photos)
+  const getOrderedItems = (): OrderableItem[] => {
     const definedOrder = Object.keys(SECTION_DEFINITIONS) as SectionStyle['id'][];
+    const items: OrderableItem[] = [];
 
-    // If we have styles with display order, use that
-    const stylesWithOrder = sectionStyles
-      .filter(s => s.displayOrder !== undefined)
-      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    // Add all sections
+    definedOrder.forEach((sectionId, index) => {
+      const style = sectionStyles.find(s => s.id === sectionId);
+      items.push({
+        type: 'section',
+        id: sectionId,
+        displayOrder: style?.displayOrder ?? index
+      });
+    });
 
-    if (stylesWithOrder.length > 0) {
-      // Start with ordered sections
-      const ordered = stylesWithOrder.map(s => s.id);
-      // Add any missing sections at the end
-      const missing = definedOrder.filter(id => !ordered.includes(id));
-      return [...ordered, ...missing];
-    }
+    // Add embedded photos
+    embeddedPhotos.forEach((photo, index) => {
+      items.push({
+        type: 'photo',
+        id: photo.id,
+        photo,
+        displayOrder: photo.displayOrder ?? (definedOrder.length + index)
+      });
+    });
 
-    return definedOrder;
+    // Sort by display order
+    return items.sort((a, b) => a.displayOrder - b.displayOrder);
   };
+
 
   // Get or create style for a section
   const getStyle = (sectionId: SectionStyle['id']): SectionStyle => {
     const existing = sectionStyles.find(s => s.id === sectionId);
     if (existing) return existing;
 
+    // Section-specific defaults
+    const isQuotesSection = sectionId === 'quotes';
+    const isHorizontalSection = sectionId === 'appetizers' || sectionId === 'attendees';
+
+    // Determine default layout
+    let defaultLayout: 'vertical' | 'horizontal' | 'grid' | 'compact' = 'vertical';
+    if (isQuotesSection) defaultLayout = 'grid';
+    else if (isHorizontalSection) defaultLayout = 'horizontal';
+
     // Default style
     return {
       id: sectionId,
       enabled: true,
       positioned: false,
-      fontSize: 'base',
-      layout: 'vertical',
+      fontSize: isQuotesSection ? 'xl' : 'base',
+      layout: defaultLayout,
       showTitle: true,
       style: {
         backgroundColor: '#FFF8E7', // Cream/parchment for old-school menu feel
@@ -95,51 +131,117 @@ const SectionStyleEditor: React.FC<SectionStyleEditorProps> = ({
   };
 
   // Drag and drop handlers
-  const handleDragStart = (sectionId: string) => {
-    setDraggedSection(sectionId);
+  const handleDragStart = (itemId: string) => {
+    setDraggedItem(itemId);
   };
 
-  const handleDragOver = (e: React.DragEvent, targetSectionId: string) => {
+  const handleDragOver = (e: React.DragEvent, targetItemId: string) => {
     e.preventDefault();
-    if (!draggedSection || draggedSection === targetSectionId) return;
+    if (!draggedItem || draggedItem === targetItemId) return;
 
-    const orderedIds = getOrderedSectionIds();
-    const draggedIndex = orderedIds.indexOf(draggedSection as SectionStyle['id']);
-    const targetIndex = orderedIds.indexOf(targetSectionId as SectionStyle['id']);
+    const orderedItems = getOrderedItems();
+    const draggedIndex = orderedItems.findIndex(item => item.id === draggedItem);
+    const targetIndex = orderedItems.findIndex(item => item.id === targetItemId);
 
     if (draggedIndex === -1 || targetIndex === -1) return;
 
-    // Reorder the sections
-    const newOrder = [...orderedIds];
-    newOrder.splice(draggedIndex, 1);
-    newOrder.splice(targetIndex, 0, draggedSection as SectionStyle['id']);
+    // Reorder the items
+    const newOrder = [...orderedItems];
+    const [removed] = newOrder.splice(draggedIndex, 1);
+    newOrder.splice(targetIndex, 0, removed);
 
-    // Update all section styles with new display order
-    const updatedStyles = newOrder.map((id, index) => {
-      const existing = sectionStyles.find(s => s.id === id);
-      const style = existing || getStyle(id);
-      return { ...style, displayOrder: index };
+    // Update display orders for all items
+    const updatedStyles: SectionStyle[] = [];
+    const photoUpdates: Array<{ id: string; displayOrder: number }> = [];
+
+    newOrder.forEach((item, index) => {
+      if (item.type === 'section') {
+        const existing = sectionStyles.find(s => s.id === item.id);
+        const style = existing || getStyle(item.id);
+        updatedStyles.push({ ...style, displayOrder: index });
+      } else {
+        photoUpdates.push({ id: item.id, displayOrder: index });
+      }
     });
 
+    // Update section styles
     onSectionStylesChange(updatedStyles);
+
+    // Update photo display orders
+    photoUpdates.forEach(update => {
+      onPhotoUpdate?.(update.id, { displayOrder: update.displayOrder });
+    });
   };
 
   const handleDragEnd = () => {
-    setDraggedSection(null);
+    setDraggedItem(null);
   };
 
   return (
     <div className="space-y-3">
       <p className="text-sm text-gray-600">
-        Customize how each rating section appears on your infographic
+        Customize how each section appears on your infographic. Drag to reorder.
       </p>
 
-      {getOrderedSectionIds().map((sectionId) => {
+      {getOrderedItems().map((item) => {
+        // Render embedded photo
+        if (item.type === 'photo') {
+          const photo = item.photo;
+          const isDragging = draggedItem === item.id;
+
+          return (
+            <div
+              key={`photo-${item.id}`}
+              draggable
+              onDragStart={() => handleDragStart(item.id)}
+              onDragOver={(e) => handleDragOver(e, item.id)}
+              onDragEnd={handleDragEnd}
+              className={`border border-green-300 rounded-md overflow-hidden bg-green-50 transition-opacity cursor-move ${
+                isDragging ? 'opacity-50' : ''
+              }`}
+            >
+              <div className="p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                    </svg>
+                    <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                      <img
+                        src={photo.url}
+                        alt="Embedded photo"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 flex items-center gap-1">
+                        <span className="text-green-600">📷</span>
+                        Embedded Photo
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {photo.caption || 'Click to edit settings'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onPhotoSelect?.(photo)}
+                    className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // Render section
+        const sectionId = item.id;
         const def = SECTION_DEFINITIONS[sectionId];
         const style = getStyle(sectionId);
         const isExpanded = expandedSection === sectionId;
         const isDraggable = !style.positioned;
-        const isDragging = draggedSection === sectionId;
+        const isDragging = draggedItem === sectionId;
 
         return (
           <div
@@ -372,12 +474,12 @@ const SectionStyleEditor: React.FC<SectionStyleEditorProps> = ({
                     <h4 className="text-sm font-medium text-gray-700 mb-3">Quote Content</h4>
                     <QuoteSelector
                       visitNotes={visitNotes}
+                      visitQuotes={visitQuotes}
                       selectedQuotes={style.quotes || []}
                       onQuotesChange={(quotes: Quote[]) => updateStyle(
                         sectionId as SectionStyle['id'],
                         { quotes }
                       )}
-                      attendeeNames={attendeeNames}
                     />
                   </div>
                 )}

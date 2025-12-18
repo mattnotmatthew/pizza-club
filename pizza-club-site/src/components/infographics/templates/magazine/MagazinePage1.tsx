@@ -53,7 +53,7 @@ const MagazinePage1: React.FC<MagazinePage1Props> = ({
         <div className="mt-4 text-right text-sm">
           <p className="text-gray-800">{address}</p>
           <p className="text-gray-800 font-medium">
-            {new Date(visitDate).toLocaleDateString('en-US', {
+            {new Date(visitDate + 'T12:00:00').toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
               year: 'numeric'

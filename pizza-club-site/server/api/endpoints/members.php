@@ -40,8 +40,8 @@ class MemberAPI extends BaseAPI {
             $member['restaurants_visited'] = (int)$member['restaurants_visited'];
             $member = $this->transformMemberData($member);
         }
-        
-        $this->sendResponse($members);
+
+        $this->sendCacheableResponse($members, 600);
     }
     
     /**
@@ -70,8 +70,8 @@ class MemberAPI extends BaseAPI {
         
         // Get member statistics
         $member['statistics'] = $this->getMemberStatistics($id);
-        
-        $this->sendResponse($member);
+
+        $this->sendCacheableResponse($member, 300);
     }
     
     /**

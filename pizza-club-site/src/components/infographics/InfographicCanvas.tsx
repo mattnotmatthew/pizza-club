@@ -2,7 +2,7 @@ import React from 'react';
 import RatingDisplay from './RatingDisplay';
 import PhotoDisplay from './PhotoDisplay';
 import StyledSection from './StyledSection';
-import type { InfographicWithData, SectionStyle } from '@/types/infographics';
+import type { InfographicWithData, SectionStyle, InfographicPhoto } from '@/types/infographics';
 import { isNestedRatings, PARENT_CATEGORIES } from '@/types';
 import { dataService } from '@/services/dataWithApi';
 
@@ -12,7 +12,7 @@ interface InfographicCanvasProps {
 }
 
 const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview = false }) => {
-  const visitDate = new Date(data.visitDate);
+  const visitDate = new Date(data.visitDate + 'T12:00:00');
   const formattedDate = visitDate.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -20,9 +20,31 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
     day: 'numeric'
   });
 
-  // Helper to get style for a section
-  const getSectionStyle = (sectionId: SectionStyle['id']): SectionStyle | undefined => {
-    return data.content.sectionStyles?.find(s => s.id === sectionId);
+  // Helper to get style for a section (returns default if not found)
+  const getSectionStyle = (sectionId: SectionStyle['id']): SectionStyle => {
+    const existing = data.content.sectionStyles?.find(s => s.id === sectionId);
+    if (existing) return existing;
+
+    // Return default style for sections not in saved data (e.g., appetizers for old infographics)
+    // Use horizontal layout for appetizers and attendees by default
+    const useHorizontal = sectionId === 'appetizers' || sectionId === 'attendees';
+    return {
+      id: sectionId,
+      enabled: true,
+      fontSize: 'base',
+      layout: useHorizontal ? 'horizontal' : 'vertical',
+      showTitle: true,
+      style: {
+        backgroundColor: '#FFF8E7',
+        textColor: '#1F2937',
+        accentColor: '#DC2626',
+        padding: 'md',
+        borderRadius: 'md',
+        border: true,
+        shadow: false
+      },
+      zIndex: 20
+    };
   };
 
   // Check if section should be rendered as positioned overlay
@@ -38,9 +60,11 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
 
   const sectionData = {
     overall: nestedRatings.overall,
+    pizzaOverall: nestedRatings.pizzaOverall,
     pizzas: nestedRatings.pizzas || [],
     components: nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] as Record<string, number> | undefined,
     otherStuff: nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] as Record<string, number> | undefined,
+    appetizers: nestedRatings.appetizers || [],
     attendees: data.attendeeNames || data.visitData.attendees,
     absentees: data.absenteeData,
     showAbsentees: data.content.showAbsentees,
@@ -50,37 +74,95 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
   // Check if we should use styled sections or legacy RatingDisplay
   const useStyledSections = data.content.sectionStyles && data.content.sectionStyles.length > 0;
 
-  // Get sections in display order
-  const getOrderedSections = (): SectionStyle['id'][] => {
-    const defaultOrder: SectionStyle['id'][] = ['overall', 'pizzas', 'components', 'other-stuff', 'attendees', 'quotes'];
-
-    if (!data.content.sectionStyles || data.content.sectionStyles.length === 0) {
-      return defaultOrder;
-    }
-
-    // Get sections with display order defined
-    const withOrder = data.content.sectionStyles
-      .filter(s => s.displayOrder !== undefined)
-      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
-      .map(s => s.id);
-
-    if (withOrder.length > 0) {
-      // Add any missing sections at the end
-      const missing = defaultOrder.filter(id => !withOrder.includes(id));
-      return [...withOrder, ...missing];
-    }
-
-    return defaultOrder;
+  // Fluid typography classes for header - smooth scaling based on viewport
+  // Uses CSS clamp() defined in index.css for seamless responsive sizing
+  const headerFontSizeClasses = {
+    xs: { title: 'text-fluid-title-xs', address: 'text-fluid-sub-xs', date: 'text-fluid-sm-xs' },
+    sm: { title: 'text-fluid-title-sm', address: 'text-fluid-sub-sm', date: 'text-fluid-sm-sm' },
+    base: { title: 'text-fluid-title-base', address: 'text-fluid-sub-base', date: 'text-fluid-sm-base' },
+    lg: { title: 'text-fluid-title-lg', address: 'text-fluid-sub-lg', date: 'text-fluid-sm-lg' },
+    xl: { title: 'text-fluid-title-xl', address: 'text-fluid-sub-xl', date: 'text-fluid-sm-xl' },
+    '2xl': { title: 'text-fluid-title-2xl', address: 'text-fluid-sub-lg', date: 'text-fluid-sub-base' },
+    '3xl': { title: 'text-fluid-title-3xl', address: 'text-fluid-sub-3xl', date: 'text-fluid-sm-3xl' },
+    '4xl': { title: 'text-fluid-title-4xl', address: 'text-fluid-sub-4xl', date: 'text-fluid-sm-4xl' }
   };
+
+  // Get header font sizes based on section style
+  const getHeaderFontSizes = () => {
+    const headerStyle = getSectionStyle('header');
+    const fontSize = headerStyle?.fontSize || 'lg'; // Default to 'lg' to match original styling
+    return headerFontSizeClasses[fontSize] || headerFontSizeClasses.lg;
+  };
+
+  const headerSizes = getHeaderFontSizes();
+
+  // Fluid logo size classes
+  const logoSizeClasses = {
+    xs: { classic: 'logo-classic-fluid-xs', alt: 'logo-fluid-xs' },
+    sm: { classic: 'logo-classic-fluid-sm', alt: 'logo-fluid-sm' },
+    base: { classic: 'logo-classic-fluid-base', alt: 'logo-fluid-base' },
+    lg: { classic: 'logo-classic-fluid-lg', alt: 'logo-fluid-lg' },
+    xl: { classic: 'logo-classic-fluid-xl', alt: 'logo-fluid-xl' },
+    '2xl': { classic: 'logo-classic-fluid-2xl', alt: 'logo-fluid-2xl' },
+    '3xl': { classic: 'logo-classic-fluid-3xl', alt: 'logo-fluid-3xl' },
+    '4xl': { classic: 'logo-classic-fluid-4xl', alt: 'logo-fluid-4xl' }
+  };
+
+  const getLogoSizeClass = () => {
+    const size = data.content.logoSize || 'lg'; // Default to 'lg'
+    const logoType = data.content.logoType || 'classic';
+    return logoSizeClasses[size]?.[logoType] || logoSizeClasses.lg[logoType];
+  };
+
+  const logoClass = getLogoSizeClass();
+
+  // Type for unified ordering of sections and embedded photos
+  type OrderableItem =
+    | { type: 'section'; id: SectionStyle['id']; displayOrder: number }
+    | { type: 'photo'; id: string; photo: InfographicPhoto; displayOrder: number };
+
+  // Get embedded photos (displayMode === 'embed')
+  const embeddedPhotos = (data.content.photos || []).filter(p => p.displayMode === 'embed');
+
+  // Get sections in display order (including embedded photos)
+  const getOrderedItems = (): OrderableItem[] => {
+    // All available sections in default order
+    const allSections: SectionStyle['id'][] = ['header', 'overall', 'attendees', 'pizzas', 'appetizers', 'components', 'other-stuff', 'quotes'];
+    const items: OrderableItem[] = [];
+
+    // Add all sections
+    allSections.forEach((sectionId, index) => {
+      const style = data.content.sectionStyles?.find(s => s.id === sectionId);
+      items.push({
+        type: 'section',
+        id: sectionId,
+        displayOrder: style?.displayOrder ?? index
+      });
+    });
+
+    // Add embedded photos
+    embeddedPhotos.forEach((photo, index) => {
+      items.push({
+        type: 'photo',
+        id: photo.id,
+        photo,
+        displayOrder: photo.displayOrder ?? (allSections.length + index)
+      });
+    });
+
+    // Sort by display order
+    return items.sort((a, b) => a.displayOrder - b.displayOrder);
+  };
+
 
   return (
     <div
       className={`infographic-container rounded-lg shadow-xl ${isPreview ? '' : 'max-w-4xl mx-auto'} print:shadow-none relative overflow-hidden`}
       style={{ backgroundColor: data.content.backgroundColor || '#FFF8E7' }}
     >
-      {/* Background Photos */}
+      {/* Background Photos (floating only, not embedded) */}
       {data.content.photos && data.content.photos
-        .filter(photo => photo.layer === 'background')
+        .filter(photo => photo.layer === 'background' && photo.displayMode !== 'embed')
         .map(photo => (
           <PhotoDisplay
             key={photo.id}
@@ -91,51 +173,96 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
       }
 
       {/* Header Section with checkerboard borders */}
-      <header className="relative px-4 sm:px-6 md:px-8 py-8 sm:py-10 md:py-12 bg-red-600 bg-checkered-border rounded-t-lg min-h-[16rem] sm:min-h-[18rem] md:min-h-[22rem] flex items-center justify-center">
-        {/* Logo - Absolutely positioned overlay */}
-        <div className={`absolute z-20 top-8 sm:top-10 md:top-3 ${(data.content.logoAlign ?? 'left') === 'left' ? 'left-4 sm:left-6 md:left-15' : 'right-4 sm:right-6 md:right-8'}`}>
-          {(data.content.logoType ?? 'classic') === 'classic' ? (
-            <img
-              src="/pizza/logo.png"
-              alt="Pizza Club"
-              className="h-32 w-32 sm:h-40 sm:w-40 md:h-56 md:w-56 object-contain"
+      <header className={`relative px-4 sm:px-6 md:px-8 py-4 sm:py-8 md:py-12 ${data.content.showHeaderHeroImage && data.restaurantHeroImage ? '' : 'bg-red-600'} bg-checkered-border rounded-t-lg min-h-[10rem] sm:min-h-[16rem] md:min-h-[22rem] flex items-center justify-center overflow-hidden`}>
+        {/* Hero Image Background (when enabled) */}
+        {data.content.showHeaderHeroImage && data.restaurantHeroImage && (
+          <>
+            <div
+              className="absolute inset-0 bg-cover"
               style={{
-                visibility: (data.content.showLogo ?? true) ? 'visible' : 'hidden'
-              }}
-              onError={(e) => {
-                // Fallback if logo doesn't load
-                const target = e.currentTarget as HTMLImageElement;
-                target.style.display = 'none';
+                backgroundImage: `url(${data.restaurantHeroImage})`,
+                backgroundPosition: `${data.content.headerHeroFocalPoint?.x ?? 50}% ${data.content.headerHeroFocalPoint?.y ?? 50}%`,
+                zIndex: 0
               }}
             />
-          ) : (
-            <img
-              src="/pizza/hot-g-logo.png"
-              alt="Pizza Club - Giardiniera"
-              className="h-58 w-auto sm:h-48 sm:w-auto md:h-65 md:w-auto object-contain"
+            {/* Gradient overlay for text readability - slider controls gradient coverage */}
+            <div
+              className="absolute inset-0"
               style={{
-                visibility: (data.content.showLogo ?? true) ? 'visible' : 'hidden',
-                maxWidth: '200px'
-              }}
-              onError={(e) => {
-                // Fallback if logo doesn't load
-                const target = e.currentTarget as HTMLImageElement;
-                target.style.display = 'none';
+                background: (() => {
+                  const value = data.content.headerHeroImageOpacity ?? 0.4;
+                  // At 0: transparent center (60% of container), dark edges
+                  // At 1: fully black
+                  const transparentStop = Math.max(0, 60 - (value * 60)); // 60% -> 0%
+                  const blackStop = Math.max(0, 80 - (value * 40)); // 80% -> 40%
+                  return `radial-gradient(ellipse at center, transparent ${transparentStop}%, rgba(0,0,0,0.7) ${blackStop}%, rgba(0,0,0,${0.85 + value * 0.15}) 100%)`;
+                })(),
+                zIndex: 1
               }}
             />
-          )}
-        </div>
+          </>
+        )}
 
-        {/* Text Content - Centered both horizontally and vertically */}
-        <div className="relative z-10 text-center w-full">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-2 ml-15">
-            {data.content.title || data.restaurantName}
-          </h1>
-          {data.content.subtitle && (
-            <p className="text-2xl sm:text-3xl text-red-100">{data.content.subtitle}</p>
-          )}
-          <p className="text-xl sm:text-2xl text-red-100 mt-3 sm:mt-4 ml-15">{data.restaurantAddress}</p>
-          <p className="text-lg sm:text-xl text-red-200 mt-1 sm:mt-2 ml-15">{formattedDate}</p>
+        {/* Red banner background - spans full width, below checkered borders (z-5) */}
+        <div
+          className="absolute left-0 right-0 top-1/2 -translate-y-1/2"
+          style={{
+            backgroundColor: 'rgba(185, 28, 28, 0.75)',
+            height: 'calc(100% - 1rem)',
+            maxHeight: '85%',
+            zIndex: 5
+          }}
+        />
+
+        {/* Header Content - Flexbox layout: logo on left, text centered in remaining space */}
+        <div className="relative z-20 flex items-center w-full pl-6 sm:pl-14 md:pl-18 lg:pl-12 pr-2 sm:pr-4 md:pr-6">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            {(data.content.logoType ?? 'classic') === 'classic' ? (
+              <img
+                src="/logo.png"
+                alt="Pizza Club"
+                className={`${logoClass} object-contain`}
+                style={{
+                  visibility: (data.content.showLogo ?? true) ? 'visible' : 'hidden'
+                }}
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <img
+                src="/hot-g-logo.png"
+                alt="Pizza Club - Giardiniera"
+                className={`${logoClass} w-auto object-contain`}
+                style={{
+                  visibility: (data.content.showLogo ?? true) ? 'visible' : 'hidden'
+                }}
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            )}
+          </div>
+
+          {/* Text Content - Centered in remaining space */}
+          <div
+            className="flex-1 text-center py-2 sm:py-3"
+            style={{
+              textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3)'
+            }}
+          >
+            <h1 className={`${headerSizes.title} font-bold text-white mb-1 sm:mb-2`}>
+              {data.content.title || data.restaurantName}
+            </h1>
+            {data.content.subtitle && (
+              <p className={`${headerSizes.address} text-white/90`}>{data.content.subtitle}</p>
+            )}
+            <p className={`${headerSizes.address} text-white mt-2 sm:mt-3`}>{data.restaurantAddress}</p>
+            <p className={`${headerSizes.date} text-white/80 mt-1`}>{formattedDate}</p>
+          </div>
         </div>
       </header>
 
@@ -143,17 +270,51 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
         {/* Ratings Section - Use styled sections if configured, otherwise use legacy RatingDisplay */}
         {useStyledSections ? (
           <section className="space-y-6">
-            {/* Render sections in custom order */}
-            {getOrderedSections()
-              .filter(sectionId => !isPositioned(sectionId))
-              .map(sectionId => (
-                <StyledSection
-                  key={sectionId}
-                  sectionId={sectionId}
-                  style={getSectionStyle(sectionId)}
-                  data={sectionData}
-                />
-              ))}
+            {/* Render sections and embedded photos in custom order (header is rendered separately) */}
+            {getOrderedItems()
+              .filter(item => {
+                if (item.type === 'section') {
+                  return item.id !== 'header' && !isPositioned(item.id);
+                }
+                return true; // Always include embedded photos in flow
+              })
+              .map(item => {
+                if (item.type === 'photo') {
+                  // Render embedded photo as a section
+                  const photo = item.photo;
+                  return (
+                    <div
+                      key={`embedded-photo-${item.id}`}
+                      className="relative w-full rounded-lg overflow-hidden"
+                    >
+                      <img
+                        src={photo.url}
+                        alt={photo.caption || 'Embedded photo'}
+                        className="w-full h-auto object-cover"
+                        style={{
+                          objectPosition: `${photo.focalPoint?.x ?? 50}% ${photo.focalPoint?.y ?? 50}%`
+                        }}
+                      />
+                      {photo.caption && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-center py-2 px-4 text-sm">
+                          {photo.caption}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                // Render section
+                const sectionId = item.id;
+                return (
+                  <StyledSection
+                    key={sectionId}
+                    sectionId={sectionId}
+                    style={getSectionStyle(sectionId)}
+                    data={sectionData}
+                  />
+                );
+              })}
           </section>
         ) : (
           <section>
@@ -418,6 +579,26 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
             </div>
           )}
 
+          {/* Appetizers - positioned */}
+          {isPositioned('appetizers') && (
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: `${getSectionStyle('appetizers')?.position?.x || 50}%`,
+                top: `${getSectionStyle('appetizers')?.position?.y || 50}%`,
+                transform: 'translate(-50%, -50%)',
+                maxWidth: '90%',
+                zIndex: getSectionStyle('appetizers')?.zIndex || 20
+              }}
+            >
+              <StyledSection
+                sectionId="appetizers"
+                style={getSectionStyle('appetizers')}
+                data={sectionData}
+              />
+            </div>
+          )}
+
           {/* Attendees - positioned */}
           {isPositioned('attendees') && (
             <div
@@ -460,9 +641,9 @@ const InfographicCanvas: React.FC<InfographicCanvasProps> = ({ data, isPreview =
         </>
       )}
 
-      {/* Foreground Photos */}
+      {/* Foreground Photos (floating only, not embedded) */}
       {data.content.photos && data.content.photos
-        .filter(photo => photo.layer === 'foreground')
+        .filter(photo => photo.layer === 'foreground' && photo.displayMode !== 'embed')
         .map(photo => (
           <PhotoDisplay
             key={photo.id}

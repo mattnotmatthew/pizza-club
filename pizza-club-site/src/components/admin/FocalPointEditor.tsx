@@ -24,11 +24,16 @@ const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
   onPanYChange
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  
-  // Use props if available, fallback to defaults
-  const zoom = propZoom ?? 1;
-  const panX = propPanX ?? 0;
-  const panY = propPanY ?? 0;
+
+  // Internal state for zoom/pan when no external callbacks provided
+  const [internalZoom, setInternalZoom] = useState(1);
+  const [internalPanX, setInternalPanX] = useState(0);
+  const [internalPanY, setInternalPanY] = useState(0);
+
+  // Use props if available, fallback to internal state
+  const zoom = propZoom ?? internalZoom;
+  const panX = propPanX ?? internalPanX;
+  const panY = propPanY ?? internalPanY;
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isEditing) return;
@@ -67,9 +72,45 @@ const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
   };
 
   const resetZoomAndPan = () => {
-    onZoomChange?.(undefined);
-    onPanXChange?.(undefined);
-    onPanYChange?.(undefined);
+    if (onZoomChange) {
+      onZoomChange(undefined);
+    } else {
+      setInternalZoom(1);
+    }
+    if (onPanXChange) {
+      onPanXChange(undefined);
+    } else {
+      setInternalPanX(0);
+    }
+    if (onPanYChange) {
+      onPanYChange(undefined);
+    } else {
+      setInternalPanY(0);
+    }
+  };
+
+  const handleZoomChange = (value: number) => {
+    if (onZoomChange) {
+      onZoomChange(value);
+    } else {
+      setInternalZoom(value);
+    }
+  };
+
+  const handlePanXChange = (value: number) => {
+    if (onPanXChange) {
+      onPanXChange(value);
+    } else {
+      setInternalPanX(value);
+    }
+  };
+
+  const handlePanYChange = (value: number) => {
+    if (onPanYChange) {
+      onPanYChange(value);
+    } else {
+      setInternalPanY(value);
+    }
   };
 
   if (!imageUrl) {
@@ -122,7 +163,7 @@ const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
               max="3"
               step="0.1"
               value={zoom}
-              onChange={(e) => onZoomChange?.(parseFloat(e.target.value))}
+              onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
               className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               style={{
                 background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((zoom - 1) / 2) * 100}%, #e5e7eb ${((zoom - 1) / 2) * 100}%, #e5e7eb 100%)`
@@ -144,7 +185,7 @@ const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
               max="50"
               step="1"
               value={panX}
-              onChange={(e) => onPanXChange?.(parseFloat(e.target.value))}
+              onChange={(e) => handlePanXChange(parseFloat(e.target.value))}
               className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               style={{
                 background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb 50%, #10b981 50%, #10b981 ${50 + (panX / 100) * 50}%, #e5e7eb ${50 + (panX / 100) * 50}%, #e5e7eb 100%)`
@@ -166,7 +207,7 @@ const FocalPointEditor: React.FC<FocalPointEditorProps> = ({
               max="50"
               step="1"
               value={panY}
-              onChange={(e) => onPanYChange?.(parseFloat(e.target.value))}
+              onChange={(e) => handlePanYChange(parseFloat(e.target.value))}
               className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               style={{
                 background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb 50%, #10b981 50%, #10b981 ${50 + (panY / 100) * 50}%, #e5e7eb ${50 + (panY / 100) * 50}%, #e5e7eb 100%)`

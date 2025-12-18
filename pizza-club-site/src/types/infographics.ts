@@ -40,6 +40,9 @@ export interface InfographicPhoto {
   layer: 'background' | 'foreground';
   focalPoint?: { x: number; y: number }; // percentages (0-100) for object-position
   zIndex?: number; // Layer ordering within background/foreground
+  displayMode?: 'float' | 'embed'; // float = absolute positioned overlay, embed = inline section
+  displayOrder?: number; // Order in section list when embedded (used alongside section displayOrder)
+  caption?: string; // Optional caption for embedded photos
 }
 
 export interface MagazineStyleOverrides {
@@ -66,7 +69,7 @@ export interface MagazineStyleOverrides {
 }
 
 export interface SectionStyle {
-  id: 'overall' | 'pizzas' | 'components' | 'other-stuff' | 'attendees' | 'quotes';
+  id: 'header' | 'overall' | 'pizzas' | 'components' | 'other-stuff' | 'appetizers' | 'attendees' | 'quotes';
   enabled: boolean; // Show/hide the section
   positioned?: boolean; // If true, becomes an overlay at position
   position?: { x: number; y: number };
@@ -102,6 +105,10 @@ export interface InfographicContent {
   showLogo?: boolean; // Show Pizza Club logo in header (classic template only)
   logoType?: 'classic' | 'alt'; // Select which logo to display (classic template only)
   logoAlign?: 'left' | 'right'; // Logo alignment in header (classic template only)
+  logoSize?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl'; // Logo size using fluid scaling
+  showHeaderHeroImage?: boolean; // Show restaurant hero image as header background
+  headerHeroImageOpacity?: number; // Opacity for hero image overlay (0-1, default 0.4)
+  headerHeroFocalPoint?: { x: number; y: number }; // Focal point for header hero image (0-100%)
   backgroundColor?: string; // Background color for entire infographic
   // Photo support
   photos?: InfographicPhoto[];
@@ -136,6 +143,7 @@ export interface InfographicWithData extends Infographic {
   restaurantName: string;
   restaurantLocation: string;
   restaurantAddress: string;
+  restaurantHeroImage?: string; // Hero image URL from restaurant
   visitData: {
     ratings: RatingStructure;
     attendees: string[];

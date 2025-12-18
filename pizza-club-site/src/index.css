@@ -16,7 +16,63 @@
   .font-faculty {
     font-family: 'Faculty Glyphic', serif;
   }
-  
+
+  /* Fluid Typography for Infographics
+   * Uses clamp(min, preferred, max) for smooth scaling
+   * Preferred value uses viewport width (vw) for fluid scaling
+   */
+
+  /* Title sizes - for restaurant name headers */
+  .text-fluid-title-xs { font-size: clamp(1rem, 2vw + 0.5rem, 1.5rem); }
+  .text-fluid-title-sm { font-size: clamp(1.125rem, 2.5vw + 0.5rem, 1.875rem); }
+  .text-fluid-title-base { font-size: clamp(1.25rem, 3vw + 0.5rem, 2.25rem); }
+  .text-fluid-title-lg { font-size: clamp(1.5rem, 3.5vw + 0.5rem, 3rem); }
+  .text-fluid-title-xl { font-size: clamp(1.5rem, 4vw + 0.5rem, 3.75rem); }
+  .text-fluid-title-2xl { font-size: clamp(1.75rem, 5vw + 0.5rem, 4.5rem); }
+  .text-fluid-title-3xl { font-size: clamp(2rem, 6vw + 0.5rem, 5rem); }
+  .text-fluid-title-4xl { font-size: clamp(2.25rem, 7vw + 0.5rem, 6rem); }
+
+  /* Subtitle sizes - for address, location */
+  .text-fluid-sub-xs { font-size: clamp(0.75rem, 1vw + 0.25rem, 0.875rem); }
+  .text-fluid-sub-sm { font-size: clamp(0.75rem, 1.25vw + 0.25rem, 1rem); }
+  .text-fluid-sub-base { font-size: clamp(0.875rem, 1.5vw + 0.25rem, 1.25rem); }
+  .text-fluid-sub-lg { font-size: clamp(1rem, 1.75vw + 0.25rem, 1.5rem); }
+  .text-fluid-sub-xl { font-size: clamp(1rem, 2vw + 0.25rem, 1.75rem); }
+  .text-fluid-sub-2xl { font-size: clamp(1.125rem, 2.5vw + 0.25rem, 2rem); }
+  .text-fluid-sub-3xl { font-size: clamp(1.25rem, 3vw + 0.25rem, 2.25rem); }
+  .text-fluid-sub-4xl { font-size: clamp(1.5rem, 3.5vw + 0.25rem, 2.5rem); }
+
+  /* Small text sizes - for dates, metadata */
+  .text-fluid-sm-xs { font-size: clamp(0.625rem, 0.75vw + 0.25rem, 0.75rem); }
+  .text-fluid-sm-sm { font-size: clamp(0.625rem, 1vw + 0.25rem, 0.875rem); }
+  .text-fluid-sm-base { font-size: clamp(0.75rem, 1.25vw + 0.25rem, 1rem); }
+  .text-fluid-sm-lg { font-size: clamp(0.75rem, 1.5vw + 0.25rem, 1.125rem); }
+  .text-fluid-sm-xl { font-size: clamp(0.875rem, 1.5vw + 0.25rem, 1.25rem); }
+  .text-fluid-sm-2xl { font-size: clamp(0.875rem, 1.75vw + 0.25rem, 1.5rem); }
+  .text-fluid-sm-3xl { font-size: clamp(1rem, 2vw + 0.25rem, 1.75rem); }
+  .text-fluid-sm-4xl { font-size: clamp(1rem, 2.25vw + 0.25rem, 2rem); }
+
+  /* Fluid logo sizes - for infographic header logos */
+  /* Hot Giardiniera logo is tall/narrow, so we scale by height */
+  .logo-fluid-xs { height: clamp(5rem, 8vw + 2rem, 8rem); }
+  .logo-fluid-sm { height: clamp(6rem, 10vw + 2rem, 10rem); }
+  .logo-fluid-base { height: clamp(7rem, 12vw + 2rem, 12rem); }
+  .logo-fluid-lg { height: clamp(8rem, 14vw + 2rem, 14rem); }
+  .logo-fluid-xl { height: clamp(9rem, 16vw + 2rem, 16rem); }
+  .logo-fluid-2xl { height: clamp(10rem, 18vw + 2rem, 18rem); }
+  .logo-fluid-3xl { height: clamp(11rem, 20vw + 2rem, 20rem); }
+  .logo-fluid-4xl { height: clamp(12rem, 22vw + 2rem, 22rem); }
+
+  /* Classic round logo sizes */
+  .logo-classic-fluid-xs { height: clamp(4rem, 6vw + 1.5rem, 6rem); width: clamp(4rem, 6vw + 1.5rem, 6rem); }
+  .logo-classic-fluid-sm { height: clamp(5rem, 8vw + 1.5rem, 8rem); width: clamp(5rem, 8vw + 1.5rem, 8rem); }
+  .logo-classic-fluid-base { height: clamp(6rem, 10vw + 1.5rem, 10rem); width: clamp(6rem, 10vw + 1.5rem, 10rem); }
+  .logo-classic-fluid-lg { height: clamp(7rem, 12vw + 1.5rem, 12rem); width: clamp(7rem, 12vw + 1.5rem, 12rem); }
+  .logo-classic-fluid-xl { height: clamp(8rem, 14vw + 1.5rem, 14rem); width: clamp(8rem, 14vw + 1.5rem, 14rem); }
+  .logo-classic-fluid-2xl { height: clamp(9rem, 16vw + 1.5rem, 16rem); width: clamp(9rem, 16vw + 1.5rem, 16rem); }
+  .logo-classic-fluid-3xl { height: clamp(10rem, 18vw + 1.5rem, 18rem); width: clamp(10rem, 18vw + 1.5rem, 18rem); }
+  .logo-classic-fluid-4xl { height: clamp(11rem, 20vw + 1.5rem, 20rem); width: clamp(11rem, 20vw + 1.5rem, 20rem); }
+
   .animate-fade-in {
     animation: fadeIn 0.8s ease-in-out;
   }
@@ -98,15 +154,16 @@
     top: 0;
     bottom: 0;
     width: 1.5rem;
-    background-image: 
-      linear-gradient(45deg, #b91c1c 25%, transparent 25%), 
-      linear-gradient(-45deg, #b91c1c 25%, transparent 25%), 
-      linear-gradient(45deg, transparent 75%, #b91c1c 75%), 
+    background-image:
+      linear-gradient(45deg, #b91c1c 25%, transparent 25%),
+      linear-gradient(-45deg, #b91c1c 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #b91c1c 75%),
       linear-gradient(-45deg, transparent 75%, #b91c1c 75%);
     background-size: 1.5rem 1.5rem;
     background-position: 0 0, 0 0.75rem, 0.75rem -0.75rem, -0.75rem 0;
     background-color: white;
     pointer-events: none;
+    z-index: 10; /* Above hero image/overlay, below logo and text */
   }
   
   .bg-checkered-border::before {

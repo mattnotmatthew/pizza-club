@@ -5,45 +5,47 @@ import Skeleton from '@/components/common/Skeleton';
 import SubNavigation from '@/components/common/SubNavigation';
 import { useSort } from '@/hooks/useSort';
 import { useSubNavigation } from '@/hooks/useSubNavigation';
+import { useMatomo } from '@/hooks/useMatomo';
 import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 
 const Restaurants: React.FC = () => {
-  // Determine initial view mode based on viewport width
-  const getInitialViewMode = (): 'map' | 'list' => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 768 ? 'list' : 'map';
-    }
-    return 'map';
-  };
-  
-  const [viewMode, setViewMode] = useState<'map' | 'list'>(getInitialViewMode());
+  const { trackEvent } = useMatomo();
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
+  const [hasSetInitialView, setHasSetInitialView] = useState(false);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>();
   const [sortField, setSortField] = useState<keyof Restaurant>('averageRating');
   const [isDesktop, setIsDesktop] = useState(false);
-  
+
   const { sortedData, toggleSort } = useSort(restaurants, sortField);
-  
-  // Navigation items for future features
+
+  // Navigation items
   const navigationItems = [
     { id: 'main', label: 'Restaurants' },
-    { id: 'infographs', label: 'Infographs' },
     { id: 'compare', label: 'Compare' }
   ];
-  
+
   const { activeItem, handleItemClick } = useSubNavigation('main');
 
+  // Set initial view mode and track desktop state
   useEffect(() => {
-    const checkIsDesktop = () => {
-      setIsDesktop(window.innerWidth >= 768);
+    const checkViewport = () => {
+      const desktop = window.innerWidth >= 768;
+      setIsDesktop(desktop);
+
+      // Only set initial view mode once on mount
+      if (!hasSetInitialView) {
+        setViewMode(desktop ? 'map' : 'list');
+        setHasSetInitialView(true);
+      }
     };
-    
-    checkIsDesktop();
-    window.addEventListener('resize', checkIsDesktop);
-    return () => window.removeEventListener('resize', checkIsDesktop);
-  }, []);
+
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    return () => window.removeEventListener('resize', checkViewport);
+  }, [hasSetInitialView]);
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -69,6 +71,7 @@ const Restaurants: React.FC = () => {
 
   const handleRestaurantSelect = (restaurant: Restaurant) => {
     setSelectedRestaurantId(restaurant.id);
+    trackEvent('Map', 'Select', restaurant.name);
   };
 
   const handleSortChange = (field: keyof Restaurant) => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Skeleton from '@/components/common/Skeleton';
+import { useMatomo } from '@/hooks/useMatomo';
 import { dataService } from '@/services/dataWithApi';
 import type { Member, Restaurant } from '@/types';
 
@@ -9,6 +10,7 @@ import type { Member, Restaurant } from '@/types';
 const MemberDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { trackEvent } = useMatomo();
   const [member, setMember] = useState<Member | null>(null);
   const [visitedRestaurants, setVisitedRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,22 +26,18 @@ const MemberDetail: React.FC = () => {
         // Fetch member from data service using slug
         const foundMember = await dataService.getMemberBySlug(id || '');
         if (foundMember) {
-          // Handle photo URL with base path
-          let photoUrl = foundMember.photoUrl || foundMember.photo;
-          if (photoUrl && photoUrl.startsWith('/images/')) {
-            photoUrl = import.meta.env.BASE_URL + photoUrl.slice(1);
+          // Handle photo URL base path prefix for local images
+          let photo = foundMember.photo;
+          if (photo && photo.startsWith('/images/')) {
+            photo = import.meta.env.BASE_URL + photo.slice(1);
           }
-          
-          const mappedMember = {
-            ...foundMember,
-            photoUrl,
-            joinDate: foundMember.joinDate || (foundMember.memberSince ? new Date(foundMember.memberSince) : undefined),
-            favoriteStyle: foundMember.favoriteStyle || foundMember.favoritePizzaStyle,
-          };
-          
-          setMember(mappedMember);
+
+          const memberWithPhotoPath = { ...foundMember, photo };
+          setMember(memberWithPhotoPath);
+          // Track member view
+          trackEvent('Member', 'View', memberWithPhotoPath.name);
           // Fetch actual visited restaurants for this member
-          const memberVisits = await dataService.getMemberVisits(mappedMember.id);
+          const memberVisits = await dataService.getMemberVisits(memberWithPhotoPath.id);
           setVisitedRestaurants(memberVisits);
         } else {
           // Member not found
@@ -83,8 +81,8 @@ const MemberDetail: React.FC = () => {
     return null;
   }
 
-  const memberSince = member.joinDate 
-    ? new Date(member.joinDate).toLocaleDateString('en-US', {
+  const memberSinceDate = member.memberSince
+    ? new Date(member.memberSince).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
       })
@@ -124,7 +122,7 @@ const MemberDetail: React.FC = () => {
           {/* Hero Image Section */}
           <div className="relative h-64 md:h-80 bg-gray-200">
             <img
-              src={member.photoUrl || '/api/placeholder/800/400'}
+              src={member.photo || '/api/placeholder/800/400'}
               alt={member.name}
               className="w-full h-full object-cover"
               style={getImagePositioning()}
@@ -134,9 +132,9 @@ const MemberDetail: React.FC = () => {
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
                 {member.name}
               </h1>
-              {member.favoriteStyle && (
+              {member.favoritePizzaStyle && (
                 <span className="inline-block bg-red-600 text-white px-3 py-1 rounded-full text-sm">
-                  {member.favoriteStyle}
+                  {member.favoritePizzaStyle}
                 </span>
               )}
             </div>
@@ -156,12 +154,12 @@ const MemberDetail: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6 border-t border-gray-200">
               <div>
                 <p className="text-sm text-gray-500">Member Since</p>
-                <p className="text-lg font-semibold">{memberSince}</p>
+                <p className="text-lg font-semibold">{memberSinceDate}</p>
               </div>
-              {member.favoriteStyle && (
+              {member.favoritePizzaStyle && (
                 <div>
                   <p className="text-sm text-gray-500">Role</p>
-                  <p className="text-lg font-semibold">{member.favoriteStyle}</p>
+                  <p className="text-lg font-semibold">{member.favoritePizzaStyle}</p>
                 </div>
               )}
             </div>

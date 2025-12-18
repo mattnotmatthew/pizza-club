@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from '@/components/common/Layout';
 import AdminRoute from '@/components/admin/AdminRoute';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import MatomoTracker from '@/components/common/MatomoTracker';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('@/pages/Home'));
@@ -17,9 +19,12 @@ const Links = lazy(() => import('@/pages/Links'));
 const Test = lazy(() => import('@/pages/Test'));
 const Infographics = lazy(() => import('@/pages/Infographics'));
 const InfographicView = lazy(() => import('@/pages/InfographicView'));
+const Standings = lazy(() => import('@/pages/Standings'));
+const Login = lazy(() => import('@/pages/Login'));
 
 // Admin pages
 const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const InfographicsList = lazy(() => import('@/pages/admin/InfographicsList'));
 const InfographicsEditor = lazy(() => import('@/pages/admin/InfographicsEditor'));
 const EventsList = lazy(() => import('@/pages/admin/EventsList'));
@@ -45,47 +50,55 @@ const Loading: React.FC = () => (
 function App() {
   return (
     <ErrorBoundary>
-      <Router basename="/pizza">
-        <Suspense fallback={<Loading />}>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="about" element={<About />} />
-              <Route path="members" element={<Members />} />
-              <Route path="members/:id" element={<MemberDetail />} />
-              <Route path="restaurants" element={<Restaurants />} />
-              <Route path="restaurants/compare" element={<RestaurantsCompare />} />
-              <Route path="restaurants/:slug" element={<RestaurantDetail />} />
-              <Route path="events" element={<Events />} />
-              <Route path="infographics" element={<Infographics />} />
-              <Route path="infographics/:id" element={<InfographicView />} />
-              <Route path="test" element={<Test />} />
-            </Route>
-            
-            {/* Links page without navigation */}
-            <Route path="links" element={<Links />} />
-            
-            {/* Admin routes */}
-            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-              <Route path="infographics" element={<InfographicsList />} />
-              <Route path="infographics/new" element={<InfographicsEditor />} />
-              <Route path="infographics/edit/:id" element={<InfographicsEditor />} />
-              <Route path="events" element={<EventsList />} />
-              <Route path="events/new" element={<EventsEditor />} />
-              <Route path="events/edit/:id" element={<EventsEditor />} />
-              <Route path="members" element={<MembersList />} />
-              <Route path="members/new" element={<MembersEditor />} />
-              <Route path="members/edit/:id" element={<MembersEditor />} />
-              <Route path="restaurants" element={<RestaurantsList />} />
-              <Route path="restaurants/new" element={<RestaurantsEditor />} />
-              <Route path="restaurants/edit/:id" element={<RestaurantsEditor />} />
-              <Route path="restaurants/:id/visits" element={<RestaurantVisits />} />
-              <Route path="links" element={<LinksList />} />
-              <Route path="links/new" element={<LinksEditor />} />
-              <Route path="links/edit/:id" element={<LinksEditor />} />
-            </Route>
-          </Routes>
-        </Suspense>
+      <Router basename="/">
+        <AuthProvider>
+          <MatomoTracker />
+          <Suspense fallback={<Loading />}>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="about" element={<About />} />
+                <Route path="members" element={<Members />} />
+                <Route path="members/:id" element={<MemberDetail />} />
+                <Route path="restaurants" element={<Restaurants />} />
+                <Route path="restaurants/compare" element={<RestaurantsCompare />} />
+                <Route path="restaurants/:slug" element={<RestaurantDetail />} />
+                <Route path="events" element={<Events />} />
+                <Route path="infographics" element={<Infographics />} />
+                <Route path="infographics/:id" element={<InfographicView />} />
+                <Route path="standings" element={<Standings />} />
+                <Route path="test" element={<Test />} />
+              </Route>
+
+              {/* Links page without navigation */}
+              <Route path="links" element={<Links />} />
+
+              {/* Login page */}
+              <Route path="login" element={<Login />} />
+
+              {/* Admin routes */}
+              <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="infographics" element={<InfographicsList />} />
+                <Route path="infographics/new" element={<InfographicsEditor />} />
+                <Route path="infographics/edit/:id" element={<InfographicsEditor />} />
+                <Route path="events" element={<EventsList />} />
+                <Route path="events/new" element={<EventsEditor />} />
+                <Route path="events/edit/:id" element={<EventsEditor />} />
+                <Route path="members" element={<MembersList />} />
+                <Route path="members/new" element={<MembersEditor />} />
+                <Route path="members/edit/:id" element={<MembersEditor />} />
+                <Route path="restaurants" element={<RestaurantsList />} />
+                <Route path="restaurants/new" element={<RestaurantsEditor />} />
+                <Route path="restaurants/edit/:id" element={<RestaurantsEditor />} />
+                <Route path="restaurants/:id/visits" element={<RestaurantVisits />} />
+                <Route path="links" element={<LinksList />} />
+                <Route path="links/new" element={<LinksEditor />} />
+                <Route path="links/edit/:id" element={<LinksEditor />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </AuthProvider>
       </Router>
     </ErrorBoundary>
   );

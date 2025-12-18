@@ -15,6 +15,9 @@ const PhotoPositioner: React.FC<PhotoPositionerProps> = ({ photo, onUpdate }) =>
     updateLayer
   } = usePhotoPositioning(photo, (updates) => onUpdate(photo.id, updates));
 
+  const displayMode = photo.displayMode || 'float';
+  const isFloating = displayMode === 'float';
+
   const handleMoveLayer = (direction: 'up' | 'down') => {
     const currentZ = photo.zIndex || (photo.layer === 'background' ? 10 : 40);
     const newZ = direction === 'up' ? currentZ + 1 : currentZ - 1;
@@ -27,103 +30,163 @@ const PhotoPositioner: React.FC<PhotoPositionerProps> = ({ photo, onUpdate }) =>
     });
   };
 
+  const handleDisplayModeChange = (mode: 'float' | 'embed') => {
+    onUpdate(photo.id, { displayMode: mode });
+  };
+
   return (
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
       <h4 className="font-medium text-sm text-gray-700">Photo Settings</h4>
-      
-      {/* Position Controls */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            X Position (%)
-          </label>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={photo.position.x}
-            onChange={(e) => updatePosition(Number(e.target.value), photo.position.y)}
-            className="w-full"
-          />
-          <input
-            type="number"
-            min="0"
-            max="100"
-            value={Math.round(photo.position.x)}
-            onChange={(e) => updatePosition(Number(e.target.value), photo.position.y)}
-            className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded"
-          />
+
+      {/* Display Mode Toggle */}
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-2">
+          Display Mode
+        </label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleDisplayModeChange('float')}
+            className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-colors ${
+              isFloating
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            <span className="block">Float</span>
+            <span className="block text-[10px] opacity-75 mt-0.5">Position anywhere</span>
+          </button>
+          <button
+            onClick={() => handleDisplayModeChange('embed')}
+            className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-colors ${
+              !isFloating
+                ? 'bg-green-600 text-white'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            <span className="block">Embed</span>
+            <span className="block text-[10px] opacity-75 mt-0.5">As section</span>
+          </button>
         </div>
-        
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Y Position (%)
-          </label>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={photo.position.y}
-            onChange={(e) => updatePosition(photo.position.x, Number(e.target.value))}
-            className="w-full"
-          />
-          <input
-            type="number"
-            min="0"
-            max="100"
-            value={Math.round(photo.position.y)}
-            onChange={(e) => updatePosition(photo.position.x, Number(e.target.value))}
-            className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded"
-          />
-        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {isFloating
+            ? 'Photo floats freely and can be positioned anywhere'
+            : 'Photo appears as a section and can be reordered with other sections'}
+        </p>
       </div>
 
-      {/* Size Controls */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Caption (for embedded photos) */}
+      {!isFloating && (
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">
-            Width (%)
+            Caption (optional)
           </label>
           <input
-            type="range"
-            min="10"
-            max="100"
-            value={photo.size.width}
-            onChange={(e) => updateSize(Number(e.target.value), photo.size.height)}
-            className="w-full"
-          />
-          <input
-            type="number"
-            min="10"
-            max="100"
-            value={Math.round(photo.size.width)}
-            onChange={(e) => updateSize(Number(e.target.value), photo.size.height)}
-            className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded"
+            type="text"
+            value={photo.caption || ''}
+            onChange={(e) => onUpdate(photo.id, { caption: e.target.value })}
+            placeholder="Add a caption..."
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Height (%)
-          </label>
-          <input
-            type="range"
-            min="10"
-            max="100"
-            value={photo.size.height}
-            onChange={(e) => updateSize(photo.size.width, Number(e.target.value))}
-            className="w-full"
-          />
-          <input
-            type="number"
-            min="10"
-            max="100"
-            value={Math.round(photo.size.height)}
-            onChange={(e) => updateSize(photo.size.width, Number(e.target.value))}
-            className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded"
-          />
-        </div>
-      </div>
+      )}
+      
+      {/* Position Controls - Only for floating photos */}
+      {isFloating && (
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                X Position (%)
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={photo.position.x}
+                onChange={(e) => updatePosition(Number(e.target.value), photo.position.y)}
+                className="w-full"
+              />
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={Math.round(photo.position.x)}
+                onChange={(e) => updatePosition(Number(e.target.value), photo.position.y)}
+                className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Y Position (%)
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={photo.position.y}
+                onChange={(e) => updatePosition(photo.position.x, Number(e.target.value))}
+                className="w-full"
+              />
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={Math.round(photo.position.y)}
+                onChange={(e) => updatePosition(photo.position.x, Number(e.target.value))}
+                className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded"
+              />
+            </div>
+          </div>
+
+          {/* Size Controls */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Width (%)
+              </label>
+              <input
+                type="range"
+                min="10"
+                max="100"
+                value={photo.size.width}
+                onChange={(e) => updateSize(Number(e.target.value), photo.size.height)}
+                className="w-full"
+              />
+              <input
+                type="number"
+                min="10"
+                max="100"
+                value={Math.round(photo.size.width)}
+                onChange={(e) => updateSize(Number(e.target.value), photo.size.height)}
+                className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Height (%)
+              </label>
+              <input
+                type="range"
+                min="10"
+                max="100"
+                value={photo.size.height}
+                onChange={(e) => updateSize(photo.size.width, Number(e.target.value))}
+                className="w-full"
+              />
+              <input
+                type="number"
+                min="10"
+                max="100"
+                value={Math.round(photo.size.height)}
+                onChange={(e) => updateSize(photo.size.width, Number(e.target.value))}
+                className="mt-1 w-full px-2 py-1 text-xs border border-gray-300 rounded"
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Focal Point Controls */}
       <div>
@@ -180,141 +243,146 @@ const PhotoPositioner: React.FC<PhotoPositionerProps> = ({ photo, onUpdate }) =>
         </p>
       </div>
 
-      {/* Opacity Control */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Opacity
-        </label>
-        <div className="flex items-center gap-3">
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={photo.opacity * 100}
-            onChange={(e) => updateOpacity(Number(e.target.value) / 100)}
-            className="flex-1"
-          />
-          <span className="text-xs text-gray-600 w-10 text-right">
-            {Math.round(photo.opacity * 100)}%
-          </span>
-        </div>
-      </div>
+      {/* Float-only controls: Opacity, Layer, Z-Index, Quick Position */}
+      {isFloating && (
+        <>
+          {/* Opacity Control */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Opacity
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={photo.opacity * 100}
+                onChange={(e) => updateOpacity(Number(e.target.value) / 100)}
+                className="flex-1"
+              />
+              <span className="text-xs text-gray-600 w-10 text-right">
+                {Math.round(photo.opacity * 100)}%
+              </span>
+            </div>
+          </div>
 
-      {/* Layer Control */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-2">
-          Layer
-        </label>
-        <div className="flex gap-2">
-          <button
-            onClick={() => updateLayer('background')}
-            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-              photo.layer === 'background'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Background
-          </button>
-          <button
-            onClick={() => updateLayer('foreground')}
-            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-              photo.layer === 'foreground'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Foreground
-          </button>
-        </div>
-      </div>
+          {/* Layer Control */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-2">
+              Layer
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => updateLayer('background')}
+                className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  photo.layer === 'background'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Background
+              </button>
+              <button
+                onClick={() => updateLayer('foreground')}
+                className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  photo.layer === 'foreground'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Foreground
+              </button>
+            </div>
+          </div>
 
-      {/* Z-Index Control */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-2">
-          Layer Order (Z-Index: {photo.zIndex || (photo.layer === 'background' ? 10 : 40)})
-        </label>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleMoveLayer('down')}
-            className="flex-1 px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Send Back
-          </button>
-          <button
-            onClick={() => handleMoveLayer('up')}
-            className="flex-1 px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Bring Forward
-          </button>
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Controls stacking within {photo.layer} layer
-        </p>
-      </div>
+          {/* Z-Index Control */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-2">
+              Layer Order (Z-Index: {photo.zIndex || (photo.layer === 'background' ? 10 : 40)})
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleMoveLayer('down')}
+                className="flex-1 px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Send Back
+              </button>
+              <button
+                onClick={() => handleMoveLayer('up')}
+                className="flex-1 px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Bring Forward
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Controls stacking within {photo.layer} layer
+            </p>
+          </div>
 
-      {/* Quick Presets */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-2">
-          Quick Position
-        </label>
-        <div className="grid grid-cols-3 gap-1">
-          <button
-            onClick={() => updatePosition(0, 0)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Top Left
-          </button>
-          <button
-            onClick={() => updatePosition(50, 0)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Top Center
-          </button>
-          <button
-            onClick={() => updatePosition(100, 0)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Top Right
-          </button>
-          <button
-            onClick={() => updatePosition(0, 50)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Mid Left
-          </button>
-          <button
-            onClick={() => updatePosition(50, 50)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Center
-          </button>
-          <button
-            onClick={() => updatePosition(100, 50)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Mid Right
-          </button>
-          <button
-            onClick={() => updatePosition(0, 100)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Bottom Left
-          </button>
-          <button
-            onClick={() => updatePosition(50, 100)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Bottom Center
-          </button>
-          <button
-            onClick={() => updatePosition(100, 100)}
-            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Bottom Right
-          </button>
-        </div>
-      </div>
+          {/* Quick Presets */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-2">
+              Quick Position
+            </label>
+            <div className="grid grid-cols-3 gap-1">
+              <button
+                onClick={() => updatePosition(0, 0)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Top Left
+              </button>
+              <button
+                onClick={() => updatePosition(50, 0)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Top Center
+              </button>
+              <button
+                onClick={() => updatePosition(100, 0)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Top Right
+              </button>
+              <button
+                onClick={() => updatePosition(0, 50)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Mid Left
+              </button>
+              <button
+                onClick={() => updatePosition(50, 50)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Center
+              </button>
+              <button
+                onClick={() => updatePosition(100, 50)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Mid Right
+              </button>
+              <button
+                onClick={() => updatePosition(0, 100)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Bottom Left
+              </button>
+              <button
+                onClick={() => updatePosition(50, 100)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Bottom Center
+              </button>
+              <button
+                onClick={() => updatePosition(100, 100)}
+                className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Bottom Right
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Focal Point Presets */}
       <div>

@@ -46,7 +46,7 @@ export function useCompareUrl(
     getShareableUrl: () => {
       const baseUrl = window.location.origin;
       const params = selectedIds.length > 0 ? `?ids=${selectedIds.join(',')}` : '';
-      return `${baseUrl}/pizza/restaurants/compare${params}`;
+      return `${baseUrl}/restaurants/compare${params}`;
     }
   };
 }

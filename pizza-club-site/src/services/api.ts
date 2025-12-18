@@ -5,12 +5,14 @@
  * Falls back to JSON files if API is not available
  */
 
-import type { 
-  Event, 
-  Member, 
-  Restaurant, 
+import type {
+  Event,
+  Member,
+  Restaurant,
+  RestaurantVisit,
+  RatingCategory,
   SocialLink,
-  PaginatedResponse 
+  PaginatedResponse
 } from '@/types';
 import type { 
   Infographic, 
@@ -39,16 +41,12 @@ async function apiRequest<T>(
   }
   
   const url = `${API_BASE_URL}/${endpoint}`;
-  
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
+    ...(API_TOKEN ? { 'Authorization': `Bearer ${API_TOKEN}` } : {}),
     ...options.headers
   };
-  
-  // Add auth token if available
-  if (API_TOKEN) {
-    (headers as any)['Authorization'] = `Bearer ${API_TOKEN}`;
-  }
   
   try {
     const response = await fetch(url, {
@@ -110,7 +108,7 @@ export const apiService = {
     let existingRestaurant = null;
     try {
       existingRestaurant = await this.getRestaurantById(restaurant.id);
-    } catch (error) {
+    } catch {
       // Restaurant doesn't exist, will create new
     }
     
@@ -187,12 +185,10 @@ export const apiService = {
 
   /**
    * Get all events
+   * Note: Events are already sorted by the backend (ORDER BY event_date)
    */
   async getEvents(): Promise<Event[]> {
-    const events = await apiRequest<Event[]>('events');
-    return events.sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+    return await apiRequest<Event[]>('events');
   },
 
   /**
@@ -283,14 +279,14 @@ export const apiService = {
   /**
    * Get rating categories
    */
-  async getRatingCategories(): Promise<any> {
+  async getRatingCategories(): Promise<RatingCategory[]> {
     return await apiRequest('rating-categories');
   },
 
   /**
    * Get visits
    */
-  async getVisits(restaurantId?: string): Promise<any[]> {
+  async getVisits(restaurantId?: string): Promise<RestaurantVisit[]> {
     const endpoint = restaurantId ? `visits?restaurant_id=${restaurantId}` : 'visits';
     return await apiRequest(endpoint);
   },
@@ -298,17 +294,17 @@ export const apiService = {
   /**
    * Get visit by ID
    */
-  async getVisitById(id: string): Promise<any> {
+  async getVisitById(id: string): Promise<RestaurantVisit | undefined> {
     return await apiRequest(`visits?id=${id}`);
   },
 
   /**
    * Save visit
    */
-  async saveVisit(visit: any): Promise<any> {
+  async saveVisit(visit: Partial<RestaurantVisit> & { restaurantId: string; date: string }): Promise<RestaurantVisit> {
     const isUpdate = !!visit.id;
     const method = isUpdate ? 'PUT' : 'POST';
-    
+
     return await apiRequest('visits', {
       method,
       body: JSON.stringify(visit)
@@ -326,10 +322,10 @@ export const apiService = {
 
   /**
    * Get all social links
+   * Note: Links are already sorted by the backend (ORDER BY sort_order ASC)
    */
   async getLinks(): Promise<SocialLink[]> {
-    const links = await apiRequest<SocialLink[]>('links');
-    return links.sort((a, b) => a.sortOrder - b.sortOrder);
+    return await apiRequest<SocialLink[]>('links');
   },
 
   /**

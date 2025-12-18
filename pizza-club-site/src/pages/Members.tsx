@@ -13,23 +13,15 @@ const Members: React.FC = () => {
       setLoading(true);
       try {
         const fetchedMembers = await dataService.getMembers();
-        // Map the data to ensure compatibility with components expecting old field names
-        const mappedMembers = fetchedMembers.map(member => {
-          // Handle photo URL with base path
-          let photoUrl = member.photoUrl || member.photo;
-          if (photoUrl && photoUrl.startsWith('/images/')) {
-            photoUrl = import.meta.env.BASE_URL + photoUrl.slice(1); // Remove leading slash and prepend base URL
+        // Handle photo URL base path prefix for local images
+        const membersWithPhotoPaths = fetchedMembers.map(member => {
+          let photo = member.photo;
+          if (photo && photo.startsWith('/images/')) {
+            photo = import.meta.env.BASE_URL + photo.slice(1); // Remove leading slash and prepend base URL
           }
-          
-          return {
-            ...member,
-            // Provide backward compatibility for deprecated fields
-            photoUrl,
-            joinDate: member.joinDate || (member.memberSince ? new Date(member.memberSince) : undefined),
-            favoriteStyle: member.favoriteStyle || member.favoritePizzaStyle,
-          };
+          return { ...member, photo };
         });
-        setMembers(mappedMembers);
+        setMembers(membersWithPhotoPaths);
       } catch (error) {
         console.error('Failed to fetch members:', error);
         // You might want to show an error state to the user

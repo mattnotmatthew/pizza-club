@@ -130,11 +130,8 @@ export const dataService = {
   },
 
   async getInfographics(): Promise<Infographic[]> {
-    const infographics = await apiService.getInfographics();
-    // Sort by most recently updated first
-    return infographics.sort((a, b) => 
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    );
+    // Note: Backend already sorts by published_at DESC, updated_at DESC
+    return await apiService.getInfographics();
   },
 
   async getInfographicById(id: string): Promise<Infographic | undefined> {

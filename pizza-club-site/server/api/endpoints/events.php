@@ -67,8 +67,8 @@ class EventAPI extends BaseAPI {
             $event['rsvpLink'] = $event['rsvp_link'];
             unset($event['rsvp_link']);
         }
-        
-        $this->sendResponse($events);
+
+        $this->sendCacheableResponse($events, 300);
     }
     
     /**
@@ -91,8 +91,8 @@ class EventAPI extends BaseAPI {
         unset($event['max_attendees']);
         $event['rsvpLink'] = $event['rsvp_link'];
         unset($event['rsvp_link']);
-        
-        $this->sendResponse($event);
+
+        $this->sendCacheableResponse($event, 300);
     }
     
     /**

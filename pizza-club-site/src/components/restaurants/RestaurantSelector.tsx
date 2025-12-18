@@ -1,4 +1,5 @@
 import React from 'react';
+import { useMatomo } from '@/hooks/useMatomo';
 import type { Restaurant } from '@/types';
 
 interface RestaurantSelectorProps {
@@ -18,7 +19,16 @@ const RestaurantSelector: React.FC<RestaurantSelectorProps> = ({
   canSelectMore,
   maxSelections
 }) => {
+  const { trackEvent } = useMatomo();
   const isSelected = (restaurantId: string) => selectedIds.includes(restaurantId);
+
+  const handleToggle = (restaurant: Restaurant) => {
+    const wasSelected = isSelected(restaurant.id);
+    if (!wasSelected) {
+      trackEvent('Compare', 'Add', restaurant.name);
+    }
+    onToggle(restaurant.id);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -57,7 +67,7 @@ const RestaurantSelector: React.FC<RestaurantSelectorProps> = ({
                 }
                 ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md'}
               `}
-              onClick={() => !disabled && onToggle(restaurant.id)}
+              onClick={() => !disabled && handleToggle(restaurant)}
             >
               {/* Checkbox */}
               <div className="absolute top-2 right-2">

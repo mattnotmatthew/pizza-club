@@ -4,16 +4,16 @@ import QuotePositioner from './QuotePositioner';
 
 interface QuoteSelectorProps {
   visitNotes: string;
+  visitQuotes?: Array<{ text: string; author?: string }>;
   selectedQuotes: Quote[];
   onQuotesChange: (quotes: Quote[]) => void;
-  attendeeNames?: string[];
 }
 
 const QuoteSelector: React.FC<QuoteSelectorProps> = ({
   visitNotes,
+  visitQuotes = [],
   selectedQuotes,
-  onQuotesChange,
-  attendeeNames = []
+  onQuotesChange
 }) => {
   // Extract potential quotes from visit notes
   // Look for sentences with quotes or notable phrases
@@ -68,13 +68,47 @@ const QuoteSelector: React.FC<QuoteSelectorProps> = ({
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Available Quotes</h3>
-        <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-md p-2">
-          {potentialQuotes.length > 0 ? (
-            potentialQuotes.map((quote, index) => (
+      {/* Visit Quotes (explicitly added to the visit) */}
+      {visitQuotes.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Quotes from Visit</h3>
+          <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-md p-2">
+            {visitQuotes.map((quote, index) => (
               <div
-                key={index}
+                key={`visit-${index}`}
+                className="flex items-start gap-2 p-2 bg-amber-50 rounded hover:bg-amber-100 border border-amber-200"
+              >
+                <div className="flex-1">
+                  <p className="text-sm text-gray-800">"{quote.text}"</p>
+                  {quote.author && (
+                    <p className="text-xs text-gray-500 mt-1">— {quote.author}</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    handleAddQuote(quote.text, quote.author || '');
+                  }}
+                  className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                  disabled={selectedQuotes.some(q => q.text === quote.text)}
+                >
+                  {selectedQuotes.some(q => q.text === quote.text) ? 'Added' : 'Add'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Extracted Quotes from Notes (secondary source) */}
+      {potentialQuotes.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">
+            {visitQuotes.length > 0 ? 'Additional Quotes from Notes' : 'Quotes from Notes'}
+          </h3>
+          <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-md p-2">
+            {potentialQuotes.map((quote, index) => (
+              <div
+                key={`notes-${index}`}
                 className="flex items-start gap-2 p-2 bg-gray-50 rounded hover:bg-gray-100"
               >
                 <div className="flex-1">
@@ -82,8 +116,7 @@ const QuoteSelector: React.FC<QuoteSelectorProps> = ({
                 </div>
                 <button
                   onClick={() => {
-                    const author = attendeeNames[0] || 'Pizza Club Member';
-                    handleAddQuote(quote, author);
+                    handleAddQuote(quote, '');
                   }}
                   className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
                   disabled={selectedQuotes.some(q => q.text === quote)}
@@ -91,12 +124,19 @@ const QuoteSelector: React.FC<QuoteSelectorProps> = ({
                   {selectedQuotes.some(q => q.text === quote) ? 'Added' : 'Add'}
                 </button>
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-gray-500 italic">No quotes found in visit notes</p>
-          )}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Empty state */}
+      {visitQuotes.length === 0 && potentialQuotes.length === 0 && (
+        <div className="border border-gray-200 rounded-md p-4">
+          <p className="text-sm text-gray-500 italic">
+            No quotes available. Add quotes to this visit in the Visits admin page, or add custom quotes below.
+          </p>
+        </div>
+      )}
 
       <div>
         <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Quotes ({selectedQuotes.length})</h3>
