@@ -73,16 +73,11 @@ const Standings: React.FC = () => {
     switch (activeView) {
       case 'overall':
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
             <LeaderboardTable
               title="Overall Rating"
               description="Best overall restaurant ratings"
               entries={standingsData.overall.entries}
-            />
-            <LeaderboardTable
-              title="Pizza Rating"
-              description="Best pizza ratings"
-              entries={standingsData.pizzaOverall.entries}
             />
           </div>
         );

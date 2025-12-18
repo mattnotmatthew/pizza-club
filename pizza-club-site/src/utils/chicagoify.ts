@@ -143,8 +143,8 @@ const PHRASE_REPLACEMENTS: [RegExp, string][] = [
   [/welcome to/gi, 'hey, welcome to'],
 
   // Club-specific
-  [/Greater Chicagoland Pizza Club/gi, 'Da Greater Chicagoland Pizza Club'],
-  [/Greater Chicagoland/gi, 'Da Greater Chicagoland'],
+  [/(?<!Da )Greater Chicagoland Pizza Club/gi, 'Da Greater Chicagoland Pizza Club'],
+  [/(?<!Da )Greater Chicagoland/gi, 'Da Greater Chicagoland'],
   [/club members/gi, 'da club members'],
   [/pizza lovers/gi, 'pizza folks'],
   [/passionate pizza/gi, 'real serious pizza'],

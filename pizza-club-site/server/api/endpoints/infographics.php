@@ -249,6 +249,11 @@ class InfographicAPI extends BaseAPI {
         $updates = [];
         $params = [':id' => $data['id']];
 
+        if (isset($data['visitDate'])) {
+            $updates[] = "visit_date = :visit_date";
+            $params[':visit_date'] = $data['visitDate'];
+        }
+
         if (isset($data['content'])) {
             $updates[] = "content = :content";
             $params[':content'] = json_encode($data['content']);

@@ -66,9 +66,14 @@ const Home: React.FC = () => {
               onClick={handleLogoClick}
               title={!isChicagoMode ? 'Click me...' : undefined}
             />
-            <h1 className="text-4xl md:text-6xl font-bold text-center mb-6 animate-fade-in">
+            <h1 className="text-4xl md:text-6xl font-bold text-center mb-2 animate-fade-in">
               Greater Chicagoland Pizza Club
             </h1>
+            {isChicagoMode && (
+              <p className="text-sm md:text-base text-[#E8A87C] italic mb-4 opacity-80" data-no-chicago>
+                (Not you, Naperville)
+              </p>
+            )}
             <div className="flex justify-center mb-12">
               <p className="text-xl md:text-2xl text-center text-yellow-100 tracking-wide animate-typewriter">
                 Nella pizza, il volto di Dio.

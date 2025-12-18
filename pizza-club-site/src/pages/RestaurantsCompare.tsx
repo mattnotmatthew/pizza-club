@@ -16,6 +16,7 @@ const RestaurantsCompare: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [toggleableCategories, setToggleableCategories] = useState<string[]>([]);
   const [ratingToggles, setRatingToggles] = useState<Record<string, boolean>>({});
+  const [showFilters, setShowFilters] = useState(false);
   const hasTrackedComparison = useRef(false);
 
   // Parse initial IDs from URL
@@ -24,16 +25,14 @@ const RestaurantsCompare: React.FC = () => {
 
   // Initialize selection state
   const selection = useCompareSelection(urlIds);
-  
+
   // Sync with URL
   useCompareUrl(selection.selectedIds, (ids) => {
-    // Handle URL changes by updating selection
     ids.forEach(id => {
       if (!selection.isSelected(id)) {
         selection.toggleSelection(id);
       }
     });
-    // Remove any that are no longer in URL
     selection.selectedIds.forEach(id => {
       if (!ids.includes(id)) {
         selection.toggleSelection(id);
@@ -45,42 +44,32 @@ const RestaurantsCompare: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch restaurants and parent categories
         const [fetchedRestaurants, parentCategories] = await Promise.all([
           dataService.getRestaurants(),
           dataService.getParentCategories()
         ]);
-        
-        // Map totalVisits for backward compatibility
+
         const mappedRestaurants = fetchedRestaurants.map((restaurant: any) => ({
           ...restaurant,
           totalVisits: restaurant.totalVisits || restaurant.visits?.length || 0
         }));
-        
-        // Debug: Check if restaurants have visits and their structure
-        console.log('Fetched restaurants:', mappedRestaurants[0]?.name, 'has', mappedRestaurants[0]?.visits?.length, 'visits');
-        if (mappedRestaurants[0]?.visits?.[0]) {
-          console.log('First visit ratings structure:', mappedRestaurants[0].visits[0].ratings);
-        }
-        
+
         setRestaurants(mappedRestaurants);
-        
-        // Get all toggleable categories (overall + pizzas + child categories)
+
+        // Get all toggleable categories
         const toggleable: string[] = [];
         const initialToggles: Record<string, boolean> = {};
-        
-        // Add overall and pizzas as toggleable
+
         if (parentCategories.includes('overall')) {
           toggleable.push('overall');
           initialToggles['overall'] = true;
         }
-        
+
         if (parentCategories.includes(PARENT_CATEGORIES.PIZZAS)) {
           toggleable.push(PARENT_CATEGORIES.PIZZAS);
           initialToggles[PARENT_CATEGORIES.PIZZAS] = true;
         }
-        
-        // Get child categories for other parents
+
         for (const parent of parentCategories) {
           if (parent !== 'overall' && parent !== PARENT_CATEGORIES.PIZZAS) {
             const children = await dataService.getChildCategories(parent);
@@ -90,13 +79,12 @@ const RestaurantsCompare: React.FC = () => {
             });
           }
         }
-        
+
         setToggleableCategories(toggleable);
         setRatingToggles(initialToggles);
       } catch (error) {
         console.error('Failed to fetch data:', error);
         setRestaurants([]);
-        // Fallback categories
         const fallbackCategories = ['overall', 'crust', 'sauce', 'cheese', 'toppings', 'value'];
         setToggleableCategories(fallbackCategories);
         const fallbackToggles: Record<string, boolean> = {};
@@ -112,7 +100,7 @@ const RestaurantsCompare: React.FC = () => {
     fetchData();
   }, []);
 
-  // Track comparison view when restaurants are selected
+  // Track comparison view
   useEffect(() => {
     if (!loading && selection.selectedIds.length >= 2 && restaurants.length > 0 && !hasTrackedComparison.current) {
       const selectedRestaurants = restaurants.filter(r => selection.selectedIds.includes(r.id));
@@ -122,34 +110,43 @@ const RestaurantsCompare: React.FC = () => {
     }
   }, [loading, selection.selectedIds, restaurants, trackEvent]);
 
+  const getCategoryLabel = (category: string): string => {
+    if (category === 'overall') return 'Overall';
+    if (category === PARENT_CATEGORIES.PIZZAS) return 'Pizzas';
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  const enabledCount = Object.values(ratingToggles).filter(Boolean).length;
+  const totalCount = toggleableCategories.length;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link 
-            to="/restaurants" 
-            className="inline-flex items-center text-red-600 hover:text-red-700 mb-4"
+          <Link
+            to="/restaurants"
+            className="inline-flex items-center text-red-600 hover:text-red-700 mb-4 group"
           >
-            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 mr-1 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back to Restaurants
           </Link>
-          
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
             Compare Restaurants
           </h1>
-          <p className="text-lg text-gray-600 max-w-3xl">
-            Select up to 4 restaurants to compare their ratings, prices, and details side-by-side.
+          <p className="text-lg text-gray-600">
+            Select up to 4 restaurants to compare ratings side-by-side
           </p>
         </div>
 
         {/* Loading State */}
         {loading ? (
-          <div className="space-y-4">
-            <Skeleton variant="rectangular" height={200} className="w-full rounded-lg" />
-            <Skeleton variant="rectangular" height={400} className="w-full rounded-lg" />
+          <div className="space-y-6">
+            <Skeleton variant="rectangular" height={200} className="w-full rounded-xl" />
+            <Skeleton variant="rectangular" height={400} className="w-full rounded-xl" />
           </div>
         ) : (
           <>
@@ -163,51 +160,91 @@ const RestaurantsCompare: React.FC = () => {
               maxSelections={selection.maxSelections}
             />
 
-            {/* Rating Toggle Controls */}
+            {/* Category Filters */}
             {selection.selectedIds.length > 0 && (
-              <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Show/Hide Rating Categories</h3>
-                <div className="flex flex-wrap gap-3">
-                  {toggleableCategories.map((category) => {
-                    let label = category;
-                    if (category === 'overall') {
-                      label = 'Overall Rating';
-                    } else if (category === PARENT_CATEGORIES.PIZZAS) {
-                      label = 'Pizzas (Average)';
-                    } else {
-                      label = category.charAt(0).toUpperCase() + category.slice(1);
-                    }
-                    
-                    return (
-                      <label key={category} className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={ratingToggles[category] || false}
-                          onChange={(e) => {
-                            setRatingToggles(prev => ({
-                              ...prev,
-                              [category]: e.target.checked
-                            }));
+              <div className="mb-6">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  <svg
+                    className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  {showFilters ? 'Hide' : 'Show'} Category Filters
+                  <span className="text-gray-400">({enabledCount}/{totalCount} shown)</span>
+                </button>
+
+                {showFilters && (
+                  <div className="mt-4 p-4 bg-white rounded-xl shadow-md">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-700">Toggle Rating Categories</h3>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            const allOn: Record<string, boolean> = {};
+                            toggleableCategories.forEach(c => allOn[c] = true);
+                            setRatingToggles(allOn);
                           }}
-                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mr-2"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {label}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          Show All
+                        </button>
+                        <span className="text-gray-300">|</span>
+                        <button
+                          onClick={() => {
+                            const allOff: Record<string, boolean> = {};
+                            toggleableCategories.forEach(c => allOff[c] = false);
+                            // Keep at least overall on
+                            allOff['overall'] = true;
+                            setRatingToggles(allOff);
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          Hide All
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {toggleableCategories.map((category) => {
+                        const isOn = ratingToggles[category] || false;
+                        return (
+                          <button
+                            key={category}
+                            onClick={() => {
+                              setRatingToggles(prev => ({
+                                ...prev,
+                                [category]: !prev[category]
+                              }));
+                            }}
+                            className={`
+                              px-3 py-1.5 rounded-full text-sm font-medium transition-all
+                              ${isOn
+                                ? 'bg-red-100 text-red-700 border border-red-200'
+                                : 'bg-gray-100 text-gray-400 border border-gray-200 line-through'
+                              }
+                              hover:shadow-sm
+                            `}
+                          >
+                            {getCategoryLabel(category)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Comparison Table */}
-            {selection.selectedIds.length > 0 && (
-              <CompareTable
-                restaurants={restaurants.filter(r => selection.selectedIds.includes(r.id))}
-                ratingToggles={ratingToggles}
-              />
-            )}
+            <CompareTable
+              restaurants={restaurants.filter(r => selection.selectedIds.includes(r.id))}
+              ratingToggles={ratingToggles}
+            />
           </>
         )}
       </div>

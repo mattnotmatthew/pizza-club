@@ -6,6 +6,7 @@
 
 import type { Event, Member, Restaurant, VisitedRestaurant, MemberVisit, SocialLink } from '@/types';
 import type { Infographic, InfographicWithData } from '@/types/infographics';
+import { isNestedRatings, PARENT_CATEGORIES, type NestedRatings } from '@/types';
 import { dataService as originalDataService } from './data';
 import { apiService } from './api';
 
@@ -13,19 +14,47 @@ export const dataService = {
   // Delegate calculation/utility methods to original service
   calculateAverageRating: originalDataService.calculateAverageRating,
   getParentCategories: originalDataService.getParentCategories,
-  getChildCategories: originalDataService.getChildCategories,
   getCategoryAverage: originalDataService.getCategoryAverage,
   getPizzaArrayAverage: originalDataService.getPizzaArrayAverage.bind(originalDataService),
+  getAppetizerArrayAverage: originalDataService.getAppetizerArrayAverage.bind(originalDataService),
   mapFlatToNested: originalDataService.mapFlatToNested,
   getAvailableRatingCategories: originalDataService.getAvailableRatingCategories,
-  
+
+  // Override getChildCategories to use API restaurants
+  async getChildCategories(parent: string): Promise<string[]> {
+    const restaurants = await this.getRestaurants();
+    const childCategories = new Set<string>();
+
+    restaurants.forEach(restaurant => {
+      restaurant.visits?.forEach(visit => {
+        if (isNestedRatings(visit.ratings)) {
+          const nestedRatings = visit.ratings as NestedRatings;
+
+          if (parent === PARENT_CATEGORIES.PIZZA_COMPONENTS && nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS]) {
+            const components = nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS];
+            if (typeof components === 'object' && !Array.isArray(components)) {
+              Object.keys(components).forEach(key => childCategories.add(key));
+            }
+          } else if (parent === PARENT_CATEGORIES.OTHER_STUFF && nestedRatings[PARENT_CATEGORIES.OTHER_STUFF]) {
+            const other = nestedRatings[PARENT_CATEGORIES.OTHER_STUFF];
+            if (typeof other === 'object' && !Array.isArray(other)) {
+              Object.keys(other).forEach(key => childCategories.add(key));
+            }
+          }
+        }
+      });
+    });
+
+    return Array.from(childCategories).sort();
+  },
+
   // Override all data fetching methods to use API
   async getRestaurants(): Promise<Restaurant[]> {
     const restaurants = await apiService.getRestaurants();
     // Calculate average ratings if not pre-calculated
     return restaurants.map(restaurant => ({
       ...restaurant,
-      averageRating: restaurant.averageRating || 
+      averageRating: restaurant.averageRating ||
         originalDataService.calculateAverageRating(restaurant)
     }));
   },

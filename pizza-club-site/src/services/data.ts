@@ -1,4 +1,4 @@
-import type { Event, Member, Restaurant, NestedRatings, FlatRatings, PizzaRating } from '@/types';
+import type { Event, Member, Restaurant, NestedRatings, FlatRatings, PizzaRating, AppetizerRating } from '@/types';
 import { isNestedRatings, PARENT_CATEGORIES } from '@/types';
 import type { Infographic, CreateInfographicInput, UpdateInfographicInput, InfographicWithData } from '@/types/infographics';
 
@@ -155,32 +155,61 @@ export const dataService = {
   // Get average rating for a specific category
   getCategoryAverage(restaurant: Restaurant, category: string): number {
     if (!restaurant.visits || restaurant.visits.length === 0) return 0;
-    
+
     const validRatings: number[] = [];
-    
+
     restaurant.visits.forEach(visit => {
       if (isNestedRatings(visit.ratings)) {
         // Handle nested structure
         const nestedRatings = visit.ratings as NestedRatings;
+        let found = false;
+
+        // Check overall
         if (category === 'overall' && nestedRatings.overall !== undefined) {
           validRatings.push(nestedRatings.overall);
-        } else if (category === PARENT_CATEGORIES.PIZZAS && nestedRatings.pizzas) {
-          // Calculate average of all pizzas for this visit
+          found = true;
+        }
+
+        // Check pizzas average
+        if (!found && category === PARENT_CATEGORIES.PIZZAS && nestedRatings.pizzas) {
           const pizzaAvg = this.getPizzaArrayAverage(nestedRatings.pizzas);
-          if (pizzaAvg > 0) validRatings.push(pizzaAvg);
-        } else if (nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] && typeof nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] === 'object') {
+          if (pizzaAvg > 0) {
+            validRatings.push(pizzaAvg);
+            found = true;
+          }
+        }
+
+        // Check appetizers average
+        if (!found && category === 'appetizers' && nestedRatings.appetizers) {
+          const appAvg = this.getAppetizerArrayAverage(nestedRatings.appetizers);
+          if (appAvg > 0) {
+            validRatings.push(appAvg);
+            found = true;
+          }
+        }
+
+        // Check pizza-components (crust, sauce, etc.)
+        if (!found && nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] &&
+            typeof nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] === 'object') {
           const componentRatings = nestedRatings[PARENT_CATEGORIES.PIZZA_COMPONENTS] as Record<string, number>;
           if (componentRatings[category] !== undefined) {
             validRatings.push(componentRatings[category]);
+            found = true;
           }
-        } else if (nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] && typeof nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] === 'object') {
+        }
+
+        // Check the-other-stuff (wait-staff, atmosphere, etc.)
+        if (!found && nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] &&
+            typeof nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] === 'object') {
           const otherRatings = nestedRatings[PARENT_CATEGORIES.OTHER_STUFF] as Record<string, number>;
           if (otherRatings[category] !== undefined) {
             validRatings.push(otherRatings[category]);
+            found = true;
           }
         }
-        // Also check for direct properties that might be nested categories
-        else if (nestedRatings[category] !== undefined && typeof nestedRatings[category] === 'number') {
+
+        // Check for direct properties as fallback
+        if (!found && nestedRatings[category] !== undefined && typeof nestedRatings[category] === 'number') {
           validRatings.push(nestedRatings[category] as number);
         }
       } else {
@@ -191,7 +220,7 @@ export const dataService = {
         }
       }
     });
-    
+
     if (validRatings.length === 0) return 0;
 
     const sum = validRatings.reduce((acc, rating) => acc + rating, 0);
@@ -200,8 +229,8 @@ export const dataService = {
 
   // New methods for parent-child structure
   async getParentCategories(): Promise<string[]> {
-    // Return the predefined parent categories
-    return ['overall', ...Object.values(PARENT_CATEGORIES)];
+    // Return the predefined parent categories including appetizers
+    return ['overall', ...Object.values(PARENT_CATEGORIES), 'appetizers'];
   },
 
   async getChildCategories(parent: string): Promise<string[]> {
@@ -265,6 +294,13 @@ export const dataService = {
 
     const sum = pizzas.reduce((acc, pizza) => acc + pizza.rating, 0);
     return Math.round((sum / pizzas.length) * 100) / 100;
+  },
+
+  getAppetizerArrayAverage(appetizers: AppetizerRating[]): number {
+    if (!appetizers || !Array.isArray(appetizers) || appetizers.length === 0) return 0;
+
+    const sum = appetizers.reduce((acc, app) => acc + app.rating, 0);
+    return Math.round((sum / appetizers.length) * 100) / 100;
   },
 
   // Utility function for future use - when members want to add new data

@@ -98,7 +98,9 @@ const Infographics: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {infographics.map((infographic) => {
+            {[...infographics]
+              .sort((a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime())
+              .map((infographic) => {
               const restaurant = getRestaurant(infographic.restaurantId);
               if (!restaurant) return null;
 

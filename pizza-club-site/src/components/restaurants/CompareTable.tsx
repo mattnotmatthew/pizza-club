@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import WholePizzaRating from '@/components/common/WholePizzaRating';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { dataService } from '@/services/dataWithApi';
 import type { Restaurant } from '@/types';
 import { PARENT_CATEGORIES } from '@/types';
@@ -17,11 +17,9 @@ const CompareTable: React.FC<CompareTableProps> = ({
   const [childCategories, setChildCategories] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
-    // Load parent categories
     dataService.getParentCategories().then((categories: string[]) => {
       setParentCategories(categories);
-      
-      // Load child categories for each parent
+
       const childPromises = categories.map(async (parent: string) => {
         if (parent !== 'overall' && parent !== PARENT_CATEGORIES.PIZZAS) {
           const children = await dataService.getChildCategories(parent);
@@ -29,7 +27,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
         }
         return null;
       });
-      
+
       Promise.all(childPromises).then(results => {
         const childMap: Record<string, string[]> = {};
         results.forEach(result => {
@@ -39,161 +37,199 @@ const CompareTable: React.FC<CompareTableProps> = ({
         });
         setChildCategories(childMap);
       });
-    }).catch((error: any) => {
-      console.error('Failed to load categories:', error);
-      // Fallback
+    }).catch(() => {
       setParentCategories(['overall']);
     });
   }, []);
-  
-  // Calculate average rating for a specific category across all visits
-  const getAverageRating = (restaurant: Restaurant, category: string) => {
-    // Debug: Check if restaurant has visits
+
+  // Get average rating for a category
+  const getAverageRating = (restaurant: Restaurant, category: string): number => {
     if (!restaurant.visits || restaurant.visits.length === 0) {
-      console.warn(`Restaurant ${restaurant.name} has no visits data for category ${category}`);
       return 0;
     }
-    
-    // Debug: Check visits structure for specific categories
-    if (category === 'atmosphere' || category === 'waitstaff') {
-      console.log(`Getting average for ${category} at ${restaurant.name}:`);
-      restaurant.visits.forEach((visit, i) => {
-        console.log(`  Visit ${i + 1}:`, visit.ratings);
-        if (visit.ratings['the-other-stuff']) {
-          console.log(`    the-other-stuff:`, visit.ratings['the-other-stuff']);
+    return dataService.getCategoryAverage(restaurant, category);
+  };
+
+  // Find the winner (highest rating) for a category
+  const getWinnerForCategory = useMemo(() => {
+    return (category: string): string | null => {
+      if (restaurants.length < 2) return null;
+
+      let maxRating = 0;
+      let winnerId: string | null = null;
+      let hasTie = false;
+
+      restaurants.forEach(restaurant => {
+        const rating = category === 'overall'
+          ? restaurant.averageRating
+          : getAverageRating(restaurant, category);
+
+        if (rating > maxRating) {
+          maxRating = rating;
+          winnerId = restaurant.id;
+          hasTie = false;
+        } else if (rating === maxRating && rating > 0) {
+          hasTie = true;
         }
       });
-    }
-    
-    const result = dataService.getCategoryAverage(restaurant, category);
-    
-    if (category === 'atmosphere' || category === 'waitstaff') {
-      console.log(`  Result for ${category}:`, result);
-    }
-    
-    return result;
+
+      return hasTie ? null : winnerId;
+    };
+  }, [restaurants]);
+
+  // Get rating color based on value
+  const getRatingColor = (rating: number, isWinner: boolean): string => {
+    if (rating === 0) return 'text-gray-400';
+    if (isWinner) return 'text-green-700 font-bold';
+    if (rating >= 4) return 'text-green-600';
+    if (rating >= 3) return 'text-yellow-600';
+    return 'text-red-500';
   };
 
   if (restaurants.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-        <p className="text-gray-500">Select restaurants above to start comparing</p>
+      <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+        <div className="max-w-md mx-auto">
+          <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <p className="text-gray-500 text-lg">Select restaurants above to start comparing</p>
+          <p className="text-gray-400 text-sm mt-2">Choose 2-4 restaurants to see them side by side</p>
+        </div>
       </div>
     );
   }
 
+  const RatingCell = ({
+    rating,
+    isWinner
+  }: {
+    rating: number;
+    isWinner: boolean;
+  }) => (
+    <td className={`px-4 py-3 text-center border-l border-gray-200 ${isWinner ? 'bg-green-50' : ''}`}>
+      <span className={`text-sm ${getRatingColor(rating, isWinner)}`}>
+        {rating > 0 ? rating.toFixed(2) : '—'}
+      </span>
+    </td>
+  );
+
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      {/* Mobile scroll container */}
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      {/* Table Header with Restaurant Cards */}
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+        <div className="grid" style={{ gridTemplateColumns: `200px repeat(${restaurants.length}, 1fr)` }}>
+          <div className="p-4 flex items-end">
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Category</span>
+          </div>
+          {restaurants.map((restaurant, index) => (
+            <div key={restaurant.id} className="p-4 text-center border-l border-gray-200">
+              <Link
+                to={`/restaurants/${restaurant.slug || restaurant.id}`}
+                className="group block"
+              >
+                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-600 font-bold text-sm mb-2">
+                  {index + 1}
+                </div>
+                <h3 className="font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                  {restaurant.name}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">{restaurant.location}</p>
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Scrollable Table Body */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="sticky left-0 z-10 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
-              </th>
-              {restaurants.map((restaurant) => (
-                <th key={restaurant.id} className="px-6 py-3 text-center min-w-[200px]">
-                  <div className="text-sm font-semibold text-gray-900">{restaurant.name}</div>
-                  <div className="text-xs text-gray-500">{restaurant.location}</div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {/* Dynamic Rating Categories with Parent-Child Structure */}
-            {parentCategories.map((parentCategory) => {
-              if (parentCategory === 'overall') {
-                // Overall rating row
-                if (ratingToggles && ratingToggles.overall === false) return null;
-                
-                return (
-                  <tr key="overall">
-                    <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      Overall Rating
-                    </td>
-                    {restaurants.map((restaurant) => (
-                      <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
-                        <div className="flex flex-col items-center">
-                          <WholePizzaRating rating={restaurant.averageRating} size="small" />
-                          <span className="text-sm text-gray-600 mt-1">
-                            {restaurant.averageRating.toFixed(2)}
-                          </span>
-                        </div>
-                      </td>
-                    ))}
-                  </tr>
-                );
-              } else if (parentCategory === PARENT_CATEGORIES.PIZZAS) {
-                // Pizzas parent category
-                if (ratingToggles && ratingToggles[PARENT_CATEGORIES.PIZZAS] === false) return null;
-                
-                return (
-                  <React.Fragment key={parentCategory}>
-                    {/* Parent header row */}
-                    <tr className="bg-gray-50">
-                      <td className="sticky left-0 z-10 bg-gray-50 px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
-                        Pizzas
-                      </td>
-                      {restaurants.map((restaurant) => (
-                        <td key={restaurant.id} className="px-6 py-3"></td>
-                      ))}
-                    </tr>
-                    {/* Pizza average row */}
-                    <tr>
-                      <td className="sticky left-0 z-10 bg-white px-6 py-4 pl-10 whitespace-nowrap text-sm font-medium text-gray-700">
-                        Average
-                      </td>
-                      {restaurants.map((restaurant) => {
-                        const rating = getAverageRating(restaurant, PARENT_CATEGORIES.PIZZAS);
-                        return (
-                          <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
-                            <span className="text-sm text-gray-600">
-                              {rating > 0 ? rating.toFixed(2) : 'N/A'}
-                            </span>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  </React.Fragment>
-                );
-              } else {
-                // Other parent categories with children
+        <table className="w-full" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '200px' }} />
+            {restaurants.map((r) => (
+              <col key={r.id} />
+            ))}
+          </colgroup>
+          <tbody className="divide-y divide-gray-100">
+            {/* Overall Rating */}
+            {(!ratingToggles || ratingToggles.overall !== false) && parentCategories.includes('overall') && (
+              <tr className="bg-red-50/50">
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className="font-semibold text-gray-900">Overall Rating</span>
+                </td>
+                {restaurants.map((restaurant) => {
+                  const winnerId = getWinnerForCategory('overall');
+                  return (
+                    <RatingCell
+                      key={restaurant.id}
+                      rating={restaurant.averageRating}
+                      isWinner={winnerId === restaurant.id}
+                    />
+                  );
+                })}
+              </tr>
+            )}
+
+            {/* Pizzas Section */}
+            {(!ratingToggles || ratingToggles[PARENT_CATEGORIES.PIZZAS] !== false) &&
+              parentCategories.includes(PARENT_CATEGORIES.PIZZAS) && (
+              <tr className="bg-amber-50/50">
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className="font-semibold text-gray-900">Pizzas Average</span>
+                </td>
+                {restaurants.map((restaurant) => {
+                  const rating = getAverageRating(restaurant, PARENT_CATEGORIES.PIZZAS);
+                  const winnerId = getWinnerForCategory(PARENT_CATEGORIES.PIZZAS);
+                  return (
+                    <RatingCell
+                      key={restaurant.id}
+                      rating={rating}
+                      isWinner={winnerId === restaurant.id}
+                    />
+                  );
+                })}
+              </tr>
+            )}
+
+            {/* Other Categories */}
+            {parentCategories
+              .filter(parent => parent !== 'overall' && parent !== PARENT_CATEGORIES.PIZZAS && parent !== 'appetizers')
+              .map((parentCategory) => {
                 const children = childCategories[parentCategory] || [];
-                const parentLabel = parentCategory.split('-').map(word => 
+                const parentLabel = parentCategory.split('-').map(word =>
                   word.charAt(0).toUpperCase() + word.slice(1)
                 ).join(' ');
-                
+
                 return (
                   <React.Fragment key={parentCategory}>
-                    {/* Parent header row */}
+                    {/* Parent Header */}
                     <tr className="bg-gray-50">
-                      <td className="sticky left-0 z-10 bg-gray-50 px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
-                        {parentLabel}
+                      <td colSpan={restaurants.length + 1} className="px-4 py-2">
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          {parentLabel}
+                        </span>
                       </td>
-                      {restaurants.map((restaurant) => (
-                        <td key={restaurant.id} className="px-6 py-3"></td>
-                      ))}
                     </tr>
-                    {/* Child category rows */}
+                    {/* Child Categories */}
                     {children.map((childCategory) => {
                       if (ratingToggles && ratingToggles[childCategory] === false) return null;
-                      
+
                       const childLabel = childCategory.charAt(0).toUpperCase() + childCategory.slice(1);
-                      
+                      const winnerId = getWinnerForCategory(childCategory);
+
                       return (
-                        <tr key={childCategory}>
-                          <td className="sticky left-0 z-10 bg-white px-6 py-4 pl-10 whitespace-nowrap text-sm font-medium text-gray-700">
-                            {childLabel}
+                        <tr key={childCategory} className="hover:bg-gray-50/50">
+                          <td className="px-4 py-3 pl-8 whitespace-nowrap">
+                            <span className="text-sm text-gray-700">{childLabel}</span>
                           </td>
                           {restaurants.map((restaurant) => {
                             const rating = getAverageRating(restaurant, childCategory);
                             return (
-                              <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center">
-                                <span className="text-sm text-gray-600">
-                                  {rating > 0 ? rating.toFixed(2) : 'N/A'}
-                                </span>
-                              </td>
+                              <RatingCell
+                                key={restaurant.id}
+                                rating={rating}
+                                isWinner={winnerId === restaurant.id}
+                              />
                             );
                           })}
                         </tr>
@@ -201,59 +237,45 @@ const CompareTable: React.FC<CompareTableProps> = ({
                     })}
                   </React.Fragment>
                 );
-              }
-            })}
+              })}
 
-            {/* Additional Details */}
-            <tr>
-              <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                Price Range
+            {/* Details Section */}
+            <tr className="bg-gray-50">
+              <td colSpan={restaurants.length + 1} className="px-4 py-2">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Details
+                </span>
+              </td>
+            </tr>
+
+            <tr className="hover:bg-gray-50/50">
+              <td className="px-4 py-3 pl-8 whitespace-nowrap">
+                <span className="text-sm text-gray-700">Total Visits</span>
               </td>
               {restaurants.map((restaurant) => (
-                <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
-                  {restaurant.priceRange || 'N/A'}
+                <td key={restaurant.id} className="px-4 py-3 text-center border-l border-gray-200">
+                  <span className="text-sm font-medium text-gray-900">{restaurant.totalVisits}</span>
                 </td>
               ))}
             </tr>
 
-            <tr>
-              <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                Total Visits
+            <tr className="hover:bg-gray-50/50">
+              <td className="px-4 py-3 pl-8 whitespace-nowrap">
+                <span className="text-sm text-gray-700">Links</span>
               </td>
               {restaurants.map((restaurant) => (
-                <td key={restaurant.id} className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
-                  {restaurant.totalVisits}
-                </td>
-              ))}
-            </tr>
-
-            <tr>
-              <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                Must Try
-              </td>
-              {restaurants.map((restaurant) => (
-                <td key={restaurant.id} className="px-6 py-4 text-center text-sm text-gray-600">
-                  <div className="max-w-[200px] mx-auto">
-                    {restaurant.mustTry || 'N/A'}
-                  </div>
-                </td>
-              ))}
-            </tr>
-
-            <tr>
-              <td className="sticky left-0 z-10 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                Links
-              </td>
-              {restaurants.map((restaurant) => (
-                <td key={restaurant.id} className="px-6 py-4 text-center text-sm">
-                  <div className="flex flex-col gap-2 items-center">
+                <td key={restaurant.id} className="px-4 py-3 text-center border-l border-gray-200">
+                  <div className="flex flex-wrap justify-center gap-2">
                     {restaurant.website && (
                       <a
                         href={restaurant.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700"
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
                       >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
                         Website
                       </a>
                     )}
@@ -261,8 +283,12 @@ const CompareTable: React.FC<CompareTableProps> = ({
                       href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700"
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100 transition-colors"
                     >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
                       Directions
                     </a>
                   </div>
@@ -271,6 +297,24 @@ const CompareTable: React.FC<CompareTableProps> = ({
             </tr>
           </tbody>
         </table>
+      </div>
+
+      {/* Legend */}
+      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
+          <span className="flex items-center gap-1">
+            <span className="w-3 h-3 rounded bg-green-50 border border-green-200"></span> Category Winner
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-green-500"></span> 4.0+
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-yellow-500"></span> 3.0-3.9
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-red-500"></span> Below 3.0
+          </span>
+        </div>
       </div>
     </div>
   );

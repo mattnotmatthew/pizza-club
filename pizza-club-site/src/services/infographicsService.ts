@@ -216,6 +216,7 @@ export const publishedService = {
 
     const payload = {
       id: data.id,
+      visitDate: data.visitDate,
       content: data.content,
       staticHtml: staticHtml
     };
