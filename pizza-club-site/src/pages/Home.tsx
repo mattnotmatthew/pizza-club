@@ -1,6 +1,14 @@
 import React from 'react';
+import { useChicagoMode } from '@/contexts/ChicagoModeContext';
 
 const Home: React.FC = () => {
+  const { isChicagoMode, setShowRiddle } = useChicagoMode();
+
+  const handleLogoClick = () => {
+    if (!isChicagoMode) {
+      setShowRiddle(true);
+    }
+  };
   // Calculate responsive background size and position
   const getBackgroundStyles = () => {
     if (typeof window === 'undefined') {
@@ -48,10 +56,15 @@ const Home: React.FC = () => {
       <section className="min-h-screen flex items-center justify-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center ml-9 lg:ml-14 lg:mb-14">
-            <img 
-              src="/logo.png" 
-              alt="Greater Chicagoland Pizza Club Logo" 
-              className="h-60 w-60 md:h-60 md:w-60 lg:h-100 lg:w-100 object-cover"
+            <img
+              src={isChicagoMode ? '/logo-ditka.png' : '/logo.png'}
+              alt="Greater Chicagoland Pizza Club Logo"
+              className={`
+                h-60 w-60 md:h-60 md:w-60 lg:h-100 lg:w-100 object-cover
+                ${!isChicagoMode ? 'cursor-pointer hover:scale-105 transition-transform duration-200' : ''}
+              `}
+              onClick={handleLogoClick}
+              title={!isChicagoMode ? 'Click me...' : undefined}
             />
             <h1 className="text-4xl md:text-6xl font-bold text-center mb-6 animate-fade-in">
               Greater Chicagoland Pizza Club

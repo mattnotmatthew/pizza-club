@@ -5,6 +5,9 @@ import AdminRoute from '@/components/admin/AdminRoute';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import MatomoTracker from '@/components/common/MatomoTracker';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ChicagoModeProvider } from '@/contexts/ChicagoModeContext';
+import DitkaRiddle from '@/components/common/DitkaRiddle';
+import ChicagoModeExit from '@/components/common/ChicagoModeExit';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('@/pages/Home'));
@@ -51,10 +54,13 @@ function App() {
   return (
     <ErrorBoundary>
       <Router basename="/">
-        <AuthProvider>
-          <MatomoTracker />
-          <Suspense fallback={<Loading />}>
-            <Routes>
+        <ChicagoModeProvider>
+          <AuthProvider>
+            <MatomoTracker />
+            <DitkaRiddle />
+            <ChicagoModeExit />
+            <Suspense fallback={<Loading />}>
+              <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
                 <Route path="about" element={<About />} />
@@ -96,9 +102,10 @@ function App() {
                 <Route path="links/new" element={<LinksEditor />} />
                 <Route path="links/edit/:id" element={<LinksEditor />} />
               </Route>
-            </Routes>
-          </Suspense>
-        </AuthProvider>
+              </Routes>
+            </Suspense>
+          </AuthProvider>
+        </ChicagoModeProvider>
       </Router>
     </ErrorBoundary>
   );

@@ -226,3 +226,148 @@
   margin: 0;
   width: auto !important;
 }
+
+/* =================================
+   CHICAGO MODE - DA BEARS THEME
+   ================================= */
+
+/* Chicago Bears Colors */
+:root {
+  --chicago-navy: #0B162A;
+  --chicago-orange: #C83803;
+  --chicago-white: #FFFFFF;
+}
+
+/* When Chicago mode is active, transform the entire site */
+html.chicago-mode {
+  /* Override background colors */
+  --tw-bg-opacity: 1;
+}
+
+/* Header transformation */
+html.chicago-mode .bg-checkered-border {
+  background-color: var(--chicago-navy) !important;
+}
+
+html.chicago-mode .bg-checkered-border::before,
+html.chicago-mode .bg-checkered-border::after {
+  background-color: var(--chicago-orange) !important;
+  background-image:
+    linear-gradient(45deg, var(--chicago-navy) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--chicago-navy) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--chicago-navy) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--chicago-navy) 75%) !important;
+}
+
+/* Body and main content area */
+html.chicago-mode body {
+  background-color: #0d1b2a !important;
+}
+
+html.chicago-mode main {
+  background: linear-gradient(180deg, #0d1b2a 0%, #1a2744 50%, #0d1b2a 100%);
+}
+
+/* Card backgrounds */
+html.chicago-mode .bg-white {
+  background-color: #1a2744 !important;
+  color: var(--chicago-white) !important;
+}
+
+html.chicago-mode .bg-gray-50,
+html.chicago-mode .bg-gray-100 {
+  background-color: #0f1f36 !important;
+}
+
+/* Text colors */
+html.chicago-mode .text-gray-600,
+html.chicago-mode .text-gray-700,
+html.chicago-mode .text-gray-800,
+html.chicago-mode .text-gray-900 {
+  color: #e5e7eb !important;
+}
+
+html.chicago-mode .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+/* Red accents become Bears orange */
+html.chicago-mode .text-red-600,
+html.chicago-mode .text-red-700,
+html.chicago-mode .text-red-800 {
+  color: var(--chicago-orange) !important;
+}
+
+html.chicago-mode .bg-red-600,
+html.chicago-mode .bg-red-700,
+html.chicago-mode .bg-red-800 {
+  background-color: var(--chicago-orange) !important;
+}
+
+html.chicago-mode .border-red-600,
+html.chicago-mode .border-red-700 {
+  border-color: var(--chicago-orange) !important;
+}
+
+/* Hover states */
+html.chicago-mode .hover\:bg-red-700:hover {
+  background-color: #e04a0f !important;
+}
+
+/* Links */
+html.chicago-mode a:not(.bg-red-600):not(.bg-red-700) {
+  color: var(--chicago-orange);
+}
+
+html.chicago-mode a:hover {
+  color: #e04a0f;
+}
+
+/* Footer */
+html.chicago-mode footer {
+  background-color: var(--chicago-navy) !important;
+  border-top: 3px solid var(--chicago-orange);
+}
+
+/* Shadows with orange tint */
+html.chicago-mode .shadow-lg,
+html.chicago-mode .shadow-md {
+  box-shadow: 0 4px 15px rgba(200, 56, 3, 0.2) !important;
+}
+
+/* Button transforms */
+html.chicago-mode button.bg-red-600,
+html.chicago-mode button.bg-red-700 {
+  background-color: var(--chicago-orange) !important;
+}
+
+/* Navigation active states */
+html.chicago-mode .text-yellow-100 {
+  color: var(--chicago-orange) !important;
+}
+
+/* Add a subtle Bears logo watermark */
+html.chicago-mode body::before {
+  content: '';
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='70' font-size='60' fill='%23C83803' opacity='0.3'%3E🐻%3C/text%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.5;
+}
+
+/* Transition for smooth theme change */
+html.chicago-mode * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Keep the Italian motto white */
+html.chicago-mode .text-yellow-100 {
+  color: #fef9c3 !important;
+}

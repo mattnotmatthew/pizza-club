@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { useChicagoMode } from '@/contexts/ChicagoModeContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isChicagoMode } = useChicagoMode();
   
   const navItems = [
     { path: '/', label: 'Home' },
@@ -22,13 +24,24 @@ const Header: React.FC = () => {
     <header className="bg-checkered-border shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2 bg-red-800/90 md:bg-transparent px-3 py-1 rounded-lg backdrop-blur-sm ml-4">
-            <img 
-              src="/logo.png" 
-              alt="Greater Chicagoland Pizza Club Logo" 
+          <Link
+            to="/"
+            className={`
+              flex items-center space-x-2 px-3 py-1 rounded-lg backdrop-blur-sm ml-4
+              ${isChicagoMode
+                ? 'bg-[#0B162A]/90 md:bg-transparent'
+                : 'bg-red-800/90 md:bg-transparent'
+              }
+            `}
+          >
+            <img
+              src={isChicagoMode ? '/logo-ditka.png' : '/logo.png'}
+              alt="Greater Chicagoland Pizza Club Logo"
               className="h-12 w-12 md:h-10 md:w-10 rounded-full shadow-md object-cover"
             />
-            <span className="text-white font-bold text-xl md:text-2xl">GCPC</span>
+            <span className={`font-bold text-xl md:text-2xl ${isChicagoMode ? 'text-[#C83803]' : 'text-white'}`}>
+              {isChicagoMode ? 'DA GCPC' : 'GCPC'}
+            </span>
           </Link>
           
           {/* Desktop Navigation */}
