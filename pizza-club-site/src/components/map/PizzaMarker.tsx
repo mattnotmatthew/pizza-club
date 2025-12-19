@@ -69,15 +69,16 @@ const PizzaMarker: React.FC<PizzaMarkerProps> = ({
         </svg>
         
         {/* Rating badge */}
-        <div 
+        <div
           className={`
-            absolute -bottom-1 -right-1
+            absolute -bottom-1 -right-2
             ${ratingColor}
             text-white font-bold
             rounded-full
-            w-6 h-6
+            px-1.5 py-0.5
+            min-w-[28px]
             flex items-center justify-center
-            text-xs
+            text-[10px]
             border-2 border-white
             shadow-md
           `}

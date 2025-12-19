@@ -122,7 +122,7 @@ const RestaurantList: React.FC<RestaurantListProps> = ({
                   />
                   
                   {/* Gradient overlay for text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/100 via-black/90 via-black/80 to-black/0" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black from-45% to-transparent" />
                 </>
               )}
 

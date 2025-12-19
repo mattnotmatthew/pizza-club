@@ -30,7 +30,7 @@ const RestaurantMarker: React.FC<RestaurantMarkerProps> = ({
     return divIcon({
       html: iconMarkup,
       className: 'custom-pizza-marker',
-      iconSize: [40, 40],
+      iconSize: [48, 44],
       iconAnchor: [20, 40],
       popupAnchor: [0, -40],
     });
@@ -49,17 +49,17 @@ const RestaurantMarker: React.FC<RestaurantMarkerProps> = ({
         click: () => onClick?.(),
       }}
     >
-      <Popup maxWidth={320}>
-        <div className="p-2">
+      <Popup minWidth={280} maxWidth={350}>
+        <div className="p-3">
           {/* Restaurant Name */}
-          <h3 className="font-bold text-lg text-gray-900 mb-1">
+          <h3 className="font-faculty font-bold text-lg text-gray-900 mb-1">
             {restaurant.name}
           </h3>
 
           {/* Rating */}
           <div className="flex items-center gap-2 mb-2">
             <PizzaRating rating={restaurant.averageRating} size="small" />
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-600 font-medium">
               ({restaurant.averageRating.toFixed(2)})
             </span>
           </div>
@@ -82,13 +82,13 @@ const RestaurantMarker: React.FC<RestaurantMarkerProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="mt-3 pt-3 border-t border-gray-200 flex gap-2">
+          <div className="mt-3 pt-3 border-t border-gray-200 flex gap-3">
             {restaurant.website && (
               <a
                 href={restaurant.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
               >
                 Website
               </a>
@@ -96,7 +96,7 @@ const RestaurantMarker: React.FC<RestaurantMarkerProps> = ({
             {restaurant.phone && (
               <a
                 href={`tel:${restaurant.phone}`}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
               >
                 Call
               </a>
@@ -105,7 +105,7 @@ const RestaurantMarker: React.FC<RestaurantMarkerProps> = ({
               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(restaurant.address)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium ml-auto"
+              className="text-red-600 hover:text-red-700 text-sm font-medium ml-auto transition-colors"
             >
               Directions
             </a>
